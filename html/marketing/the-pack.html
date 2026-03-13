@@ -1,3 +1,19 @@
+<!--
+  OnlyPaws
+  File: html/marketing/the-pack.html
+
+  CSS:
+  /css/styles.css
+  /css/pages/marketing-shared.css
+  /css/pages/marketing-the-pack.css
+
+  JS:
+  /js/supabase.js
+  /js/nav.js
+  /js/partials.js
+  /js/paths.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,225 +21,9 @@
   <title>The Pack — OnlyPaws</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="../../css/styles.css" />
-
-  <style>
-    .pageShell{
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-    }
-
-    .wrap{
-      max-width:1040px;
-      margin:0 auto;
-      padding:0 18px 70px;
-      width:100%;
-    }
-
-    .hero{
-      display:grid;
-      grid-template-columns:1.1fr .9fr;
-      gap:16px;
-      align-items:stretch;
-      margin-top:6px;
-    }
-
-    @media (max-width: 920px){
-      .hero{grid-template-columns:1fr;}
-    }
-
-    .heroNote{
-      margin-top:16px;
-      border-radius:18px;
-      padding:16px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.16);
-      color:rgba(255,255,255,.88);
-      font-size:14px;
-      line-height:1.6;
-    }
-
-    .previewPanel{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-
-    .previewCard{
-      border-radius:18px;
-      padding:16px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.16);
-    }
-
-    .previewCard h3{
-      margin:0 0 8px;
-      font-size:1.1rem;
-    }
-
-    .previewCard p{
-      margin:0;
-      color:rgba(255,255,255,.84);
-      line-height:1.6;
-      font-size:14px;
-    }
-
-    .section{
-      margin-top:18px;
-    }
-
-    .sectionTitle{
-      margin:0 0 8px;
-      font-size:1.65rem;
-      letter-spacing:-0.4px;
-    }
-
-    .sectionSub{
-      margin:0 0 16px;
-      color:var(--muted);
-      line-height:1.6;
-      font-size:15px;
-    }
-
-    .packGrid{
-      display:grid;
-      grid-template-columns:repeat(3, minmax(0, 1fr));
-      gap:16px;
-    }
-
-    @media (max-width: 920px){
-      .packGrid{grid-template-columns:repeat(2, minmax(0, 1fr));}
-    }
-
-    @media (max-width: 620px){
-      .packGrid{grid-template-columns:1fr;}
-    }
-
-    .petCard{
-      display:block;
-      text-decoration:none;
-      color:inherit;
-      border-radius:22px;
-      padding:14px;
-      background:rgba(255,255,255,.09);
-      border:1px solid var(--stroke);
-      transition:transform .18s ease, opacity .18s ease, background .18s ease;
-    }
-
-    .petCard:hover{
-      transform:translateY(-1px) scale(1.02);
-    }
-
-    .petThumb{
-      width:100%;
-      aspect-ratio:1 / 1;
-      border-radius:18px;
-      overflow:hidden;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
-      margin-bottom:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:40px;
-    }
-
-    .petThumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-
-    .petTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:8px;
-    }
-
-    .petName{
-      margin:0;
-      font-size:1.08rem;
-      line-height:1.2;
-    }
-
-    .petTag{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      background:rgba(255,255,255,.12);
-      border:1px solid rgba(255,255,255,.16);
-      color:rgba(255,255,255,.9);
-      white-space:nowrap;
-      text-transform:lowercase;
-    }
-
-    .petMeta{
-      color:rgba(255,255,255,.78);
-      font-size:13px;
-      line-height:1.5;
-      margin-bottom:8px;
-    }
-
-    .petBio{
-      margin:0;
-      color:rgba(255,255,255,.86);
-      font-size:14px;
-      line-height:1.6;
-      min-height:44px;
-    }
-
-    .petFooter{
-      margin-top:12px;
-      font-size:13px;
-      color:rgba(255,255,255,.78);
-    }
-
-    .ctaPanel{
-      margin-top:18px;
-      border-radius:22px;
-      padding:22px;
-      background:rgba(0,0,0,.14);
-      border:1px solid var(--stroke);
-      text-align:center;
-    }
-
-    .ctaPanel h2{
-      margin:0 0 10px;
-      font-size:1.45rem;
-    }
-
-    .ctaPanel p{
-      margin:0;
-      color:rgba(255,255,255,.86);
-      line-height:1.65;
-      font-size:14px;
-      max-width:700px;
-      margin-inline:auto;
-    }
-
-    .footerWrap{
-      margin-top:28px;
-    }
-
-    .loadingState,
-    .emptyState,
-    .errorState{
-      border-radius:18px;
-      padding:18px;
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.14);
-      color:rgba(255,255,255,.88);
-      font-size:14px;
-      line-height:1.6;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/pages/marketing-shared.css" />
+  <link rel="stylesheet" href="/css/pages/marketing-the-pack.css" />
 </head>
 
 <body>
@@ -237,25 +37,27 @@
 
           <h1>The Pack</h1>
 
-          <p class="sub">
+          <p class="sub packIntro">
             Explore some of the pets on OnlyPaws before signing up.
             Discover adorable creators, open their profiles, and get a feel for the platform.
           </p>
 
           <div class="btnRow">
-            <a class="btn" href="fans.html">Join as a fan →</a>
-            <a class="ghost" href="creators.html">Create your pet page</a>
+            <a class="btn" id="joinAsFanLink" href="/html/marketing/fans.html">Join as a fan →</a>
+            <a class="ghost" id="createPetPageTopLink" href="/html/marketing/creators.html">Create your pet page</a>
           </div>
 
-          <div class="heroNote">
-            The Pack is a public preview of OnlyPaws. Browse featured pets first, then sign up if you
-            want to follow creators, support them, or build a page for your own pet.
+          <div class="marketingList">
+            <div class="marketingListItem">
+              The Pack is a public preview of OnlyPaws. Browse featured pets first, then sign up if you
+              want to follow creators, support them, or build a page for your own pet.
+            </div>
           </div>
         </div>
 
         <div class="panel">
-          <div class="previewPanel">
-            <div class="previewCard">
+          <div class="marketingGrid">
+            <div class="marketingListItem">
               <h3>What you can do here</h3>
               <p>
                 Browse featured pets, discover their vibes, and see what OnlyPaws is all about
@@ -263,7 +65,7 @@
               </p>
             </div>
 
-            <div class="previewCard">
+            <div class="marketingListItem">
               <h3>What happens after signup</h3>
               <p>
                 Fans can follow creators and support their favorite animals.
@@ -271,7 +73,7 @@
               </p>
             </div>
 
-            <div class="previewCard">
+            <div class="marketingListItem">
               <h3>Why The Pack exists</h3>
               <p>
                 Because a pet platform should actually show pets first.
@@ -289,20 +91,20 @@
             A few of the faces currently hanging around OnlyPaws.
           </p>
 
-          <div id="packStatus" class="loadingState">Loading The Pack...</div>
-          <div id="packGrid" class="packGrid" style="display:none;"></div>
+          <div id="packStatus" class="packLoading">Loading The Pack...</div>
+          <div id="packGrid" class="packGrid" hidden></div>
         </div>
       </div>
 
-      <div class="ctaPanel">
+      <div class="ctaPanel panel centerText">
         <h2>Want your pet in The Pack?</h2>
         <p>
           Create a page for your pet, share their photos and updates, and let people discover them on OnlyPaws.
         </p>
 
-        <div class="btnRow" style="justify-content:center;">
-          <a class="btn" href="creators.html">Create a pet page →</a>
-          <a class="ghost" href="fans.html">Join as a fan</a>
+        <div class="btnRow statusActions">
+          <a class="btn" id="createPetPageBottomLink" href="/html/marketing/creators.html">Create a pet page →</a>
+          <a class="ghost" id="joinAsFanBottomLink" href="/html/marketing/fans.html">Join as a fan</a>
         </div>
       </div>
 
@@ -311,10 +113,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../js/supabase.js"></script>
-  <script src="../../js/nav.js"></script>
-  <script src="../../js/partials.js"></script>
-  <script src="../../js/paths.js"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/paths.js"></script>
 
   <script>
     function hideCurrentMarketingLink() {
@@ -323,7 +125,7 @@
 
       if (path.includes("creators")) current = "creators";
       else if (path.includes("fans")) current = "fans";
-      else if (path.includes("index") || path.endsWith("/")) current = "index";
+      else if (path === "/" || path.endsWith("/index.html")) current = "index";
       else if (path.includes("the-pack")) current = "the-pack";
 
       document.querySelectorAll("[data-page]").forEach(link => {
@@ -331,6 +133,18 @@
           link.remove();
         }
       });
+    }
+
+    function applyThePackPaths() {
+      const joinAsFanLink = document.getElementById("joinAsFanLink");
+      const createPetPageTopLink = document.getElementById("createPetPageTopLink");
+      const createPetPageBottomLink = document.getElementById("createPetPageBottomLink");
+      const joinAsFanBottomLink = document.getElementById("joinAsFanBottomLink");
+
+      if (joinAsFanLink) joinAsFanLink.href = OP_PATHS.marketing.fans;
+      if (createPetPageTopLink) createPetPageTopLink.href = OP_PATHS.marketing.creators;
+      if (createPetPageBottomLink) createPetPageBottomLink.href = OP_PATHS.marketing.creators;
+      if (joinAsFanBottomLink) joinAsFanBottomLink.href = OP_PATHS.marketing.fans;
     }
 
     function escapeHtml(str = "") {
@@ -405,20 +219,20 @@
         : `<span aria-hidden="true">${speciesEmoji(creator.tag)}</span>`;
 
       return `
-        <a class="petCard" href="${cardHref(creator)}">
-          <div class="petThumb">
+        <a class="packCard" href="${cardHref(creator)}">
+          <div class="packCardMedia">
             ${thumbMarkup}
           </div>
 
-          <div class="petTop">
-            <h3 class="petName">${escapeHtml(creator.name)}</h3>
-            <span class="petTag">${escapeHtml(creator.tag)}</span>
+          <div class="packCardTop">
+            <h3 class="packCardTitle">${escapeHtml(creator.name)}</h3>
+            <span class="packCardBadge">${escapeHtml(creator.tag)}</span>
           </div>
 
-          <div class="petMeta">${escapeHtml(creator.meta)}</div>
-          <p class="petBio">${escapeHtml(creator.bio)}</p>
+          <div class="packCardMeta">${escapeHtml(creator.meta)}</div>
+          <p class="packCardBio">${escapeHtml(creator.bio)}</p>
 
-          <div class="petFooter">view profile after signup →</div>
+          <div class="packCardMeta">view profile after signup →</div>
         </a>
       `;
     }
@@ -512,26 +326,28 @@
         if (!creators.length) {
           const fallback = fallbackCreators();
           gridEl.innerHTML = fallback.map(createPetCard).join("");
-          statusEl.style.display = "none";
-          gridEl.style.display = "grid";
+          statusEl.hidden = true;
+          gridEl.hidden = false;
           return;
         }
 
         gridEl.innerHTML = creators.map(createPetCard).join("");
-        statusEl.style.display = "none";
-        gridEl.style.display = "grid";
+        statusEl.hidden = true;
+        gridEl.hidden = false;
       } catch (error) {
         console.error("failed to load the pack:", error);
 
         const creators = fallbackCreators();
         gridEl.innerHTML = creators.map(createPetCard).join("");
-        statusEl.className = "errorState";
+        statusEl.className = "packEmpty";
         statusEl.textContent = "Could not load live creators right now, so here is a preview of The Pack instead.";
-        gridEl.style.display = "grid";
+        gridEl.hidden = false;
       }
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
+      applyThePackPaths();
+
       await loadMarketingLayout();
       hideCurrentMarketingLink();
 
