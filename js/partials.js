@@ -10,12 +10,12 @@ async function loadPartial(selector, url) {
 
 // default: app layout
 async function loadLayout() {
-  await loadPartial("#header-placeholder", "../components/header.html");
-  await loadPartial("#footer-placeholder", "../components/footer.html");
+  await loadPartial("#header-placeholder", "/components/header.html");
+  await loadPartial("#footer-placeholder", "/components/footer.html");
 }
 
-// marketing layout (index/fans/creators/faq/etc)
+// marketing layout
 async function loadMarketingLayout() {
-  await loadPartial("#header-placeholder", "../components/header-marketing.html");
-  await loadPartial("#footer-placeholder", "../components/footer-marketing.html");
+  await loadPartial("#header-placeholder", "/components/header-marketing.html");
+  await loadPartial("#footer-placeholder", "/components/footer-marketing.html");
 }
