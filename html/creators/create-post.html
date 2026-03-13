@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Create Post</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+
+<body>
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <div class="panel">
+      <div class="row">
+        <div>
+          <div class="pill" id="modePill" style="margin-top:8px; display:none;">Create Post</div>
+          <h1 id="pageTitle">Create a post</h1>
+          <p class="sub" id="pageSub">Creator-only. This writes into <b>posts</b>.</p>
+        </div>
+      </div>
+
+      <div class="locked" id="creatorLockBox">
+        <b>🔒 Creator tools locked</b>
+        <div class="btnRow" style="margin-top:12px;">
+          <a class="btn" id="unlockBtn" href="#" target="_blank" rel="noopener">Unlock Creator Access — €10/month</a>
+          <button class="ghost" id="refreshBtn" type="button">Refresh</button>
+        </div>
+        <div style="margin-top:8px; opacity:.9;">After checkout, tap Refresh.</div>
+      </div>
+
+      <div class="field">
+        <label>Visibility</label>
+        <select id="is_public">
+          <option value="true">Public (shows in feeds)</option>
+          <option value="false">Private (creator only)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Type</label>
+        <select id="is_paid">
+          <option value="false">🆓 FREE</option>
+          <option value="true">🔒 PREMIUM</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Title</label>
+        <input id="title" placeholder="e.g. Lola doing chaos stuff 🐾" />
+      </div>
+
+      <div class="field">
+        <label>Content</label>
+        <textarea id="content" placeholder="Write the post content…"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Preview (recommended for PREMIUM)</label>
+        <textarea id="preview" placeholder="Short teaser shown when locked…"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Media (optional)</label>
+        <input id="mediaFile" type="file" accept="image/*,video/*" />
+      </div>
+
+      <div class="btnRow">
+        <button class="btn" id="publishBtn" type="button">Publish</button>
+        <a class="ghost" id="cancelEditBtn" href="creator-dash.html" style="display:none;">Cancel</a>
+      </div>
+
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/supabase.js"></script>
+  <script src="../../js/partials.js"></script>
+
+  <script>
+    function show(el, yes) {
+      if (!el) return;
+      el.style.display = yes ? "inline-flex" : "none";
+    }
+
+    async function hydrateUserPill() {
+      try {
+        const pill = document.getElementById("userPill");
+        if (!pill) return;
+
+        const { data: sessData } = await onlypawsClient.auth.getSession();
+        const session = sessData?.session;
+
+        if (!session) {
+          pill.textContent = "Guest";
+          return;
+        }
+
+        const uid = session.user.id;
+        const email = session.user.email || "";
+
+        const { data: prof } = await onlypawsClient
+          .from("profiles")
+          .select("username, display_name, role")
+          .eq("user_id", uid)
+          .maybeSingle();
+
+        const uname = (prof?.username || "").trim();
+        const dname = (prof?.display_name || "").trim();
+
+        if (uname) pill.textContent = "@" + uname;
+        else if (dname) pill.textContent = dname;
+        else if (email) pill.textContent = email.split("@")[0];
+        else pill.textContent = "User";
+      } catch (e) {}
+    }
+
+    async function hydrateNav() {
+      const profileBtn = document.getElementById("navProfile");
+      const fanDash = document.getElementById("navFanDash");
+      const creatorDash = document.getElementById("navCreatorDash");
+      const logoutBtn = document.getElementById("navLogout");
+
+      show(profileBtn, true);
+      show(logoutBtn, true);
+      show(fanDash, false);
+      show(creatorDash, false);
+
+      if (profileBtn) profileBtn.href = "../app/profile.html";
+
+      try {
+        const { data: u } = await onlypawsClient.auth.getUser();
+        const userId = u?.user?.id;
+        if (!userId) return;
+
+        const { data: p } = await onlypawsClient
+          .from("profiles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (p?.role === "creator") {
+          if (creatorDash) creatorDash.href = "creator-dash.html";
+          show(creatorDash, true);
+        } else {
+          if (fanDash) fanDash.href = "../fans/fan-dash.html";
+          show(fanDash, true);
+        }
+      } catch (e) {}
+    }
+  </script>
+
+  <script>
+    const CREATOR_PLAN_URL = "https://buy.stripe.com/5kQbJ25UY5qegpM4kD5wI02";
+
+    const BUCKET = "posts";
+    const BUCKET_IS_PUBLIC = true;
+    const MAX_MB = 25;
+
+    const msg = document.getElementById("msg");
+    const publishBtn = document.getElementById("publishBtn");
+
+    const creatorLockBox = document.getElementById("creatorLockBox");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    unlockBtn.href = CREATOR_PLAN_URL;
+
+    const modePill = document.getElementById("modePill");
+    const pageTitle = document.getElementById("pageTitle");
+    const pageSub = document.getElementById("pageSub");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+
+    let user = null;
+    let profile = null;
+    let creatorPlanActive = false;
+
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get("edit");
+    let editingPost = null;
+
+    function setMsg(t) {
+      msg.textContent = t || "";
+    }
+
+    function detectMediaType(file) {
+      if (!file) return "none";
+      if (file.type && file.type.startsWith("image/")) return "image";
+      if (file.type && file.type.startsWith("video/")) return "video";
+      return "none";
+    }
+
+    function safeFileName(name) {
+      return (name || "file").replace(/[^\w.\-]+/g, "_");
+    }
+
+    function setToolsEnabled(enabled) {
+      document.getElementById("is_public").disabled = !enabled;
+      document.getElementById("is_paid").disabled = !enabled;
+      document.getElementById("title").disabled = !enabled;
+      document.getElementById("content").disabled = !enabled;
+      document.getElementById("preview").disabled = !enabled;
+      document.getElementById("mediaFile").disabled = !enabled;
+      publishBtn.disabled = !enabled;
+    }
+
+    async function getSessionOrRedirect() {
+      const { data, error } = await onlypawsClient.auth.getSession();
+      if (error) console.warn("getSession error:", error);
+
+      const session = data?.session || null;
+      if (!session) {
+        window.location.href = "../marketing/fans.html";
+        return null;
+      }
+      return session;
+    }
+
+    async function fetchProfile(userId) {
+      const { data: p, error: pe } = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, role")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (pe) throw pe;
+      return p || null;
+    }
+
+    async function hasActiveCreatorPlan(userId) {
+      try {
+        const { data, error } = await onlypawsClient
+          .from("entitlements")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("key", "creator_plan")
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (error) return false;
+        return !!data;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function requireCreatorAndPlan() {
+      const session = await getSessionOrRedirect();
+      if (!session) return false;
+
+      user = session.user;
+      profile = await fetchProfile(user.id);
+
+      if (!profile || profile.role !== "creator") {
+        window.location.href = "../marketing/index.html";
+        return false;
+      }
+
+      creatorPlanActive = await hasActiveCreatorPlan(user.id);
+
+      if (!creatorPlanActive) {
+        creatorLockBox.style.display = "block";
+        setToolsEnabled(false);
+        setMsg("Creator Plan required to publish posts.");
+        return false;
+      }
+
+      creatorLockBox.style.display = "none";
+      setToolsEnabled(true);
+      setMsg("");
+      return true;
+    }
+
+    async function uploadMedia(postId) {
+      const file = document.getElementById("mediaFile").files?.[0] || null;
+      if (!file) return { media_url: null, media_type: "none" };
+
+      const media_type = detectMediaType(file);
+      if (media_type === "none") throw new Error("Unsupported file type. Use image/video only.");
+
+      const sizeMb = file.size / (1024 * 1024);
+      if (sizeMb > MAX_MB) throw new Error(`File too large (${sizeMb.toFixed(1)}MB). Max ${MAX_MB}MB.`);
+
+      const path = `uploads/${user.id}/${postId}/${Date.now()}_${safeFileName(file.name)}`;
+
+      console.log("BUCKET:", BUCKET, "PATH:", path);
+
+      const { error: upErr } = await onlypawsClient.storage
+        .from(BUCKET)
+        .upload(path, file, { upsert: false, contentType: file.type || undefined });
+
+      if (upErr) {
+        const m = (upErr.message || "").toLowerCase();
+        if (m.includes("bucket") && m.includes("not found")) {
+          throw new Error(`Bucket "${BUCKET}" not found. Create it in Supabase Storage → Buckets.`);
+        }
+        throw upErr;
+      }
+
+      let media_url = null;
+      if (BUCKET_IS_PUBLIC) {
+        const { data } = onlypawsClient.storage.from(BUCKET).getPublicUrl(path);
+        media_url = data?.publicUrl || null;
+      } else {
+        media_url = path;
+      }
+
+      return { media_url, media_type };
+    }
+
+    function setEditModeUI() {
+      modePill.textContent = "Edit Post";
+      document.title = "OnlyPaws — Edit Post";
+      pageTitle.textContent = "Edit post";
+      pageSub.innerHTML = `Update your post. Changes save into <b>posts</b>.`;
+      publishBtn.textContent = "Save changes";
+      cancelEditBtn.style.display = "inline-flex";
+    }
+
+    async function loadPostForEdit(postId) {
+      setMsg("Loading post…");
+      setEditModeUI();
+
+      const { data, error } = await onlypawsClient
+        .from("posts")
+        .select("id, title, content, preview, is_paid, is_public, media_url, media_type, creator_id")
+        .eq("id", postId)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Post not found.");
+
+      if (data.creator_id !== user.id) {
+        throw new Error("Not allowed: this post is not yours.");
+      }
+
+      editingPost = data;
+
+      document.getElementById("title").value = data.title || "";
+      document.getElementById("content").value = data.content || "";
+      document.getElementById("preview").value = data.preview || "";
+      document.getElementById("is_paid").value = data.is_paid ? "true" : "false";
+      document.getElementById("is_public").value = data.is_public === false ? "false" : "true";
+
+      setMsg("Loaded ✅");
+    }
+
+    async function publishOrUpdate() {
+      setMsg(editId ? "Saving…" : "Publishing…");
+      publishBtn.disabled = true;
+
+      try {
+        if (!user || !profile || profile.role !== "creator") throw new Error("Not allowed.");
+        if (!creatorPlanActive) throw new Error("Creator Plan required.");
+
+        const title = (document.getElementById("title").value || "").trim();
+        const content = (document.getElementById("content").value || "").trim();
+        const preview = (document.getElementById("preview").value || "").trim();
+
+        const is_paid = document.getElementById("is_paid").value === "true";
+        const is_public = document.getElementById("is_public").value === "true";
+
+        if (!title) throw new Error("Title is required.");
+        if (!content) throw new Error("Content is required.");
+
+        const creator_id = user.id;
+
+        if (editId) {
+          if (!editingPost) throw new Error("Edit mode not ready.");
+
+          const { error: upErr1 } = await onlypawsClient
+            .from("posts")
+            .update({
+              title,
+              content,
+              preview: preview || null,
+              is_paid,
+              is_public,
+              creator_id
+            })
+            .eq("id", editId)
+            .eq("creator_id", user.id);
+
+          if (upErr1) throw upErr1;
+
+          const hasFile = !!(document.getElementById("mediaFile").files?.[0]);
+          if (hasFile) {
+            setMsg("Uploading media…");
+            const { media_url, media_type } = await uploadMedia(editId);
+
+            if (media_url) {
+              const { error: upErr2 } = await onlypawsClient
+                .from("posts")
+                .update({ media_url, media_type })
+                .eq("id", editId)
+                .eq("creator_id", user.id);
+
+              if (upErr2) throw upErr2;
+            }
+          }
+
+          setMsg("Saved ✅");
+          document.getElementById("mediaFile").value = "";
+          return;
+        }
+
+        const { data: inserted, error: insErr } = await onlypawsClient
+          .from("posts")
+          .insert([{
+            creator_id,
+            title,
+            content,
+            preview: preview || null,
+            is_paid,
+            is_public,
+            media_type: "none",
+            media_url: null
+          }])
+          .select("id")
+          .single();
+
+        if (insErr) throw insErr;
+
+        const postId = inserted.id;
+
+        const hasFile = !!(document.getElementById("mediaFile").files?.[0]);
+        if (hasFile) {
+          setMsg("Uploading media…");
+          const { media_url, media_type } = await uploadMedia(postId);
+
+          if (media_url) {
+            const { error: upErr } = await onlypawsClient
+              .from("posts")
+              .update({ media_url, media_type })
+              .eq("id", postId)
+              .eq("creator_id", user.id);
+
+              if (upErr) throw upErr;
+          }
+        }
+
+        setMsg("Published ✅");
+
+        document.getElementById("title").value = "";
+        document.getElementById("content").value = "";
+        document.getElementById("preview").value = "";
+        document.getElementById("mediaFile").value = "";
+        document.getElementById("is_paid").value = "false";
+        document.getElementById("is_public").value = "true";
+      } catch (e) {
+        console.warn(e);
+        setMsg(e.message || String(e));
+      } finally {
+        publishBtn.disabled = false;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadLayout();
+
+      publishBtn.addEventListener("click", publishOrUpdate);
+      refreshBtn.addEventListener("click", () => window.location.reload());
+
+      const navLogout = document.getElementById("navLogout");
+      if (navLogout) {
+        navLogout.addEventListener("click", async () => {
+          await onlypawsClient.auth.signOut();
+          window.location.href = "../marketing/index.html";
+        });
+      }
+
+      await hydrateNav();
+      await hydrateUserPill();
+
+      const ok = await requireCreatorAndPlan();
+      if (!ok) return;
+
+      if (editId) {
+        try {
+          await loadPostForEdit(editId);
+        } catch (e) {
+          setMsg(e.message || String(e));
+          setToolsEnabled(false);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
