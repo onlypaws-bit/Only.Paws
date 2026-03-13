@@ -8,13 +8,11 @@ async function loadPartial(selector, url) {
   el.innerHTML = await res.text();
 }
 
-// default: app layout
 async function loadLayout() {
   await loadPartial("#header-placeholder", "/components/header.html");
   await loadPartial("#footer-placeholder", "/components/footer.html");
 }
 
-// marketing layout
 async function loadMarketingLayout() {
   await loadPartial("#header-placeholder", "/components/header-marketing.html");
   await loadPartial("#footer-placeholder", "/components/footer-marketing.html");
