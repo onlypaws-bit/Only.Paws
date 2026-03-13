@@ -1,0 +1,63 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/marketing-fans.css
+   Purpose: styles specific to the marketing fans page
+   ========================================================= */
+
+.fansHeroIntro {
+  margin-top: 14px;
+}
+
+.fansFeatureList {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.fansFeatureItem {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.08);
+}
+
+.fansFeatureItem strong {
+  display: block;
+}
+
+.fansFeatureItem p {
+  margin: 6px 0 0;
+}
+
+.fansAsideImage {
+  margin-top: 16px;
+}
+
+.fansAsideImage img {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 16px;
+}
+
+.fansSupportInfo {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.fansSupportNote {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+}
+
+.fansAuthSpacer {
+  margin-top: 16px;
+}
+
+@media (max-width: 920px) {
+  .fansAsideImage img {
+    max-width: 340px;
+  }
+}

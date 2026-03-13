@@ -1,0 +1,154 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/marketing-auth.css
+   Purpose: styles specific to the marketing auth pages (creators, fans)
+   ========================================================= */
+
+
+.authLayout {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 16px;
+}
+
+.authPanelStack {
+  display: grid;
+  gap: 16px;
+}
+
+.authLead {
+  margin-top: 14px;
+}
+
+.authForm {
+  margin-top: 16px;
+}
+
+.authFieldGroup {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.authField {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  outline: none;
+}
+
+.authField::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.authField:focus {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.authActionsRow {
+  margin-top: 14px;
+}
+
+.authSecondaryRow {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.authMsg {
+  margin-top: 12px;
+}
+
+.authHintBlock {
+  margin-top: 14px;
+}
+
+.resetBox {
+  display: none;
+}
+
+.resetBox.isOpen {
+  display: block;
+}
+
+.resetActions {
+  margin-top: 14px;
+}
+
+.authInfoCard {
+  padding: 18px;
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.authInfoList {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.authInfoListItem {
+  padding: 14px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.authInfoListItem p {
+  margin: 6px 0 0;
+}
+
+.authInfoListItem strong {
+  display: block;
+}
+
+.authAsideImage {
+  margin-top: 16px;
+}
+
+.authAsideImage img {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 16px;
+}
+
+.authLegalNote {
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.authLegalNote a {
+  color: white;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.authSectionSpacer {
+  margin-top: 16px;
+}
+
+.creatorPlanCard,
+.fanSupportCard {
+  margin-top: 16px;
+}
+
+@media (max-width: 920px) {
+  .authLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .authAsideImage img {
+    max-width: 340px;
+  }
+}

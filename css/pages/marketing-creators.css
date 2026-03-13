@@ -1,0 +1,131 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/marketing-creators.css
+   Purpose: styles specific to the marketing creators page
+   ========================================================= */
+
+.creatorsHeroIntro {
+  margin-top: 14px;
+}
+
+.creatorsFeatureList {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.creatorsFeatureItem {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.08);
+}
+
+.creatorsFeatureItem strong {
+  display: block;
+}
+
+.creatorsFeatureItem p {
+  margin: 6px 0 0;
+}
+
+/* ===== CREATOR PLAN ===== */
+
+.creatorPlanCard {
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.10);
+}
+
+.creatorPlanTitle {
+  margin: 0 0 6px;
+}
+
+.creatorPlanPrice {
+  font-size: 1.8rem;
+  font-weight: 900;
+  margin: 6px 0 10px;
+}
+
+.creatorPlanNote {
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+}
+
+.creatorPlanActions {
+  margin-top: 14px;
+}
+
+/* ===== CREATOR INFO BLOCK ===== */
+
+.creatorsInfoCard {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.09);
+}
+
+.creatorsInfoList {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.creatorsInfoListItem {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: rgba(255,255,255,.08);
+}
+
+.creatorsInfoListItem strong {
+  display: block;
+}
+
+.creatorsInfoListItem p {
+  margin: 6px 0 0;
+}
+
+/* ===== IMAGE / SIDE CONTENT ===== */
+
+.creatorsAsideImage {
+  margin-top: 16px;
+}
+
+.creatorsAsideImage img {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 16px;
+}
+
+/* ===== LEGAL / NOTE ===== */
+
+.creatorsLegalNote {
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+}
+
+.creatorsLegalNote a {
+  color: white;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ===== SPACING HELPERS ===== */
+
+.creatorsSectionSpacer {
+  margin-top: 16px;
+}
+
+@media (max-width: 920px) {
+  .creatorsAsideImage img {
+    max-width: 340px;
+  }
+}

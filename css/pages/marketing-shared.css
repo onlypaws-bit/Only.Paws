@@ -1,0 +1,135 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/marketing-shared.css
+   Purpose: styles specific to the marketing shared pages
+   ========================================================= */
+
+
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+}
+
+.cardsStack {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.marketingIntro {
+  margin-top: 16px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+}
+
+.brandImageCompact img {
+  max-width: 340px;
+}
+
+.supportCard {
+  margin-top: 16px;
+}
+
+.authBox,
+.statusCard,
+.resetBox {
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.authBox:first-child,
+.statusCard:first-child,
+.resetBox:first-child {
+  margin-top: 0;
+}
+
+.authActions {
+  margin-top: 14px;
+}
+
+.forgotRow {
+  margin-top: 12px;
+}
+
+.tinyLink {
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tinyLink:hover {
+  color: #ffffff;
+}
+
+.centerWrap {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding-top: 48px;
+}
+
+.centerText {
+  text-align: center;
+}
+
+.statusActions {
+  margin-top: 18px;
+}
+
+.marketingList {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.marketingListItem {
+  padding: 14px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.marketingGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.marketingTwoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.marketingThreeCols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.footerWrap {
+  margin-top: 18px;
+}
+
+@media (max-width: 920px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .marketingTwoCols,
+  .marketingThreeCols {
+    grid-template-columns: 1fr;
+  }
+
+  .centerWrap {
+    padding-top: 28px;
+  }
+}

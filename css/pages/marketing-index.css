@@ -1,0 +1,45 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/marketing-index.css
+   Purpose: styles specific to the marketing index page
+   ========================================================= */
+
+
+
+.indexCardActions {
+  margin-top: 12px;
+}
+
+.indexSupportActions {
+  margin-top: 14px;
+}
+
+.supportCard {
+  margin-top: 16px;
+}
+
+.indexHeroImage {
+  max-width: 420px;
+}
+
+.indexCards {
+  margin-top: 16px;
+}
+
+.indexCards .card {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.indexCards .card p {
+  margin: 0;
+}
+
+.indexMiniBlock {
+  margin-top: 18px;
+}
+
+@media (max-width: 920px) {
+  .indexHeroImage {
+    max-width: 360px;
+  }
+}
