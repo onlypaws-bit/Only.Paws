@@ -504,3 +504,36 @@ h2{
 [hidden] {
   display: none !important;
 }
+
+.footerLinks{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:10px;
+}
+
+.footerLinks a{
+  opacity:.8;
+}
+
+.footerLinks a:hover{
+  opacity:1;
+}
+
+.footerSocial{
+  margin-top:12px;
+  display:flex;
+  justify-content:center;
+}
+
+.footerInstagram{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  opacity:.85;
+}
+
+.footerInstagram:hover{
+  opacity:1;
+}
