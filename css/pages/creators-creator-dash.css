@@ -1,0 +1,291 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/creator-dash.css
+   Purpose: styles specific to the creator dashboard page
+   ========================================================= */
+
+.dashboardGrid{
+  margin-top:16px;
+}
+
+.dashboardCol{
+  display:grid;
+  gap:14px;
+}
+
+.dashboardBtnRow{
+  margin-top:12px;
+}
+
+.dashboardSmallRow{
+  margin-top:10px;
+}
+
+.dashboardTightRow{
+  margin-top:8px;
+}
+
+.dashboardInfoBox{
+  margin-top:12px;
+}
+
+.dashboardWalletMsg{
+  margin-top:10px;
+}
+
+.dashboardCardTop{
+  margin-top:14px;
+}
+
+.dashboardListTop{
+  margin-top:10px;
+}
+
+.dashboardSectionTitle{
+  margin-top:24px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.dashboardSectionTitle h2{
+  margin:0;
+}
+
+.walletGrid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:12px;
+  margin-top:14px;
+}
+
+.kpi{
+  border-radius:18px;
+  padding:16px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.16);
+}
+
+.k{
+  font-size:13px;
+  color:rgba(255,255,255,.78);
+}
+
+.v{
+  margin-top:8px;
+  font-size:1.8rem;
+  font-weight:900;
+  line-height:1;
+}
+
+.s{
+  margin-top:8px;
+  font-size:12px;
+  color:rgba(255,255,255,.72);
+  line-height:1.45;
+}
+
+.list{
+  display:grid;
+  gap:12px;
+  margin-top:12px;
+}
+
+.locked{
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.16);
+}
+
+.dashboardLockedTop{
+  margin-top:10px;
+}
+
+.rowCard{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:14px;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.16);
+  overflow:hidden;
+}
+
+.rowCard.clickable{
+  cursor:pointer;
+  transition:transform .18s ease, background .18s ease;
+}
+
+.rowCard.clickable:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.10);
+}
+
+.dashboardRowCard{
+  flex-direction:column;
+}
+
+.postMeta{
+  min-width:0;
+  flex:1;
+  width:100%;
+}
+
+.dashboardPostMetaFull{
+  width:100%;
+}
+
+.postActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.dashboardBadgeRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.dashboardBadgeRowSmall{
+  margin-bottom:6px;
+}
+
+.dashboardSmallTop{
+  margin-top:8px;
+}
+
+.petMeta{
+  min-width:0;
+  flex:1;
+}
+
+.petLine,
+.subLine{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+.dashboardPetTitle,
+.dashboardNoMargin{
+  margin:0;
+}
+
+.dashboardHandle{
+  opacity:.85;
+  font-weight:700;
+}
+
+.dashboardMetaLine{
+  opacity:.9;
+}
+
+.dashboardColText{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:0;
+}
+
+.dashboardMinWidthZero{
+  min-width:0;
+}
+
+.dashboardBadgeWrap{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:center;
+}
+
+.dashboardAmountCol{
+  text-align:right;
+}
+
+.avatarMini,
+.petAvatarMini{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  overflow:hidden;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.16);
+}
+
+.avatarMini img,
+.petAvatarMini img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.danger{
+  border-color:rgba(255,120,120,.28);
+}
+
+.isDisabled{
+  pointer-events:none;
+  opacity:.6;
+}
+
+.dashboardInfoGap{
+  margin-top:10px;
+}
+
+/* ===== IMPORTANT: media inside dashboard cards ===== */
+
+.dashboardRowCard .mediaWrap{
+  margin-top:10px;
+  width:100%;
+  max-width:100%;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.18);
+  aspect-ratio:16 / 9;
+}
+
+.dashboardRowCard .mediaWrap img,
+.dashboardRowCard .mediaWrap video{
+  width:100%;
+  height:100%;
+  max-width:100%;
+  object-fit:cover;
+  display:block;
+}
+
+@media (max-width:720px){
+  .walletGrid{
+    grid-template-columns:1fr;
+  }
+
+  .rowCard{
+    flex-direction:column;
+  }
+
+  .dashboardBadgeWrap,
+  .dashboardAmountCol{
+    text-align:left;
+    justify-content:flex-start;
+  }
+
+  .dashboardRowCard .mediaWrap{
+    aspect-ratio:4 / 5;
+    max-height:420px;
+  }
+}
