@@ -1,18 +1,26 @@
-// feed.js
+/* =========================================================
+   OnlyPaws
+   File: /js/feed.js
+   Purpose: fetch creator feed and featured creators
+   ========================================================= */
+
 async function fetchCreatorFeed(creatorId) {
   const supabase = window.onlypawsClient;
 
-  // session + viewer
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session }
+  } = await supabase.auth.getSession();
+
   const viewerId = session?.user?.id || null;
   const isCreatorViewingOwnFeed = !!viewerId && viewerId === creatorId;
 
-  // subscription check (only meaningful if logged and not the creator)
   let isSub = false;
+
   if (session && !isCreatorViewingOwnFeed) {
     const { data, error } = await supabase.rpc("is_subscribed_to", {
       p_creator_id: creatorId,
     });
+
     if (error) throw error;
     isSub = !!data;
   }
@@ -37,8 +45,7 @@ async function fetchCreatorFeed(creatorId) {
       return { ...p, can_view, is_locked: !can_view };
     }
 
-    // From here: public posts
-    // Rule 2: Free public => everyone (viewer in this page can still be null)
+    // Rule 2: Free public => everyone
     if (p.is_paid !== true) {
       return { ...p, can_view: true, is_locked: false };
     }
@@ -51,18 +58,20 @@ async function fetchCreatorFeed(creatorId) {
   return { isSub, posts: enriched };
 }
 
-// export globale (se lavori senza bundler)
 window.fetchCreatorFeed = fetchCreatorFeed;
 
-// --- Featured creators (4-6 slots) ---
-// Pulls a mix of latest-active and newest creators, then applies a deterministic daily shuffle.
+/* =========================================================
+   FEATURED CREATORS
+   Pulls a mix of latest-active and newest creators,
+   then applies a deterministic daily shuffle.
+   ========================================================= */
+
 async function fetchFeaturedCreators(limit = 6) {
   const supabase = window.onlypawsClient;
 
   const halfTop = Math.ceil(limit / 2);
   const halfNew = Math.floor(limit / 2);
 
-  // Latest active creators
   const { data: latest, error: err1 } = await supabase
     .from("profiles")
     .select("id, username, avatar_url, created_at, last_active_at")
@@ -72,7 +81,6 @@ async function fetchFeaturedCreators(limit = 6) {
 
   if (err1) throw err1;
 
-  // Newest creators
   const { data: newest, error: err2 } = await supabase
     .from("profiles")
     .select("id, username, avatar_url, created_at, last_active_at")
@@ -82,26 +90,30 @@ async function fetchFeaturedCreators(limit = 6) {
 
   if (err2) throw err2;
 
-  // Merge + de-dup
   const map = new Map();
+
   [...(latest || []), ...(newest || [])].forEach((c) => {
-    if (c?.id && !map.has(c.id)) map.set(c.id, c);
+    if (c?.id && !map.has(c.id)) {
+      map.set(c.id, c);
+    }
   });
 
   const merged = Array.from(map.values());
 
-  // If very few creators exist, just return them
-  if (merged.length <= limit) return merged;
+  if (merged.length <= limit) {
+    return merged;
+  }
 
-  // Deterministic daily shuffle (changes once per day)
-  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const today = new Date().toISOString().slice(0, 10);
   const seedStr = today.replace(/-/g, "");
 
   function seededRandom(seed) {
     let h = 0;
+
     for (let i = 0; i < seed.length; i++) {
       h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
     }
+
     return () => {
       h = (Math.imul(1664525, h) + 1013904223) | 0;
       return (h >>> 0) / 4294967296;
@@ -110,7 +122,6 @@ async function fetchFeaturedCreators(limit = 6) {
 
   const rand = seededRandom(seedStr);
 
-  // Fisher-Yates shuffle using seeded RNG
   for (let i = merged.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
     const tmp = merged[i];
@@ -121,5 +132,4 @@ async function fetchFeaturedCreators(limit = 6) {
   return merged.slice(0, limit);
 }
 
-// export globale (se lavori senza bundler)
 window.fetchFeaturedCreators = fetchFeaturedCreators;
