@@ -17,8 +17,6 @@
    for navigation across the entire project.
    ========================================================= */
 
-
-
 window.OP_PATHS = {
   app: {
     authCallback: "/html/app/auth-callback.html",
@@ -61,15 +59,7 @@ window.OP_PATHS = {
     fans: "/html/marketing/pages/fans.html",
     thePack: "/html/marketing/pages/the-pack.html",
     emailConfirmed: "/html/marketing/pages/email-confirmed.html",
-    resetPassword: "/html/marketing/pages/reset-password.html",
-
-    faqCreators: "/html/marketing/faq/faq-creators.html",
-    faqFans: "/html/marketing/faq/faq-fans.html",
-
-    terms: "/html/marketing/legal/terms.html",
-    privacyPolicy: "/html/marketing/legal/privacy-policy.html",
-    contentPolicy: "/html/marketing/legal/content-policy.html",
-    stripe: "/html/marketing/legal/stripe.html"
+    resetPassword: "/html/marketing/pages/reset-password.html"
   },
 
   thanks: {
@@ -115,7 +105,6 @@ window.OP_PATHS = {
 
     authGuardJs: "/js/auth-guard.js",
     feedJs: "/js/feed.js",
-    marketingAuthJs: "/js/marketing-auth.js",
     marketingIndexJs: "/js/marketing-index.js",
     marketingSharedJs: "/js/marketing-shared.js",
     marketingThePackJs: "/js/marketing-the-pack.js",
