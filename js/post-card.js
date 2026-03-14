@@ -135,23 +135,6 @@
     return `<span class="op-badge op-badge--free">Free</span>`;
   }
 
-  /**
-   * post:
-   * {
-   *   id,
-   *   creator_username,
-   *   creator_name,
-   *   creator_avatar_url,
-   *   title,
-   *   excerpt|content,
-   *   price_cents,
-   *   currency,
-   *   is_locked,
-   *   media_url,
-   *   media_type,
-   *   created_at
-   * }
-   */
   function renderPostCard(post, opts = {}) {
     const postUrl = (opts.postUrl || defaultPostUrl)(post);
     const title = esc(post.title || "");
@@ -350,7 +333,7 @@
     if (!FEATURE_LIKES) return;
 
     if (!window.onlypawsLikes || !window.onlypawsClient) {
-      console.warn("Load supabase.likes.js before post-card.js");
+      console.warn("Load onlypawsClient.js before post-card.js");
       return;
     }
 
@@ -372,6 +355,8 @@
     s.id = "op-postcard-css";
     s.textContent = `
       .op-postCard{
+        width:100%;
+        max-width:100%;
         border-radius:18px;
         border:1px solid rgba(255,255,255,.14);
         background:rgba(255,255,255,.08);
@@ -515,18 +500,22 @@
 
       .op-mediaWrap{
         margin-top:8px;
+        width:100%;
+        max-width:100%;
         border-radius:14px;
         overflow:hidden;
         border:1px solid rgba(255,255,255,.14);
         background:rgba(0,0,0,.18);
         position:relative;
+        aspect-ratio:4 / 5;
       }
 
       .op-mediaWrap img,
       .op-mediaWrap video{
         width:100%;
+        height:100%;
+        max-width:100%;
         display:block;
-        max-height:min(420px, 58vh);
         object-fit:cover;
       }
 
@@ -627,6 +616,13 @@
         background:rgba(255,255,255,.14);
       }
 
+      @media (min-width: 760px){
+        .op-mediaWrap{
+          aspect-ratio:16 / 9;
+          max-height:340px;
+        }
+      }
+
       @media (max-width: 640px){
         .op-postMain{
           padding:12px;
@@ -646,9 +642,9 @@
           -webkit-line-clamp:2;
         }
 
-        .op-mediaWrap img,
-        .op-mediaWrap video{
-          max-height:42vh;
+        .op-mediaWrap{
+          aspect-ratio:4 / 5;
+          max-height:300px;
         }
 
         .op-lockBox{
