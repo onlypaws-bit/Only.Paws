@@ -7,10 +7,11 @@
 </head>
 <body>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../js/supabase.js"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
 
   <script>
-    async function bootstrapUser(role) {
+    async function bootstrapUser(roleFallback) {
       const { data: uData, error: uErr } = await onlypawsClient.auth.getUser();
       if (uErr) throw uErr;
 
@@ -20,31 +21,76 @@
       const uid = user.id;
       const now = new Date().toISOString();
 
-      await onlypawsClient
+      // profiles: create only if missing, do NOT overwrite existing role
+      const { data: existingProfile, error: profileReadErr } = await onlypawsClient
         .from("profiles")
-        .upsert({ user_id: uid, role, updated_at: now }, { onConflict: "user_id" });
+        .select("user_id, role")
+        .eq("user_id", uid)
+        .maybeSingle();
 
-      await onlypawsClient
+      if (profileReadErr) throw profileReadErr;
+
+      if (!existingProfile) {
+        const role = roleFallback || user?.user_metadata?.role || "fan";
+
+        const { error: profileInsertErr } = await onlypawsClient
+          .from("profiles")
+          .insert({
+            user_id: uid,
+            role,
+            updated_at: now
+          });
+
+        if (profileInsertErr) throw profileInsertErr;
+      }
+
+      // wallets: safe upsert
+      const { error: walletErr } = await onlypawsClient
         .from("wallets")
-        .upsert({ profile_id: uid }, { onConflict: "profile_id" });
-
-      await onlypawsClient
-        .from("entitlements")
         .upsert(
-          {
+          { profile_id: uid },
+          { onConflict: "profile_id" }
+        );
+
+      if (walletErr) throw walletErr;
+
+      // entitlements: create if missing, otherwise only refresh updated_at
+      const { data: existingEntitlement, error: entReadErr } = await onlypawsClient
+        .from("entitlements")
+        .select("user_id")
+        .eq("user_id", uid)
+        .maybeSingle();
+
+      if (entReadErr) throw entReadErr;
+
+      if (!existingEntitlement) {
+        const role = roleFallback || user?.user_metadata?.role || "fan";
+
+        const { error: entInsertErr } = await onlypawsClient
+          .from("entitlements")
+          .insert({
             user_id: uid,
             fan_membership: role === "fan",
             creator_plan: role === "creator",
             creator_membership: false,
             updated_at: now
-          },
-          { onConflict: "user_id" }
-        );
+          });
+
+        if (entInsertErr) throw entInsertErr;
+      } else {
+        const { error: entUpdateErr } = await onlypawsClient
+          .from("entitlements")
+          .update({ updated_at: now })
+          .eq("user_id", uid);
+
+        if (entUpdateErr) throw entUpdateErr;
+      }
     }
 
     (async () => {
       try {
-        const { data: s } = await onlypawsClient.auth.getSession();
+        const { data: s, error: sErr } = await onlypawsClient.auth.getSession();
+        if (sErr) throw sErr;
 
         if (s?.session) {
           const role = s.session.user?.user_metadata?.role || "fan";
@@ -55,7 +101,7 @@
       }
 
       const next = new URLSearchParams(window.location.search).get("next");
-      window.location.href = next || "profile.html";
+      window.location.href = next || OP_PATHS.app.profile;
     })();
   </script>
 </body>
