@@ -106,7 +106,7 @@ function setupLogout() {
 
     btn.disabled = true;
     const oldText = btn.textContent;
-    btn.textContent = "Logging out…";
+    btn.textContent = "Logging out...";
 
     try {
       await onlypawsClient.auth.signOut();
