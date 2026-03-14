@@ -1,3 +1,20 @@
+<!--
+  OnlyPaws
+  File: html/app/feed.html
+
+  CSS:
+  /css/styles.css
+  /css/pages/app-feed.css
+
+  JS:
+  /js/supabase.js
+  /js/supabase-likes.js
+  /js/post-card.js
+  /js/partials.js
+  /js/support-us.js
+  /js/paths.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +22,7 @@
   <title>OnlyPaws — Feed</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="../../css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 
 <body>
@@ -17,29 +34,35 @@
       <p class="sub">Browse creators, discover cute content, and support what you love.</p>
 
       <div class="searchRow">
-        <input id="searchInput" class="search" placeholder="Search creators (by name or @username)..." />
+        <input
+          id="searchInput"
+          class="search"
+          placeholder="Search creators (by name or @username)..."
+        />
       </div>
 
       <div class="subtleLine">
         Want to help keep OnlyPaws running?
-       <button id="supportBtn" class="navBtn">
-  Support OnlyPaws
-</button>
+        <button id="supportBtn" class="navBtn" type="button">
+          Support OnlyPaws
+        </button>
+      </div>
 
       <div id="debug" class="debug"></div>
     </div>
 
-    <div class="panel" style="margin-top:14px;">
+    <div class="panel feedSectionPanel">
       <div class="pill">Featured creators</div>
       <div class="creatorList" id="creatorList"></div>
       <div class="hint" id="creatorHint">Loading creators…</div>
     </div>
 
-    <div class="panel" style="margin-top:14px;">
+    <div class="panel feedSectionPanel">
       <div class="postsHeader">
         <h2>Latest posts</h2>
-        <div class="hint" style="margin-top:0;">Visible posts (premium appears after purchase)</div>
+        <div class="hint postsHeaderHint">Visible posts (premium appears after purchase)</div>
       </div>
+
       <div class="posts" id="posts"></div>
       <div class="hint" id="postsHint">Loading posts…</div>
     </div>
@@ -47,18 +70,27 @@
     <div id="footer-placeholder"></div>
   </div>
 
+  <div id="mediaModal" class="mediaModal" aria-hidden="true">
+    <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
+      <button id="mediaModalClose" class="mediaModalClose" type="button">✕</button>
+      <img id="mediaModalImg" alt="Preview" class="mediaModalImgHidden" />
+      <video id="mediaModalVid" controls playsinline class="mediaModalVidHidden"></video>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../js/supabase.js"></script>
-  <script src="../../js/supabase-likes.js"></script>
-  <script src="../../js/post-card.js"></script>
-  <script src="../../js/partials.js"></script>
-  <script src="../../js/support-us.js"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/supabase-likes.js"></script>
+  <script src="/js/post-card.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/support-us.js"></script>
 
   <script>
     let creatorsAll = [];
 
     function goIndex() {
-      window.location.replace("../marketing/index.html");
+      window.location.replace(OP_PATHS.marketing.index);
     }
 
     function show(el, yes) {
@@ -90,7 +122,7 @@
     }
 
     function creatorProfileUrl(username) {
-      return `../creators/creator-profile.html?u=${encodeURIComponent(username)}`;
+      return `${OP_PATHS.creators.creatorProfile}?u=${encodeURIComponent(username)}`;
     }
 
     function avatarHtml(c) {
@@ -245,7 +277,7 @@
       show(fanDash, false);
       show(creatorDash, false);
 
-      if (profileBtn) profileBtn.href = "profile.html";
+      if (profileBtn) profileBtn.href = OP_PATHS.app.profile;
 
       try {
         const { data: u } = await onlypawsClient.auth.getUser();
@@ -259,10 +291,10 @@
           .maybeSingle();
 
         if (p?.role === "creator") {
-          if (creatorDash) creatorDash.href = "../creators/creator-dash.html";
+          if (creatorDash) creatorDash.href = OP_PATHS.creators.creatorDash;
           show(creatorDash, true);
         } else {
-          if (fanDash) fanDash.href = "../fans/fan-dash.html";
+          if (fanDash) fanDash.href = OP_PATHS.fans.fanDash;
           show(fanDash, true);
         }
       } catch (e) {}
@@ -435,6 +467,17 @@
       setupSearch();
       setupLogout();
 
+      const supportBtn = document.getElementById("supportBtn");
+      if (supportBtn && typeof initSupportUsButton === "function") {
+        await initSupportUsButton({
+          buttonId: "supportBtn",
+          messageId: "debug",
+          loginRedirect: OP_PATHS.app.feed + "?support=1",
+          successPath: OP_PATHS.thanks.supportUs,
+          cancelPath: OP_PATHS.app.feed
+        });
+      }
+
       const { data, error } = await onlypawsClient.auth.getSession();
       if (error) {
         setDebug(`Auth session error:\n${error.message}`);
@@ -462,13 +505,5 @@
       await boot();
     });
   </script>
-
-  <div id="mediaModal" class="mediaModal" aria-hidden="true">
-    <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
-      <button id="mediaModalClose" class="mediaModalClose" type="button">✕</button>
-      <img id="mediaModalImg" alt="Preview" style="display:none;">
-      <video id="mediaModalVid" controls playsinline style="display:none;"></video>
-    </div>
-  </div>
 </body>
 </html>
