@@ -1,0 +1,37 @@
+.op-hidden {
+  display: none !important;
+}
+
+.op-section-space {
+  margin-top: 8px;
+}
+
+.op-top-actions {
+  margin-top: 12px;
+}
+
+.op-help-text {
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+.op-preview-panel {
+  padding: 12px;
+}
+
+.op-preview-media {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  border-radius: 14px;
+}
+
+.op-preview-image {
+  max-height: 420px;
+  object-fit: cover;
+}
+
+.op-preview-video {
+  max-height: 420px;
+  background: rgba(0, 0, 0, 0.2);
+}
