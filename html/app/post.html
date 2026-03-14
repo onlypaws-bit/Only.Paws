@@ -8,7 +8,7 @@
 
   JS:
   /js/paths.js
-  /js/supabase.js
+  /js/onlypawsClient.js
   /js/nav.js
   /js/partials.js
 -->
@@ -64,7 +64,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
-  <script src="/js/supabase.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/partials.js"></script>
 
@@ -114,14 +114,7 @@
 
     function getClient() {
       if (window.onlypawsClient) return window.onlypawsClient;
-
-      const url = window.SUPABASE_URL || "";
-      const key = window.SUPABASE_ANON_KEY || "";
-      if (url && key && window.supabase?.createClient) {
-        return window.supabase.createClient(url, key);
-      }
-
-      throw new Error("Missing onlypawsClient. Ensure supabase.js is loaded and sets window.onlypawsClient.");
+      throw new Error("Missing onlypawsClient. Ensure onlypawsClient.js is loaded and sets window.onlypawsClient.");
     }
 
     async function hydrateUserPill(client) {
