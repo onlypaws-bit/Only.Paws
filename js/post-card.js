@@ -1,9 +1,12 @@
-// post-card.js
-// UI + binding LIKE riutilizzabile per i post
-// Dipendenze global:
-// - window.onlypawsClient
-// - window.onlypawsLikes
-// - window.OP_PATHS (optional but recommended)
+/* =========================================================
+   OnlyPaws
+   File: /js/post-card.js
+   Purpose: reusable post card UI with like binding
+   Dependencies:
+   - window.onlypawsClient
+   - window.onlypawsLikes
+   - window.OP_PATHS (optional but recommended)
+   ========================================================= */
 
 (() => {
   const FEATURE_LIKES = true;
@@ -48,14 +51,17 @@
   }
 
   function defaultPostUrl(post) {
-    if (window.OP_PATHS?.app?.post) {
-      return `${window.OP_PATHS.app.post}?id=${encodeURIComponent(post.id)}`;
+    if (window.OP_PATHS?.app?.shared?.post) {
+      return `${window.OP_PATHS.app.shared.post}?id=${encodeURIComponent(post.id)}`;
     }
-    return `/html/app/post.html?id=${encodeURIComponent(post.id)}`;
+    return `/html/app/shared/post.html?id=${encodeURIComponent(post.id)}`;
   }
 
   function creatorProfileUrl(username) {
-    const base = window.OP_PATHS?.creators?.creatorProfile || "/html/creators/creator-profile.html";
+    const base =
+      window.OP_PATHS?.app?.fans?.creatorProfile ||
+      "/html/app/fans/creator-profile.html";
+
     return `${base}?u=${encodeURIComponent(username || "creator")}`;
   }
 
