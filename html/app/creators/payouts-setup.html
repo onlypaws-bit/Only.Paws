@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Enable payouts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+
+<body>
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <div class="panel">
+      <h1>Enable payouts</h1>
+      <p class="sub">
+        To withdraw earnings, you need to enable payouts (Stripe onboarding). Once completed, your dashboard will allow withdrawals.
+      </p>
+
+      <div class="box">
+        <div class="statusLine">
+          <div class="lock" id="lockIcon">🔒</div>
+          <div style="min-width:0;">
+            <div class="stTitle" id="statusTitle">Payouts not enabled</div>
+            <div class="stText" id="statusText">Start setup to enable withdrawals.</div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn" id="startBtn" type="button">Start payout setup</button>
+          <button class="ghost" id="refreshBtn" type="button">I've completed setup — Refresh</button>
+          <a class="ghost" href="creator-dash.html">Back to dashboard</a>
+        </div>
+
+        <div class="okline" id="submittedLine" style="display:none;">
+          <span>✅</span>
+          <span>Setup submitted. Press Refresh to re-check payout status.</span>
+        </div>
+
+        <div class="note" id="note">
+          Tip: if Stripe needs verification, payouts may take a moment to become active. Refresh again after ~1 minute.
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/onlypawsClient.js"></script>
+  <script src="../../js/partials.js"></script>
+
+  <script>
+    function goIndex() {
+      window.location.href = "../marketing/index.html";
+    }
+
+    function setUI({ enabled, title, text }) {
+      const lockIcon = document.getElementById("lockIcon");
+      const statusTitle = document.getElementById("statusTitle");
+      const statusText = document.getElementById("statusText");
+      const startBtn = document.getElementById("startBtn");
+
+      if (enabled) {
+        lockIcon.textContent = "✅";
+        statusTitle.textContent = title || "Payouts enabled";
+        statusText.textContent = text || "Stripe is ready. You can withdraw from the dashboard.";
+        startBtn.disabled = true;
+        startBtn.textContent = "Payouts already enabled";
+      } else {
+        lockIcon.textContent = "🔒";
+        statusTitle.textContent = title || "Payouts not enabled";
+        statusText.textContent = text || "Start setup to enable withdrawals.";
+        startBtn.disabled = false;
+        startBtn.textContent = "Start payout setup";
+      }
+    }
+
+    async function requireSession() {
+      const { data } = await onlypawsClient.auth.getSession();
+      if (!data?.session) {
+        window.location.href = "../marketing/creators.html?next=../creators/payouts-setup.html";
+        return null;
+      }
+      return data.session;
+    }
+
+    async function hydrateUserPill() {
+      try {
+        const userPill = document.getElementById("userPill");
+        if (!userPill) return;
+
+        const { data: sessData } = await onlypawsClient.auth.getSession();
+        const session = sessData?.session;
+
+        if (!session) {
+          userPill.textContent = "Guest";
+          return;
+        }
+
+        const uid = session.user.id;
+        const email = session.user.email || "";
+
+        const { data: prof } = await onlypawsClient
+          .from("profiles")
+          .select("username, display_name")
+          .eq("user_id", uid)
+          .maybeSingle();
+
+        const uname = (prof?.username || "").trim();
+        const dname = (prof?.display_name || "").trim();
+
+        if (uname) userPill.textContent = "@" + uname;
+        else if (dname) userPill.textContent = dname;
+        else if (email) userPill.textContent = email.split("@")[0];
+        else userPill.textContent = "User";
+      } catch (e) {
+        const userPill = document.getElementById("userPill");
+        if (userPill) userPill.textContent = "User";
+      }
+    }
+
+    async function hydrateNav() {
+      const profileBtn = document.getElementById("navProfile");
+      const fanDash = document.getElementById("navFanDash");
+      const creatorDash = document.getElementById("navCreatorDash");
+      const logoutBtn = document.getElementById("navLogout");
+
+      if (profileBtn) {
+        profileBtn.href = "../app/profile.html";
+        profileBtn.style.display = "inline-flex";
+      }
+
+      if (logoutBtn) logoutBtn.style.display = "inline-flex";
+
+      if (fanDash) fanDash.style.display = "none";
+
+      if (creatorDash) {
+        creatorDash.href = "creator-dash.html";
+        creatorDash.style.display = "inline-flex";
+      }
+    }
+
+    function setupLogout() {
+      const navLogout = document.getElementById("navLogout");
+      if (!navLogout) return;
+      if (navLogout.dataset.bound === "1") return;
+
+      navLogout.dataset.bound = "1";
+      navLogout.addEventListener("click", async () => {
+        try {
+          await onlypawsClient.auth.signOut();
+        } catch (e) {}
+        goIndex();
+      });
+    }
+
+    async function fetchConnectStatus() {
+      const { data, error } = await onlypawsClient.functions.invoke("connect-status", { body: {} });
+      if (error) throw error;
+      return data;
+    }
+
+    async function checkNow() {
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = "Checking…";
+
+      try {
+        const st = await fetchConnectStatus();
+        console.log("connect-status", st);
+
+        if (st?.payouts_enabled) {
+          setUI({
+            enabled: true,
+            title: "Payouts enabled",
+            text: "Stripe is ready. Go back to the dashboard to withdraw."
+          });
+        } else {
+          const reason = st?.reason || null;
+          const extra =
+            (st?.requirements?.currently_due?.length)
+              ? ("Missing: " + st.requirements.currently_due.join(", "))
+              : (reason ? ("Reason: " + reason) : null);
+
+          setUI({
+            enabled: false,
+            title: "Payouts not enabled",
+            text: extra || "Start setup to enable withdrawals."
+          });
+        }
+      } catch (e) {
+        console.warn("connect-status failed:", e);
+        setUI({
+          enabled: false,
+          title: "Payouts not enabled",
+          text: "Start setup to enable withdrawals."
+        });
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "I've completed setup — Refresh";
+      }
+    }
+
+    async function startSetup() {
+      const startBtn = document.getElementById("startBtn");
+
+      startBtn.disabled = true;
+      startBtn.textContent = "Opening Stripe…";
+
+      try {
+        const returnUrl = window.location.origin + "/html/creators/payouts-setup.html?done=1";
+        const refreshUrl = window.location.origin + "/html/creators/payouts-setup.html?retry=1";
+
+        const { data, error } = await onlypawsClient.functions.invoke("connect-update", {
+          body: { return_url: returnUrl, refresh_url: refreshUrl }
+        });
+
+        if (error) {
+          const ctxBody = error?.context?.body;
+          const extra = ctxBody ? (typeof ctxBody === "string" ? ctxBody : JSON.stringify(ctxBody)) : "";
+          throw new Error((error.message || "Edge Function error") + (extra ? " — " + extra : ""));
+        }
+
+        if (!data?.url) throw new Error("Missing Stripe URL");
+        window.location.href = data.url;
+      } catch (e) {
+        alert("❌ Payout setup failed: " + (e?.message || String(e)));
+        startBtn.disabled = false;
+        startBtn.textContent = "Start payout setup";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadLayout();
+
+      if (typeof onlypawsClient === "undefined") {
+        alert("❌ onlypawsClient not found. Check onlypawsClient.js.");
+        return;
+      }
+
+      const session = await requireSession();
+      if (!session) return;
+
+      await hydrateNav();
+      await hydrateUserPill();
+      setupLogout();
+
+      const qp = new URLSearchParams(window.location.search);
+      const submittedLine = document.getElementById("submittedLine");
+      if (qp.get("done") === "1" || qp.get("retry") === "1") {
+        submittedLine.style.display = "flex";
+      }
+
+      document.getElementById("startBtn").addEventListener("click", startSetup);
+      document.getElementById("refreshBtn").addEventListener("click", checkNow);
+
+      await checkNow();
+    });
+  </script>
+</body>
+</html>

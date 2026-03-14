@@ -1,0 +1,480 @@
+<!--
+  OnlyPaws
+  File: html/marketing/creators.html
+
+  CSS:
+  ../../css/styles.css
+  ../../css/pages/marketing-shared.css
+  ../../css/pages/marketing-auth.css
+  ../../css/pages/marketing-creators.css
+
+  JS:
+  ../../js/paths.js
+  ../../js/supabase.js
+  ../../js/nav.js
+  ../../js/partials.js
+  ../../js/support-us.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — For Creators</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="../../css/styles.css" />
+  <link rel="stylesheet" href="../../css/pages/marketing-shared.css" />
+  <link rel="stylesheet" href="../../css/pages/marketing-auth.css" />
+  <link rel="stylesheet" href="../../css/pages/marketing-creators.css" />
+</head>
+
+<body>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <div class="hero authLayout">
+        <div class="panel">
+          <div class="pill">Publish pet content. Earn support.</div>
+
+          <h1>Become a creator</h1>
+
+          <p class="sub creatorsHeroIntro">
+            Build your creator profile, showcase your pets, and monetize your content with subscriptions.
+            Payments are handled securely through Stripe.
+          </p>
+
+          <div class="creatorsFeatureList">
+            <div class="creatorsFeatureItem">📸 Post exclusive photos &amp; videos</div>
+            <div class="creatorsFeatureItem">🐾 Build a creator profile with your pets</div>
+            <div class="creatorsFeatureItem">💳 Secure payouts &amp; billing via Stripe</div>
+            <div class="creatorsFeatureItem">🔒 Pet-first content policy</div>
+          </div>
+
+          <div class="authBox">
+            <form id="creator-auth-form" class="authForm">
+              <div class="authFieldGroup">
+                <input
+                  type="email"
+                  id="creator-email"
+                  class="authField"
+                  placeholder="Email"
+                  required
+                />
+
+                <input
+                  type="password"
+                  id="creator-password"
+                  class="authField"
+                  placeholder="Password (min 6)"
+                  required
+                />
+              </div>
+
+              <div class="btnRow authActionsRow">
+                <button type="submit" class="btn" id="creatorLoginBtn">Log in</button>
+                <button type="button" class="ghost" id="creatorSignupBtn">Create creator account</button>
+              </div>
+
+              <div class="forgotRow">
+                <button type="button" class="tinyLink" id="forgotBtn">Forgot password?</button>
+                <span class="hint">You’ll receive an email link</span>
+              </div>
+
+              <div class="resetBox" id="resetBox">
+                <div class="hint">
+                  Send a password reset email to the address above.
+                </div>
+
+                <div class="btnRow resetActions">
+                  <button type="button" class="btn" id="sendResetBtn">Send reset email</button>
+                  <button type="button" class="ghost" id="cancelResetBtn">Cancel</button>
+                </div>
+              </div>
+
+              <div id="creatorMsg" class="authMsg"></div>
+            </form>
+          
+          </div>
+        </div>
+
+        <div class="panel authPanelStack">
+          <div class="pill">For creators</div>
+
+          <h2 class="sectionTitle creatorsSectionSpacer">Creator Plan</h2>
+
+          <p class="sub">
+            Creator Plan costs €10/month and requires an active account.
+            Registration is required before purchasing.
+          </p>
+
+          <div class="creatorPlanCard">
+            <div class="creatorPlanTitle">Monthly creator access</div>
+            <div class="creatorPlanPrice">€10<span>/month</span></div>
+            <div class="creatorPlanNote">
+              Cancel anytime • Secure payments via Stripe
+            </div>
+          </div>
+
+          <div class="btnRow creatorsSectionSpacer">
+            <a class="ghost" id="creatorFaqLink" href="../faq/faq-creators.html">Creator FAQ</a>
+            <a class="ghost" id="fanLandingLink" href="fans.html">I’m a fan</a>
+          </div>
+
+          <div class="supportCard">
+            <div class="brandImage creatorsAsideImage">
+              <img id="creatorsImage" src="../../assets/images/onlypaws-creators.png" alt="OnlyPaws creators" />
+            </div>
+
+            <h3>Support Us 🐾</h3>
+
+            <p>
+              Love OnlyPaws and want to support the project?
+              This is a recurring support contribution billed every 3 months.
+              It does not unlock any features or memberships.
+              It simply helps us keep OnlyPaws alive, improve the platform,
+              and take care of our furry friends 💜
+            </p>
+
+            <div class="btnRow indexSupportActions">
+              <button class="btn" id="supportUsBtn" type="button">
+                Support OnlyPaws 🐾
+              </button>
+            </div>
+
+      
+            <div id="supportUsMsg" class="authMsg"></div>
+
+            <div class="note">Cancel anytime • Secure payments via Stripe</div>
+            
+          </div>
+        </div>
+      </div>
+
+      <div class="footerWrap" id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/paths.js"></script>
+  <script src="../../js/supabase.js"></script>
+  <script src="../../js/nav.js"></script>
+  <script src="../../js/partials.js"></script>
+  <script src="../../js/support-us.js"></script>
+
+  <script>
+    const form = document.getElementById("creator-auth-form");
+    const msg = document.getElementById("creatorMsg");
+    const emailEl = document.getElementById("creator-email");
+    const passEl = document.getElementById("creator-password");
+    const loginBtn = document.getElementById("creatorLoginBtn");
+    const signupBtn = document.getElementById("creatorSignupBtn");
+
+    const forgotBtn = document.getElementById("forgotBtn");
+    const resetBox = document.getElementById("resetBox");
+    const sendResetBtn = document.getElementById("sendResetBtn");
+    const cancelResetBtn = document.getElementById("cancelResetBtn");
+
+    function hideCurrentMarketingLink() {
+      const path = window.location.pathname.toLowerCase();
+      let current = "index";
+
+      if (path.includes("creators")) current = "creators";
+      else if (path.includes("fans")) current = "fans";
+      else if (path.includes("the-pack")) current = "the-pack";
+      else if (path.includes("index") || path.endsWith("/")) current = "index";
+
+      document.querySelectorAll("[data-page]").forEach(link => {
+        if (link.dataset.page === current) {
+          link.remove();
+        }
+      });
+    }
+
+    function applyCreatorsPaths() {
+      const creatorFaqLink = document.getElementById("creatorFaqLink");
+      const fanLandingLink = document.getElementById("fanLandingLink");
+      const creatorsImage = document.getElementById("creatorsImage");
+
+      if (creatorFaqLink) creatorFaqLink.href = OP_PATHS.faq.creators;
+      if (fanLandingLink) fanLandingLink.href = OP_PATHS.marketing.fans;
+      if (creatorsImage) creatorsImage.src = OP_PATHS.assets.creatorsImage;
+    }
+
+    function setMsg(text) {
+      msg.textContent = text || "";
+    }
+
+    function getNextPath() {
+      const next = new URLSearchParams(window.location.search).get("next");
+
+      if (next === "profile") return OP_PATHS.app.profile;
+      if (next === "feed") return OP_PATHS.app.feed;
+
+      if (next && next.endsWith(".html")) {
+        return next;
+      }
+
+      return OP_PATHS.app.feed;
+    }
+
+    function setBusy(isBusy) {
+      signupBtn.disabled = isBusy;
+      loginBtn.disabled = isBusy;
+      emailEl.disabled = isBusy;
+      passEl.disabled = isBusy;
+      forgotBtn.disabled = isBusy;
+      sendResetBtn.disabled = isBusy;
+      cancelResetBtn.disabled = isBusy;
+    }
+
+    function showResetBox(show) {
+      resetBox.classList.toggle("isOpen", show);
+    }
+
+    function getResetPasswordRedirect() {
+      return new URL(OP_PATHS.marketing.resetPassword, window.location.href).href;
+    }
+
+    function getEmailConfirmedRedirect() {
+      return new URL(OP_PATHS.marketing.emailConfirmed, window.location.href).href;
+    }
+
+    async function ensureProfileAndWalletWithoutOverwritingRole(defaultRole) {
+      const { data: uData, error: uErr } = await onlypawsClient.auth.getUser();
+      if (uErr) throw uErr;
+
+      const user = uData?.user;
+      if (!user?.id) throw new Error("No user session");
+
+      const uid = user.id;
+      const now = new Date().toISOString();
+
+      const existingProfileRes = await onlypawsClient
+        .from("profiles")
+        .select("user_id, role")
+        .eq("user_id", uid)
+        .maybeSingle();
+
+      if (existingProfileRes.error) throw existingProfileRes.error;
+
+      if (!existingProfileRes.data) {
+        const insertProfileRes = await onlypawsClient
+          .from("profiles")
+          .insert({
+            user_id: uid,
+            role: defaultRole,
+            updated_at: now
+          })
+          .select()
+          .maybeSingle();
+
+        if (insertProfileRes.error) throw insertProfileRes.error;
+      } else {
+        const updateProfileRes = await onlypawsClient
+          .from("profiles")
+          .update({ updated_at: now })
+          .eq("user_id", uid)
+          .select()
+          .maybeSingle();
+
+        if (updateProfileRes.error) throw updateProfileRes.error;
+      }
+
+      const walletRes = await onlypawsClient
+        .from("wallets")
+        .upsert({ profile_id: uid }, { onConflict: "profile_id" })
+        .select()
+        .maybeSingle();
+
+      if (walletRes.error) throw walletRes.error;
+    }
+
+    function redirectAfterSignup() {
+      window.location.href = OP_PATHS.app.profile;
+    }
+
+    function redirectAfterLogin() {
+      window.location.href = getNextPath();
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      applyCreatorsPaths();
+
+      await loadMarketingLayout();
+      hideCurrentMarketingLink();
+
+      if (typeof initNav === "function") {
+        await initNav();
+      }
+
+      if (typeof initSupportUsButton === "function") {
+        await initSupportUsButton({
+          buttonId: "supportUsBtn",
+          messageId: "supportUsMsg",
+          loginRedirect: OP_PATHS.marketing.creators + "?support=1",
+          successPath: OP_PATHS.thanks.supportUs,
+          cancelPath: OP_PATHS.marketing.creators
+        });
+      }
+
+      if (typeof onlypawsClient === "undefined") {
+        setMsg("❌ onlypawsClient not found. Check supabase.js path + script order.");
+        console.error("onlypawsClient is undefined.");
+        return;
+      }
+
+      try {
+        const { data: s } = await onlypawsClient.auth.getSession();
+        if (s?.session) {
+          redirectAfterLogin();
+        }
+      } catch (e) {
+        console.warn("auto-redirect skipped:", e);
+      }
+    });
+
+    forgotBtn.addEventListener("click", () => {
+      showResetBox(true);
+      setMsg("");
+    });
+
+    cancelResetBtn.addEventListener("click", () => {
+      showResetBox(false);
+      setMsg("");
+    });
+
+    sendResetBtn.addEventListener("click", async () => {
+      setBusy(true);
+
+      try {
+        const email = (emailEl.value || "").trim();
+
+        if (!email) {
+          setMsg("Please enter your email first.");
+          return;
+        }
+
+        setMsg("Sending reset email...");
+
+        const { error } = await onlypawsClient.auth.resetPasswordForEmail(email, {
+          redirectTo: getResetPasswordRedirect()
+        });
+
+        if (error) {
+          setMsg("❌ " + error.message);
+          return;
+        }
+
+        setMsg("✅ Email sent! Check your inbox (and spam) 🐾");
+        showResetBox(false);
+      } catch (err) {
+        setMsg("❌ " + (err?.message || String(err)));
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    signupBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+
+      if (typeof form.requestSubmit === "function") {
+        form.requestSubmit();
+      } else {
+        form.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      setMsg("Creating your creator account...");
+      setBusy(true);
+
+      try {
+        const email = (emailEl.value || "").trim();
+        const password = passEl.value || "";
+
+        if (!email) {
+          setMsg("Please enter your email.");
+          return;
+        }
+
+        if (password.length < 6) {
+          setMsg("Password must be at least 6 characters.");
+          return;
+        }
+
+        const { data, error } = await onlypawsClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { role: "creator" },
+            emailRedirectTo: getEmailConfirmedRedirect()
+          }
+        });
+
+        if (error) {
+          setMsg("❌ " + error.message);
+          return;
+        }
+
+        if (data?.session) {
+          await ensureProfileAndWalletWithoutOverwritingRole("creator");
+          redirectAfterSignup();
+          return;
+        }
+
+        setMsg("✅ Account created. Check your email to confirm 🐾");
+      } catch (err) {
+        setMsg("❌ " + (err?.message || String(err)));
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    loginBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      setMsg("Logging in...");
+      setBusy(true);
+
+      try {
+        const email = (emailEl.value || "").trim();
+        const password = passEl.value || "";
+
+        if (!email) {
+          setMsg("Please enter your email.");
+          return;
+        }
+
+        if (!password) {
+          setMsg("Please enter your password.");
+          return;
+        }
+
+        const { data, error } = await onlypawsClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          setMsg("❌ " + error.message);
+          return;
+        }
+
+        if (data?.session) {
+          await ensureProfileAndWalletWithoutOverwritingRole("creator");
+          redirectAfterLogin();
+          return;
+        }
+      } catch (err) {
+        setMsg("❌ " + (err?.message || String(err)));
+      } finally {
+        setBusy(false);
+      }
+    });
+  </script>
+</body>
+</html>
