@@ -1,3 +1,9 @@
+/* =========================================================
+   OnlyPaws
+   File: js/paths.js
+   Purpose: central absolute path map for pages, assets, and components
+   ========================================================= */
+
 window.OP_PATHS = {
   app: {
     authCallback: "/html/app/auth-callback.html",
@@ -34,7 +40,7 @@ window.OP_PATHS = {
   },
 
   marketing: {
-    index: "/html/marketing/index.html",
+    index: "/index.html",
     creators: "/html/marketing/creators.html",
     fans: "/html/marketing/fans.html",
     thePack: "/html/marketing/the-pack.html",
@@ -64,5 +70,26 @@ window.OP_PATHS = {
     footer: "/components/footer.html",
     headerMarketing: "/components/header-marketing.html",
     footerMarketing: "/components/footer-marketing.html"
+  },
+
+  static: {
+    css: "/css/styles.css",
+    marketingSharedCss: "/css/pages/marketing-shared.css",
+    marketingIndexCss: "/css/pages/marketing-index.css",
+    marketingAuthCss: "/css/pages/marketing-auth.css",
+    marketingFansCss: "/css/pages/marketing-fans.css",
+    marketingCreatorsCss: "/css/pages/marketing-creators.css",
+    marketingThePackCss: "/css/pages/marketing-the-pack.css",
+    marketingStatusCss: "/css/pages/marketing-status.css",
+    marketingResetPasswordCss: "/css/pages/marketing-reset-password.css",
+    appFeedCss: "/css/pages/app-feed.css",
+
+    supabaseJs: "/js/supabase.js",
+    supabaseLikesJs: "/js/supabase-likes.js",
+    postCardJs: "/js/post-card.js",
+    partialsJs: "/js/partials.js",
+    supportUsJs: "/js/support-us.js",
+    navJs: "/js/nav.js",
+    pathsJs: "/js/paths.js"
   }
 };
