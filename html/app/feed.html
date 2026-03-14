@@ -46,7 +46,7 @@
 
         <div class="subtleLine">
           <span>Want to help keep OnlyPaws running?</span>
-          <button id="supportBtn" class="navBtn" type="button">
+          <button id="supportBtn" class="navBtn primary" type="button">
             Support OnlyPaws
           </button>
         </div>
@@ -99,11 +99,6 @@
       window.location.replace(OP_PATHS.marketing.index);
     }
 
-    function show(el, yes) {
-      if (!el) return;
-      el.style.display = yes ? "inline-flex" : "none";
-    }
-
     function setDebug(msg) {
       const el = document.getElementById("debug");
       if (!el) return;
@@ -128,7 +123,7 @@
     }
 
     function creatorProfileUrl(username) {
-      return `${OP_PATHS.creators.creatorProfile}?u=${encodeURIComponent(username)}`;
+      return `${OP_PATHS.creators.creatorProfile}?u=${encodeURIComponent(username || "")}`;
     }
 
     function avatarHtml(c) {
@@ -141,6 +136,7 @@
 
     function renderCreators(list) {
       const el = document.getElementById("creatorList");
+
       if (!list || list.length === 0) {
         el.innerHTML = "";
         return;
@@ -148,7 +144,7 @@
 
       el.innerHTML = list.map(c => {
         const name = c.display_name || c.username || "Creator";
-        const uname = c.username || "username";
+        const uname = c.username || "creator";
         const bio = c.bio || "";
 
         return `
@@ -163,33 +159,6 @@
           </a>
         `;
       }).join("");
-    }
-
-    function mediaBlock(p) {
-      if (!p.media_url) return "";
-      const isVideo = p.media_type === "video";
-      const locked = p.is_locked === true;
-
-      const media = isVideo
-        ? `<video ${locked ? "" : "controls"} playsinline src="${esc(p.media_url)}"></video>`
-        : `<img src="${esc(p.media_url)}" alt="Post media">`;
-
-      if (!locked) {
-        return `<div class="mediaWrap">${media}</div>`;
-      }
-
-      const uname = p?.profiles?.username || "creator";
-      const url = creatorProfileUrl(uname);
-
-      return `
-        <div class="mediaWrap blurred">
-          ${media}
-          <div class="lockOverlay">
-            <div class="badge">🔒 Subscribers / Premium</div>
-            <a class="navBtn primary" href="${url}">Open creator</a>
-          </div>
-        </div>
-      `;
     }
 
     function renderPosts(list) {
@@ -222,7 +191,7 @@
             is_locked: locked,
             media_url: p.media_url || null,
             media_type: p.media_type || null,
-            created_at: p.created_at || null,
+            created_at: p.created_at || null
           });
         }).join("");
 
@@ -245,8 +214,10 @@
               <div class="badge">${paidBadge}</div>
             </div>
             <h3>${esc(title)}</h3>
-            ${mediaBlock(p)}
             <p>${esc(content)}</p>
+            <div class="btnRow">
+              <a class="ghost" href="${OP_PATHS.app.post}?id=${encodeURIComponent(p.id)}">Open post</a>
+            </div>
           </div>
         `;
       }).join("");
@@ -254,6 +225,8 @@
 
     function setupSearch() {
       const input = document.getElementById("searchInput");
+      if (!input) return;
+
       input.addEventListener("input", () => {
         const q = (input.value || "").trim().toLowerCase();
 
@@ -269,57 +242,6 @@
             return name.includes(q) || uname.includes(q);
           })
         );
-      });
-    }
-
-    async function hydrateNavLoggedOnly() {
-      const profileBtn = document.getElementById("navProfile");
-      const logoutBtn = document.getElementById("navLogout");
-      const fanDash = document.getElementById("navFanDash");
-      const creatorDash = document.getElementById("navCreatorDash");
-
-      show(profileBtn, true);
-      show(logoutBtn, true);
-      show(fanDash, false);
-      show(creatorDash, false);
-
-      if (profileBtn) profileBtn.href = OP_PATHS.app.profile;
-
-      try {
-        const { data: u } = await onlypawsClient.auth.getUser();
-        const userId = u?.user?.id;
-        if (!userId) return;
-
-        const { data: p } = await onlypawsClient
-          .from("profiles")
-          .select("role")
-          .eq("user_id", userId)
-          .maybeSingle();
-
-        if (p?.role === "creator") {
-          if (creatorDash) creatorDash.href = OP_PATHS.creators.creatorDash;
-          show(creatorDash, true);
-        } else {
-          if (fanDash) fanDash.href = OP_PATHS.fans.fanDash;
-          show(fanDash, true);
-        }
-      } catch (e) {}
-    }
-
-    function setupLogout() {
-      const logoutBtn = document.getElementById("navLogout");
-      if (!logoutBtn) return;
-      if (logoutBtn.dataset.bound === "1") return;
-
-      logoutBtn.dataset.bound = "1";
-      logoutBtn.addEventListener("click", async (ev) => {
-        ev.preventDefault();
-        logoutBtn.disabled = true;
-        logoutBtn.textContent = "Logging out…";
-        try {
-          await onlypawsClient.auth.signOut();
-        } catch (e) {}
-        goIndex();
       });
     }
 
@@ -352,7 +274,7 @@
         username: c.username,
         display_name: c.display_name || c.username,
         bio: c.bio || "",
-        avatar_url: c.avatar_url || "",
+        avatar_url: c.avatar_url || ""
       }));
 
       renderCreators(creatorsAll);
@@ -376,7 +298,9 @@
       if (error) {
         hint.textContent = "Could not load posts.";
         setDebug(
-          (document.getElementById("debug").textContent ? document.getElementById("debug").textContent + "\n\n" : "") +
+          (document.getElementById("debug").textContent
+            ? document.getElementById("debug").textContent + "\n\n"
+            : "") +
           `Posts query failed:\n${error.message}\n(code: ${error.code || "?"})`
         );
         console.error(error);
@@ -471,17 +395,26 @@
 
     async function boot() {
       setupSearch();
-      setupLogout();
 
       const supportBtn = document.getElementById("supportBtn");
       if (supportBtn && typeof initSupportUsButton === "function") {
-        await initSupportUsButton({
-          buttonId: "supportBtn",
-          messageId: "supportMsg",
-          loginRedirect: OP_PATHS.app.feed + "?support=1",
-          successPath: OP_PATHS.thanks.supportUs,
-          cancelPath: OP_PATHS.app.feed
-        });
+        try {
+          await initSupportUsButton({
+            buttonId: "supportBtn",
+            messageId: "supportMsg",
+            loginRedirect: OP_PATHS.app.feed + "?support=1",
+            successPath: OP_PATHS.thanks.supportUs,
+            cancelPath: OP_PATHS.app.feed
+          });
+        } catch (e) {
+          console.error("support us init failed", e);
+          setDebug(
+            (document.getElementById("debug").textContent
+              ? document.getElementById("debug").textContent + "\n\n"
+              : "") +
+            `Support button init failed:\n${e?.message || String(e)}`
+          );
+        }
       }
 
       const { data, error } = await onlypawsClient.auth.getSession();
@@ -496,7 +429,6 @@
         return;
       }
 
-      await hydrateNavLoggedOnly();
       await loadCreators(session.user.id);
       await loadLatestPosts();
     }
