@@ -3,6 +3,7 @@
 // Dipendenze global:
 // - window.onlypawsClient
 // - window.onlypawsLikes
+// - window.OP_PATHS (optional but recommended)
 
 (() => {
   const FEATURE_LIKES = true;
@@ -47,11 +48,15 @@
   }
 
   function defaultPostUrl(post) {
-    return `post.html?id=${encodeURIComponent(post.id)}`;
+    if (window.OP_PATHS?.app?.post) {
+      return `${window.OP_PATHS.app.post}?id=${encodeURIComponent(post.id)}`;
+    }
+    return `/html/app/post.html?id=${encodeURIComponent(post.id)}`;
   }
 
   function creatorProfileUrl(username) {
-    return `creator-profile.html?u=${encodeURIComponent(username || "creator")}`;
+    const base = window.OP_PATHS?.creators?.creatorProfile || "/html/creators/creator-profile.html";
+    return `${base}?u=${encodeURIComponent(username || "creator")}`;
   }
 
   function mediaHtml(post, locked) {
@@ -90,28 +95,28 @@
     `;
   }
 
-function formatPostDate(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
+  function formatPostDate(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
 
-  const now = new Date();
-  const diffMs = now - d;
+    const now = new Date();
+    const diffMs = now - d;
 
-  const min = Math.floor(diffMs / 60000);
-  const hr = Math.floor(diffMs / 3600000);
-  const day = Math.floor(diffMs / 86400000);
+    const min = Math.floor(diffMs / 60000);
+    const hr = Math.floor(diffMs / 3600000);
+    const day = Math.floor(diffMs / 86400000);
 
-  if (min < 1) return "now";
-  if (min < 60) return `${min}m`;
-  if (hr < 24) return `${hr}h`;
-  if (day < 7) return `${day}d`;
+    if (min < 1) return "now";
+    if (min < 60) return `${min}m`;
+    if (hr < 24) return `${hr}h`;
+    if (day < 7) return `${day}d`;
 
-  return d.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
-}
+    return d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+    });
+  }
 
   function renderBadge(post, locked) {
     const price =
@@ -143,7 +148,8 @@ function formatPostDate(value) {
    *   currency,
    *   is_locked,
    *   media_url,
-   *   media_type
+   *   media_type,
+   *   created_at
    * }
    */
   function renderPostCard(post, opts = {}) {
@@ -152,7 +158,7 @@ function formatPostDate(value) {
     const excerpt = esc(post.excerpt || post.content || "");
     const creator = esc(post.creator_username || post.creator_name || "");
     const creatorAvatar = esc(post.creator_avatar_url || "");
-const createdAt = formatPostDate(post.created_at);
+    const createdAt = formatPostDate(post.created_at);
     const locked = Boolean(post.is_locked);
     const media = mediaHtml(post, locked);
     const badge = renderBadge(post, locked);
@@ -197,13 +203,13 @@ const createdAt = formatPostDate(post.created_at);
               </a>
 
               <div class="op-userMeta">
-  ${
-    opts.showCreator !== false && creator
-      ? `<a class="op-creator" href="${esc(creatorProfileUrl(creator))}" data-op-stop-nav="1">@${creator}</a>`
-      : `<span class="op-creatorPlaceholder"></span>`
-  }
-  ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
-</div>
+                ${
+                  opts.showCreator !== false && creator
+                    ? `<a class="op-creator" href="${esc(creatorProfileUrl(creator))}" data-op-stop-nav="1">@${creator}</a>`
+                    : `<span class="op-creatorPlaceholder"></span>`
+                }
+                ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
+              </div>
             </div>
 
             <div class="op-postHeaderRight">
@@ -452,6 +458,13 @@ const createdAt = formatPostDate(post.created_at);
         height:13px;
       }
 
+      .op-postDate{
+        font-size:12px;
+        opacity:.72;
+        margin-top:2px;
+        white-space:nowrap;
+      }
+
       .op-postHeaderRight{
         display:flex;
         align-items:center;
@@ -513,7 +526,7 @@ const createdAt = formatPostDate(post.created_at);
       .op-mediaWrap video{
         width:100%;
         display:block;
-        max-height:520px;
+        max-height:min(420px, 58vh);
         object-fit:cover;
       }
 
@@ -545,7 +558,6 @@ const createdAt = formatPostDate(post.created_at);
         backdrop-filter:blur(10px);
       }
 
-
       .op-lockTitle{
         margin:10px 0 6px;
         font-size:15px;
@@ -558,13 +570,6 @@ const createdAt = formatPostDate(post.created_at);
         line-height:1.35;
         opacity:.9;
       }
-
-.op-postDate{
-  font-size:12px;
-  opacity:.72;
-  margin-top:2px;
-  white-space:nowrap;
-}
 
       .op-openCreatorBtn{
         display:inline-flex;
@@ -620,6 +625,40 @@ const createdAt = formatPostDate(post.created_at);
 
       .op-liked{
         background:rgba(255,255,255,.14);
+      }
+
+      @media (max-width: 640px){
+        .op-postMain{
+          padding:12px;
+        }
+
+        .op-postHeader{
+          align-items:flex-start;
+          gap:10px;
+        }
+
+        .op-title{
+          font-size:14px;
+        }
+
+        .op-excerpt{
+          font-size:13px;
+          -webkit-line-clamp:2;
+        }
+
+        .op-mediaWrap img,
+        .op-mediaWrap video{
+          max-height:42vh;
+        }
+
+        .op-lockBox{
+          max-width:220px;
+          padding:14px;
+        }
+
+        .op-postBottom{
+          padding:10px 12px;
+        }
       }
     `;
     document.head.appendChild(s);
