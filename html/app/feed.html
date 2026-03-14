@@ -7,12 +7,13 @@
   /css/pages/app-feed.css
 
   JS:
+  /js/paths.js
   /js/supabase.js
   /js/supabase-likes.js
   /js/post-card.js
+  /js/nav.js
   /js/partials.js
   /js/support-us.js
-  /js/paths.js
 -->
 
 <!DOCTYPE html>
@@ -23,52 +24,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-<link rel="stylesheet" href="/css/pages/app-feed.css" />
+  <link rel="stylesheet" href="/css/pages/app-feed.css" />
 </head>
 
 <body>
-  <div class="wrap">
-    <div id="header-placeholder"></div>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
 
-    <div class="panel">
-      <h1>Feed</h1>
-      <p class="sub">Browse creators, discover cute content, and support what you love.</p>
+      <div class="panel">
+        <h1>Feed</h1>
+        <p class="sub">Browse creators, discover cute content, and support what you love.</p>
 
-      <div class="searchRow">
-        <input
-          id="searchInput"
-          class="search"
-          placeholder="Search creators (by name or @username)..."
-        />
+        <div class="searchRow">
+          <input
+            id="searchInput"
+            class="search"
+            placeholder="Search creators (by name or @username)..."
+          />
+        </div>
+
+        <div class="subtleLine">
+          <span>Want to help keep OnlyPaws running?</span>
+          <button id="supportBtn" class="navBtn" type="button">
+            Support OnlyPaws
+          </button>
+        </div>
+
+        <div id="supportMsg" class="hint supportHint"></div>
+        <div id="debug" class="debug"></div>
       </div>
 
-      <div class="subtleLine">
-        Want to help keep OnlyPaws running?
-        <button id="supportBtn" class="navBtn" type="button">
-          Support OnlyPaws
-        </button>
+      <div class="panel feedSectionPanel">
+        <div class="pill">Featured creators</div>
+        <div class="creatorList" id="creatorList"></div>
+        <div class="hint" id="creatorHint">Loading creators…</div>
       </div>
 
-      <div id="debug" class="debug"></div>
-    </div>
+      <div class="panel feedSectionPanel">
+        <div class="postsHeader">
+          <h2>Latest posts</h2>
+          <div class="hint postsHeaderHint">Visible posts (premium appears after purchase)</div>
+        </div>
 
-    <div class="panel feedSectionPanel">
-      <div class="pill">Featured creators</div>
-      <div class="creatorList" id="creatorList"></div>
-      <div class="hint" id="creatorHint">Loading creators…</div>
-    </div>
-
-    <div class="panel feedSectionPanel">
-      <div class="postsHeader">
-        <h2>Latest posts</h2>
-        <div class="hint postsHeaderHint">Visible posts (premium appears after purchase)</div>
+        <div class="posts" id="posts"></div>
+        <div class="hint" id="postsHint">Loading posts…</div>
       </div>
 
-      <div class="posts" id="posts"></div>
-      <div class="hint" id="postsHint">Loading posts…</div>
+      <div class="footerWrap" id="footer-placeholder"></div>
     </div>
-
-    <div id="footer-placeholder"></div>
   </div>
 
   <div id="mediaModal" class="mediaModal" aria-hidden="true">
@@ -84,6 +88,7 @@
   <script src="/js/supabase.js"></script>
   <script src="/js/supabase-likes.js"></script>
   <script src="/js/post-card.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/partials.js"></script>
   <script src="/js/support-us.js"></script>
 
@@ -423,7 +428,7 @@
             let endMs = 0;
 
             if (raw) {
-              if (typeof raw === "number" || /^\\d+$/.test(String(raw))) {
+              if (typeof raw === "number" || /^\d+$/.test(String(raw))) {
                 const n = Number(raw);
                 endMs = n < 1e12 ? (n * 1000) : n;
               } else {
@@ -472,7 +477,7 @@
       if (supportBtn && typeof initSupportUsButton === "function") {
         await initSupportUsButton({
           buttonId: "supportBtn",
-          messageId: "debug",
+          messageId: "supportMsg",
           loginRedirect: OP_PATHS.app.feed + "?support=1",
           successPath: OP_PATHS.thanks.supportUs,
           cancelPath: OP_PATHS.app.feed
@@ -498,6 +503,10 @@
 
     window.addEventListener("DOMContentLoaded", async () => {
       await loadLayout();
+
+      if (typeof initNav === "function") {
+        await initNav();
+      }
 
       onlypawsClient.auth.onAuthStateChange((event) => {
         if (event === "SIGNED_OUT") goIndex();
