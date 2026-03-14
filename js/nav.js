@@ -1,6 +1,6 @@
 /* =========================================================
    OnlyPaws
-   File: js/nav.js
+   File: /js/nav.js
    Purpose: shared navigation hydration for app and marketing headers
    ========================================================= */
 
@@ -64,9 +64,17 @@ async function hydrateNav() {
       return;
     }
 
-    if (profileBtn) profileBtn.href = OP_PATHS.app.profile;
-    if (fanDashBtn) fanDashBtn.href = OP_PATHS.fans.fanDash;
-    if (creatorDashBtn) creatorDashBtn.href = OP_PATHS.creators.creatorDash;
+    if (profileBtn) {
+      profileBtn.href = OP_PATHS.app.shared.profile;
+    }
+
+    if (fanDashBtn) {
+      fanDashBtn.href = OP_PATHS.app.fans.fanDash;
+    }
+
+    if (creatorDashBtn) {
+      creatorDashBtn.href = OP_PATHS.app.creators.creatorDash;
+    }
 
     show(profileBtn, true);
     show(fanDashBtn, false);
