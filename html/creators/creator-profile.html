@@ -1,254 +1,714 @@
+<!--
+  OnlyPaws
+  File: html/creators/creator-profile.html
+
+  CSS:
+  /css/styles.css
+  /css/pages/creator-profile.css
+
+  JS:
+  /js/paths.js
+  /js/onlypawsClient.js
+  /js/post-card.js
+  /js/nav.js
+  /js/partials.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OnlyPaws — Enable payouts</title>
+  <title>OnlyPaws — Creator Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/pages/creator-profile.css" />
 </head>
 
 <body>
-  <div class="wrap">
-    <div id="header-placeholder"></div>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
 
-    <div class="panel">
-      <h1>Enable payouts</h1>
-      <p class="sub">
-        To withdraw earnings, you need to enable payouts (Stripe onboarding). Once completed, your dashboard will allow withdrawals.
-      </p>
+      <div class="grid creatorProfileGrid">
+        <div class="panel">
+          <div class="pill">Creator</div>
+          <h1 id="creatorName">Creator</h1>
 
-      <div class="box">
-        <div class="statusLine">
-          <div class="lock" id="lockIcon">🔒</div>
-          <div style="min-width:0;">
-            <div class="stTitle" id="statusTitle">Payouts not enabled</div>
-            <div class="stText" id="statusText">Start setup to enable withdrawals.</div>
+          <div class="heroRow">
+            <div class="avatar creatorAvatarLarge" id="creatorAvatar">🐾</div>
+
+            <div class="meta">
+              <b id="creatorHandle">@username</b>
+              <span id="creatorBio"></span>
+            </div>
           </div>
+
+          <div class="btnRow" id="actionRow">
+            <button class="ghost" id="followBtn" type="button">Follow</button>
+            <button class="btn" id="premiumBtn" type="button">Subscribe</button>
+          </div>
+
+          <div class="hint" id="creatorHint"></div>
         </div>
 
-        <div class="btnRow">
-          <button class="btn" id="startBtn" type="button">Start payout setup</button>
-          <button class="ghost" id="refreshBtn" type="button">I've completed setup — Refresh</button>
-          <a class="ghost" href="creator-dash.html">Back to dashboard</a>
-        </div>
-
-        <div class="okline" id="submittedLine" style="display:none;">
-          <span>✅</span>
-          <span>Setup submitted. Press Refresh to re-check payout status.</span>
-        </div>
-
-        <div class="note" id="note">
-          Tip: if Stripe needs verification, payouts may take a moment to become active. Refresh again after ~1 minute.
+        <div class="panel">
+          <div class="pill">Pets</div>
+          <div class="petsList" id="petsList"></div>
+          <div class="hint" id="petsHint">Loading…</div>
         </div>
       </div>
-    </div>
 
-    <div id="footer-placeholder"></div>
+      <div class="panel creatorPostsPanel">
+        <div class="postsHeader">
+          <h2>Posts</h2>
+          <div class="hint postsHeaderHint">FREE is visible • PREMIUM is locked unless subscribed</div>
+        </div>
+
+        <div class="posts" id="posts"></div>
+        <div class="hint" id="postsHint">Loading…</div>
+      </div>
+
+      <div class="footerWrap" id="footer-placeholder"></div>
+    </div>
   </div>
 
+  <div class="toast" id="toast"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/onlypaw-client.js"></script>
-  <script src="../js/partials.js"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/post-card.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
 
   <script>
     function goIndex() {
-      window.location.href = "index.html";
+      window.location.replace(OP_PATHS.marketing.index);
     }
 
-    function setUI({ enabled, title, text }) {
-      const lockIcon = document.getElementById("lockIcon");
-      const statusTitle = document.getElementById("statusTitle");
-      const statusText = document.getElementById("statusText");
-      const startBtn = document.getElementById("startBtn");
+    function esc(s) {
+      return (s ?? "").toString()
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
-      if (enabled) {
-        lockIcon.textContent = "✅";
-        statusTitle.textContent = title || "Payouts enabled";
-        statusText.textContent = text || "Stripe is ready. You can withdraw from the dashboard.";
-        startBtn.disabled = true;
-        startBtn.textContent = "Payouts already enabled";
+    function getParams() {
+      const p = new URLSearchParams(window.location.search);
+      return {
+        u: (p.get("u") || "").trim(),
+        success: (p.get("success") || "").trim(),
+        session_id: (p.get("session_id") || "").trim()
+      };
+    }
+
+    function isUUID(v) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v || "");
+    }
+
+    function setBtnBusy(btn, yes, txt) {
+      if (!btn) return;
+      btn.disabled = !!yes;
+      if (txt != null) btn.textContent = txt;
+    }
+
+    function setTopHint(msg) {
+      const el = document.getElementById("creatorHint");
+      if (!el) return;
+      el.textContent = msg || "";
+    }
+
+    const toastEl = document.getElementById("toast");
+    function toast(msg) {
+      if (!toastEl) return;
+      toastEl.textContent = msg || "";
+      toastEl.classList.add("show");
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(() => toastEl.classList.remove("show"), 2600);
+    }
+
+    function goToSubscriptions(creatorId) {
+      window.location.href = `${OP_PATHS.fans.subscriptions}?creator=${encodeURIComponent(creatorId)}`;
+    }
+
+    function creatorProfileUrl(username) {
+      return `${OP_PATHS.creators.creatorProfile}?u=${encodeURIComponent(username || "")}`;
+    }
+
+    function renderCreator(c) {
+      const name = c.display_name || c.username || "Creator";
+      const uname = c.username || "username";
+      const bio = c.bio || "";
+
+      document.getElementById("creatorName").textContent = name;
+      document.getElementById("creatorHandle").textContent = "@" + uname;
+      document.getElementById("creatorBio").textContent = bio;
+
+      const av = document.getElementById("creatorAvatar");
+      const url = (c.avatar_url || "").trim();
+
+      if (url) {
+        av.innerHTML = `<img src="${esc(url)}" alt="Creator avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
       } else {
-        lockIcon.textContent = "🔒";
-        statusTitle.textContent = title || "Payouts not enabled";
-        statusText.textContent = text || "Start setup to enable withdrawals.";
-        startBtn.disabled = false;
-        startBtn.textContent = "Start payout setup";
+        av.textContent = "🐾";
       }
     }
 
-    async function requireSession() {
-      const { data } = await onlypawsClient.auth.getSession();
-      if (!data?.session) {
-        window.location.href = "creators.html?next=payouts-setup.html";
-        return null;
+    function renderPets(list) {
+      const el = document.getElementById("petsList");
+
+      if (!list || list.length === 0) {
+        el.innerHTML = "";
+        return;
       }
-      return data.session;
+
+      el.innerHTML = list.map(p => {
+        const name = p.name || "Pet";
+        const line = [p.species, p.breed].filter(Boolean).join(" • ");
+        const av = (p.avatar_url || "").trim()
+          ? `<img src="${esc(p.avatar_url)}" alt="Pet avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+          : "🐾";
+
+        return `
+          <div class="petCard">
+            <div class="petAvatar">${av}</div>
+            <div>
+              <b>${esc(name)}</b>
+              <span>${esc(line || " ")}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
 
-    async function hydrateUserPill() {
-      try {
-        const userPill = document.getElementById("userPill");
-        if (!userPill) return;
+    async function loadCreatorByUsername(username) {
+      const { data, error } = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, bio, avatar_url, role, stripe_onboarding_status, charges_enabled, stripe_connect_account_id")
+        .eq("username", username)
+        .maybeSingle();
 
-        const { data: sessData } = await onlypawsClient.auth.getSession();
-        const session = sessData?.session;
-
-        if (!session) {
-          userPill.textContent = "Guest";
-          return;
-        }
-
-        const uid = session.user.id;
-        const email = session.user.email || "";
-
-        const { data: prof } = await onlypawsClient
-          .from("profiles")
-          .select("username, display_name")
-          .eq("user_id", uid)
-          .maybeSingle();
-
-        const uname = (prof?.username || "").trim();
-        const dname = (prof?.display_name || "").trim();
-
-        if (uname) userPill.textContent = "@" + uname;
-        else if (dname) userPill.textContent = dname;
-        else if (email) userPill.textContent = email.split("@")[0];
-        else userPill.textContent = "User";
-      } catch (e) {
-        const userPill = document.getElementById("userPill");
-        if (userPill) userPill.textContent = "User";
-      }
-    }
-
-    async function hydrateNav() {
-      const profileBtn = document.getElementById("navProfile");
-      const fanDash = document.getElementById("navFanDash");
-      const creatorDash = document.getElementById("navCreatorDash");
-      const logoutBtn = document.getElementById("navLogout");
-
-      if (profileBtn) profileBtn.style.display = "inline-flex";
-      if (logoutBtn) logoutBtn.style.display = "inline-flex";
-      if (fanDash) fanDash.style.display = "none";
-      if (creatorDash) creatorDash.style.display = "inline-flex";
-    }
-
-    function setupLogout() {
-      const navLogout = document.getElementById("navLogout");
-      if (!navLogout) return;
-      if (navLogout.dataset.bound === "1") return;
-
-      navLogout.dataset.bound = "1";
-      navLogout.addEventListener("click", async () => {
-        try {
-          await onlypawsClient.auth.signOut();
-        } catch (e) {}
-        goIndex();
-      });
-    }
-
-    async function fetchConnectStatus() {
-      const { data, error } = await onlypawsClient.functions.invoke("connect-status", { body: {} });
       if (error) throw error;
+      if (!data) throw new Error("Creator not found");
+      if (data.role !== "creator") throw new Error("This user is not a creator");
+
+      renderCreator(data);
       return data;
     }
 
-    async function checkNow() {
-      const refreshBtn = document.getElementById("refreshBtn");
+    async function loadCreatorByUserId(userId) {
+      const { data, error } = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, bio, avatar_url, role, stripe_onboarding_status, charges_enabled, stripe_connect_account_id")
+        .eq("user_id", userId)
+        .maybeSingle();
 
-      refreshBtn.disabled = true;
-      refreshBtn.textContent = "Checking…";
+      if (error) throw error;
+      if (!data) throw new Error("Creator not found");
+      if (data.role !== "creator") throw new Error("This user is not a creator");
 
-      try {
-        const st = await fetchConnectStatus();
-        console.log("connect-status", st);
-
-        if (st?.payouts_enabled) {
-          setUI({
-            enabled: true,
-            title: "Payouts enabled",
-            text: "Stripe is ready. Go back to the dashboard to withdraw."
-          });
-        } else {
-          const reason = st?.reason || null;
-          const extra =
-            (st?.requirements?.currently_due?.length)
-              ? ("Missing: " + st.requirements.currently_due.join(", "))
-              : (reason ? ("Reason: " + reason) : null);
-
-          setUI({
-            enabled: false,
-            title: "Payouts not enabled",
-            text: extra || "Start setup to enable withdrawals."
-          });
-        }
-      } catch (e) {
-        console.warn("connect-status failed:", e);
-        setUI({
-          enabled: false,
-          title: "Payouts not enabled",
-          text: "Start setup to enable withdrawals."
-        });
-      } finally {
-        refreshBtn.disabled = false;
-        refreshBtn.textContent = "I've completed setup — Refresh";
-      }
+      renderCreator(data);
+      return data;
     }
 
-    async function startSetup() {
-      const startBtn = document.getElementById("startBtn");
+    async function loadPetsByOwner(ownerId) {
+      const hint = document.getElementById("petsHint");
+      hint.textContent = "Loading…";
 
-      startBtn.disabled = true;
-      startBtn.textContent = "Opening Stripe…";
+      const { data, error } = await onlypawsClient
+        .from("pets")
+        .select("id, name, species, breed, avatar_url")
+        .eq("owner_id", ownerId)
+        .order("created_at", { ascending: false });
 
-      try {
-        const returnUrl = window.location.origin + "/html/payouts-setup.html?done=1";
-        const refreshUrl = window.location.origin + "/html/payouts-setup.html?retry=1";
+      if (error) throw error;
 
-        const { data, error } = await onlypawsClient.functions.invoke("connect-update", {
-          body: { return_url: returnUrl, refresh_url: refreshUrl }
-        });
+      renderPets(data || []);
+      hint.textContent = (data && data.length) ? "" : "No pets yet.";
+    }
 
-        if (error) {
-          const ctxBody = error?.context?.body;
-          const extra = ctxBody ? (typeof ctxBody === "string" ? ctxBody : JSON.stringify(ctxBody)) : "";
-          throw new Error((error.message || "Edge Function error") + (extra ? " — " + extra : ""));
+    async function loadPostsByCreatorId(creatorId) {
+      const hint = document.getElementById("postsHint");
+      hint.textContent = "Loading…";
+
+      const { data, error } = await onlypawsClient
+        .from("posts")
+        .select("id, creator_id, title, content, preview, media_url, media_type, is_paid, is_public, is_pinned, created_at")
+        .eq("creator_id", creatorId)
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(24);
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    async function getFollowRowId(fanId, creatorId) {
+      const { data, error } = await onlypawsClient
+        .from("followers")
+        .select("id")
+        .eq("creator_id", creatorId)
+        .eq("fan_id", fanId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.id || null;
+    }
+
+    async function getSubscriptionState(creatorId, fanId) {
+      if (!creatorId || !fanId) return null;
+
+      const { data, error } = await onlypawsClient
+        .from("fan_subscriptions")
+        .select("id, status, current_period_end, cancel_at_period_end, provider_subscription_id")
+        .eq("creator_id", creatorId)
+        .eq("fan_id", fanId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data || null;
+    }
+
+    function computeAccess(subRow) {
+      const periodEndMs = subRow?.current_period_end
+        ? new Date(subRow.current_period_end).getTime()
+        : 0;
+
+      const hasAccess = !!periodEndMs && periodEndMs > Date.now();
+
+      const status = (subRow?.status || "").toString().toLowerCase();
+      const statusCanceled = (status === "canceled" || status === "cancelled");
+
+      const isCanceling = hasAccess && (subRow?.cancel_at_period_end === true);
+      const isHardCanceled = !hasAccess && statusCanceled;
+
+      return { hasAccess, isCanceling, periodEndMs, isHardCanceled };
+    }
+
+    function renderPosts(list, creatorUsername, ent) {
+      const postsEl = document.getElementById("posts");
+
+      if (!list || list.length === 0) {
+        postsEl.innerHTML = `
+          <div class="postCard">
+            <h3>No posts yet</h3>
+            <p>This creator hasn’t published anything yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (window.OnlyPawsPostCard?.renderPostCard) {
+        postsEl.innerHTML = list.map(p => {
+          const uname = creatorUsername || "creator";
+          const title = p.title || "Post";
+
+          const isPremium = (p.is_paid === true);
+          const isPrivate = (p.is_public === false);
+          const isMine = (ent.isSelf === true);
+
+          let canView = false;
+
+          if (isPrivate) {
+            canView = isMine;
+          } else if (!isPremium) {
+            canView = true;
+          } else {
+            canView = isMine || (ent.isSubscribed === true);
+          }
+
+          const locked = !canView;
+
+          return window.OnlyPawsPostCard.renderPostCard({
+            id: p.id,
+            creator_username: uname,
+            creator_name: uname,
+            title,
+            excerpt: locked ? (p.preview || "Locked content.") : (p.content || p.preview || ""),
+            price_cents: null,
+            currency: "eur",
+            is_locked: locked,
+            media_url: p.media_url || null,
+            media_type: p.media_type || null,
+            created_at: p.created_at || null
+          });
+        }).join("");
+
+        window.OnlyPawsPostCard.initPostCards(postsEl);
+        return;
+      }
+
+      postsEl.innerHTML = list.map(p => {
+        const title = p.title || "Post";
+        const isPremium = (p.is_paid === true);
+        const isPrivate = (p.is_public === false);
+        const isMine = (ent.isSelf === true);
+
+        let canView = false;
+
+        if (isPrivate) {
+          canView = isMine;
+        } else if (!isPremium) {
+          canView = true;
+        } else {
+          canView = isMine || (ent.isSubscribed === true);
         }
 
-        if (!data?.url) throw new Error("Missing Stripe URL");
-        window.location.href = data.url;
+        const badgeLabel = isPremium
+          ? "🔒 PREMIUM"
+          : (isPrivate ? "🙈 PRIVATE" : "🆓 FREE");
+
+        const bodyText = canView
+          ? (p.content || p.preview || "")
+          : (p.preview || "Subscribe to unlock this post.");
+
+        return `
+          <div class="postCard">
+            <div class="postTop">
+              <div class="badge">@${esc(creatorUsername || "creator")}</div>
+              <div class="badge">${badgeLabel}</div>
+            </div>
+
+            <h3>${esc(title)}</h3>
+            <p>${esc(bodyText)}</p>
+
+            <div class="btnRow creatorPostActions">
+              ${canView
+                ? `<a class="ghost" href="${OP_PATHS.app.post}?id=${encodeURIComponent(p.id)}">Open post</a>`
+                : `<button class="ghost" type="button" data-action="premium">Subscribe</button>`
+              }
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      postsEl.querySelectorAll('[data-action="premium"]').forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (ent.creatorId) goToSubscriptions(ent.creatorId);
+        });
+      });
+    }
+
+    async function boot() {
+      const { data: sessData } = await onlypawsClient.auth.getSession();
+      const session = sessData?.session;
+
+      if (!session) {
+        goIndex();
+        return;
+      }
+
+      const fanId = session.user.id;
+
+      let viewerRole = "";
+      try {
+        const { data: vp } = await onlypawsClient
+          .from("profiles")
+          .select("role")
+          .eq("user_id", fanId)
+          .maybeSingle();
+
+        viewerRole = (vp?.role || "").toString();
+      } catch (e) {}
+
+      const viewerIsCreator = (viewerRole === "creator");
+
+      const { u, success, session_id } = getParams();
+      if (!u) {
+        goIndex();
+        return;
+      }
+
+      const followBtn = document.getElementById("followBtn");
+      const premiumBtn = document.getElementById("premiumBtn");
+      const actionRow = document.getElementById("actionRow");
+
+      function explainCreatorCantSubscribe() {
+        setTopHint("⏳ Creator → creator subscriptions are coming later. For now, creators can’t subscribe.");
+      }
+
+      function explainCreatorNotReady() {
+        setTopHint("⚠️ This creator isn’t ready for subscriptions yet.");
+      }
+
+      try {
+        const creator = isUUID(u)
+          ? await loadCreatorByUserId(u)
+          : await loadCreatorByUsername(u);
+
+        const creatorUsername = creator.username || "";
+        const isSelf = (creator.user_id === fanId);
+
+        actionRow.style.display = isSelf ? "none" : "flex";
+
+        if (!isSelf && viewerIsCreator) {
+          explainCreatorCantSubscribe();
+        }
+
+        if (success === "1" || session_id) {
+          toast("✅ Payment received — syncing subscription…");
+          setTopHint("");
+        } else {
+          setTopHint("");
+        }
+
+        const status = (creator.stripe_onboarding_status || "").toString().trim().toLowerCase();
+        const statusOk = (status === "completed" || status === "complete");
+        const creatorEligible = (creator.role === "creator" && statusOk);
+
+        if (!creatorEligible) {
+          premiumBtn.title = "Creator not ready yet.";
+        } else {
+          premiumBtn.title = "";
+        }
+
+        let subRow = await getSubscriptionState(creator.user_id, fanId);
+        let subState = computeAccess(subRow);
+        let hasAccess = subState.hasAccess;
+
+        if ((success === "1" || session_id) && !hasAccess) {
+          const waits = [1500, 3000, 5000];
+          for (const w of waits) {
+            await new Promise(r => setTimeout(r, w));
+            try {
+              subRow = await getSubscriptionState(creator.user_id, fanId);
+              subState = computeAccess(subRow);
+              hasAccess = subState.hasAccess;
+              if (hasAccess) break;
+            } catch (e) {}
+          }
+        }
+
+        const [followRowId, posts] = await Promise.all([
+          getFollowRowId(fanId, creator.user_id),
+          loadPostsByCreatorId(creator.user_id)
+        ]);
+
+        let currentFollowId = followRowId;
+
+        function setFollowUi() {
+          followBtn.textContent = currentFollowId ? "Unfollow" : "Follow";
+        }
+
+        setFollowUi();
+
+        followBtn.addEventListener("click", async () => {
+          try {
+            if (currentFollowId) {
+              setBtnBusy(followBtn, true, "Unfollowing…");
+
+              const { error } = await onlypawsClient
+                .from("followers")
+                .delete()
+                .eq("id", currentFollowId)
+                .eq("fan_id", fanId);
+
+              if (error) throw error;
+              currentFollowId = null;
+              setFollowUi();
+            } else {
+              setBtnBusy(followBtn, true, "Following…");
+
+              const { data, error } = await onlypawsClient
+                .from("followers")
+                .insert({ creator_id: creator.user_id, fan_id: fanId })
+                .select("id")
+                .maybeSingle();
+
+              if (error) throw error;
+              currentFollowId = data?.id || null;
+              setFollowUi();
+            }
+          } catch (e) {
+            alert(e?.message || String(e));
+          } finally {
+            setBtnBusy(followBtn, false);
+          }
+        });
+
+        function setPremiumUi() {
+          if (viewerIsCreator) {
+            premiumBtn.textContent = "Coming soon";
+            premiumBtn.disabled = true;
+            premiumBtn.title = "Creators can’t subscribe yet.";
+            return;
+          }
+
+          if (!creatorEligible) {
+            premiumBtn.textContent = "Creator not ready";
+            premiumBtn.disabled = true;
+            premiumBtn.title = "Creator not ready yet.";
+            return;
+          }
+
+          subState = computeAccess(subRow);
+          hasAccess = subState.hasAccess;
+          const isCanceling = subState.isCanceling;
+          const isHardCanceled = subState.isHardCanceled;
+
+          if (isHardCanceled) {
+            premiumBtn.textContent = "Subscribe again";
+            premiumBtn.disabled = false;
+            premiumBtn.title = "";
+            if (!(success === "1" || session_id)) {
+              setTopHint("⚠️ This subscription was canceled and can’t be resumed. Subscribe again to renew.");
+            }
+            return;
+          }
+
+          if (!hasAccess) {
+            premiumBtn.textContent = "Subscribe";
+            premiumBtn.disabled = false;
+            premiumBtn.title = "";
+            return;
+          }
+
+          if (isCanceling) {
+            premiumBtn.textContent = "Resume (keep access)";
+            premiumBtn.disabled = false;
+            premiumBtn.title = "";
+
+            if (!(success === "1" || session_id)) {
+              const d = subRow?.current_period_end
+                ? new Date(subRow.current_period_end).toLocaleDateString()
+                : "";
+              setTopHint(d ? `Cancels on ${d} — resume anytime.` : "Cancels at period end — resume anytime.");
+            }
+            return;
+          }
+
+          premiumBtn.textContent = "Subscribed ✓ (Cancel)";
+          premiumBtn.disabled = false;
+          premiumBtn.title = "";
+        }
+
+        setPremiumUi();
+
+        premiumBtn.addEventListener("click", async () => {
+          if (viewerIsCreator) {
+            explainCreatorCantSubscribe();
+            return;
+          }
+
+          if (!creatorEligible) {
+            explainCreatorNotReady();
+            return;
+          }
+
+          subState = computeAccess(subRow);
+
+          if (subRow && subState.isCanceling) {
+            try {
+              setBtnBusy(premiumBtn, true, "Resuming…");
+
+              const { data: s } = await onlypawsClient.auth.getSession();
+              const token = s?.session?.access_token;
+              if (!token) throw new Error("No session");
+
+              const { error } = await onlypawsClient.functions.invoke("resume-fan-subscription", {
+                body: { creator_id: creator.user_id },
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              if (error) throw error;
+
+              subRow = await getSubscriptionState(creator.user_id, fanId);
+
+              setPremiumUi();
+              toast("✅ Subscription resumed.");
+              setTopHint("");
+
+              renderPosts(posts, creatorUsername, {
+                creatorId: creator.user_id,
+                isSelf,
+                isSubscribed: true
+              });
+            } catch (e) {
+              alert(e?.message || String(e));
+            } finally {
+              setBtnBusy(premiumBtn, false);
+            }
+            return;
+          }
+
+          if (subRow && subState.hasAccess && !subRow.cancel_at_period_end) {
+            try {
+              setBtnBusy(premiumBtn, true, "Canceling…");
+
+              const { data: s } = await onlypawsClient.auth.getSession();
+              const token = s?.session?.access_token;
+              if (!token) throw new Error("No session");
+
+              const { error } = await onlypawsClient.functions.invoke("cancel-fan-subscription", {
+                body: { creator_id: creator.user_id },
+                headers: { Authorization: `Bearer ${token}` }
+              });
+
+              if (error) throw error;
+
+              subRow = await getSubscriptionState(creator.user_id, fanId);
+              setPremiumUi();
+
+              const d = subRow?.current_period_end
+                ? new Date(subRow.current_period_end).toLocaleDateString()
+                : "";
+
+              setTopHint(
+                d
+                  ? `✅ Will cancel on ${d}. You can resume anytime before then.`
+                  : "✅ Will cancel at period end. You can resume anytime before then."
+              );
+            } catch (e) {
+              alert(e?.message || String(e));
+            } finally {
+              setBtnBusy(premiumBtn, false);
+            }
+            return;
+          }
+
+          goToSubscriptions(creator.user_id);
+        });
+
+        await loadPetsByOwner(creator.user_id);
+
+        renderPosts(posts, creatorUsername || creator.username || "creator", {
+          creatorId: creator.user_id,
+          isSelf,
+          isSubscribed: !!hasAccess
+        });
+
+        document.getElementById("postsHint").textContent = posts.length ? "" : "No posts yet.";
+
+        if (hasAccess && (success === "1" || session_id)) {
+          setTopHint("✅ Subscribed! Premium posts are now unlocked.");
+
+          const clean = new URL(window.location.href);
+          clean.searchParams.delete("success");
+          clean.searchParams.delete("session_id");
+          window.history.replaceState({}, "", clean.toString());
+        }
       } catch (e) {
-        alert("❌ Payout setup failed: " + (e?.message || String(e)));
-        startBtn.disabled = false;
-        startBtn.textContent = "Start payout setup";
+        document.getElementById("creatorHint").textContent = "❌ " + (e?.message || String(e));
+        document.getElementById("petsHint").textContent = "";
+        document.getElementById("postsHint").textContent = "";
       }
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
       await loadLayout();
 
-      if (typeof onlypawsClient === "undefined") {
-        alert("❌ onlypawsClient not found. Check onlypaw-client.js.");
-        return;
+      if (typeof initNav === "function") {
+        await initNav();
       }
 
-      const session = await requireSession();
-      if (!session) return;
+      onlypawsClient.auth.onAuthStateChange((event) => {
+        if (event === "SIGNED_OUT") goIndex();
+      });
 
-      await hydrateNav();
-      await hydrateUserPill();
-      setupLogout();
-
-      const qp = new URLSearchParams(window.location.search);
-      const submittedLine = document.getElementById("submittedLine");
-      if (qp.get("done") === "1" || qp.get("retry") === "1") {
-        submittedLine.style.display = "flex";
-      }
-
-      document.getElementById("startBtn").addEventListener("click", startSetup);
-      document.getElementById("refreshBtn").addEventListener("click", checkNow);
-
-      await checkNow();
+      await boot();
     });
   </script>
 </body>
