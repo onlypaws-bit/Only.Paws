@@ -8,8 +8,7 @@
 
   JS:
   /js/paths.js
-  /js/supabase.js
-  /js/supabase-likes.js
+  /js/onlypawsClient.js
   /js/post-card.js
   /js/nav.js
   /js/partials.js
@@ -138,8 +137,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
-  <script src="/js/supabase.js"></script>
-  <script src="/js/supabase-likes.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
   <script src="/js/post-card.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/partials.js"></script>
@@ -939,7 +937,7 @@
 
     async function load() {
       if (typeof onlypawsClient === "undefined") {
-        setState("❌ onlypawsClient missing", "Check supabase.js path and script order.");
+        setState("❌ onlypawsClient missing", "Check onlypawsClient.js path and script order.");
         return;
       }
 
@@ -1012,7 +1010,6 @@
       creatorUsername = (prof?.username || "").trim();
 
       const role = prof?.role || "fan";
-      const handle = creatorUsername ? `@${creatorUsername}` : (prof?.display_name || email);
 
       if (creatorUsername) {
         createPostBtn.href = `${OP_PATHS.creators.createPost}?u=${encodeURIComponent(creatorUsername)}`;
