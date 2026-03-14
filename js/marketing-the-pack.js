@@ -210,6 +210,10 @@
       await loadMarketingLayout();
     }
 
+    if (window.OPMarketing?.hideCurrentMarketingLink) {
+      window.OPMarketing.hideCurrentMarketingLink();
+    }
+
     if (typeof initNav === "function") {
       await initNav();
     }
