@@ -68,8 +68,67 @@
   margin-top: 14px;
 }
 
+/* ===== forgot password row ===== */
+
+.forgotRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.tinyLink {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  min-width: auto;
+  width: auto;
+  border-radius: 0;
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.2;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.tinyLink:hover {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.tinyLink:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.tinyLink:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.forgotRow .hint {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+/* ===== reset box ===== */
+
 .resetBox {
   display: none;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .resetBox.isOpen {
@@ -150,5 +209,17 @@
 
   .authAsideImage img {
     max-width: 340px;
+  }
+}
+
+@media (max-width: 640px) {
+  .forgotRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .forgotRow .hint {
+    display: block;
   }
 }
