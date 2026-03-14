@@ -4,33 +4,46 @@
   File: /html/app/creators/create-post.html
 
   Purpose:
-  Creator interface for publishing or editing posts.
+  Creator-only page for creating and editing posts.
 
-  Features:
-  - Requires authenticated creator
-  - Checks active Creator Plan before allowing publishing
+  What this page does:
+  - Requires an authenticated creator
+  - Checks for an active Creator Plan before allowing publish/edit
   - Supports FREE and PREMIUM posts
-  - Optional media upload (image/video) to Supabase Storage
-  - Live media preview before publishing
-  - Handles both CREATE and EDIT modes
-  - Locked UI if creator plan is missing
+  - Supports PUBLIC and PRIVATE visibility
+  - Optionally uploads image/video media to Supabase Storage
+  - Shows a live local preview for selected media
+  - Supports both CREATE mode and EDIT mode via ?edit=<post_id>
+
+  Main flows:
+  - If the user is not logged in, redirect to public fans page
+  - If the user is not a creator, redirect to marketing home
+  - If Creator Plan is missing, lock the editor and show unlock CTA
+  - If ?edit= is present, load the target post and switch UI to edit mode
+  - On publish, insert the post first, then upload media if provided
+  - On edit, update the post first, then replace media if a new file is provided
 
   Dependencies:
   JS
-  /js/paths.js
-  /js/onlypawsClient.js
-  /js/partials.js
-  /js/nav.js
-  /js/auth-guard.js
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/partials.js
+  - /js/nav.js
+  - /js/auth-guard.js
 
   CSS
-  /css/styles.css
+  - /css/styles.css
 
   Supabase:
   - posts table
   - profiles table
   - entitlements table
   - storage bucket: "posts"
+
+  Notes:
+  - Media preview is local before upload
+  - Existing media is not rendered back into the preview area in edit mode
+    unless a new file is selected
   =========================================================
 -->
 <!DOCTYPE html>
@@ -47,37 +60,36 @@
       display: none !important;
     }
 
-    .op-sectionSpace {
+    .op-section-space {
       margin-top: 8px;
     }
 
-    .op-btnRowTop {
+    .op-top-actions {
       margin-top: 12px;
     }
 
-    .op-helpText {
+    .op-help-text {
       margin-top: 8px;
       opacity: 0.9;
     }
 
-    .op-previewPanel {
+    .op-preview-panel {
       padding: 12px;
     }
 
-    #mediaPreviewImage,
-    #mediaPreviewVideo {
+    .op-preview-media {
       width: 100%;
       max-width: 100%;
       display: block;
       border-radius: 14px;
     }
 
-    #mediaPreviewImage {
+    .op-preview-image {
       max-height: 420px;
       object-fit: cover;
     }
 
-    #mediaPreviewVideo {
+    .op-preview-video {
       max-height: 420px;
       background: rgba(0, 0, 0, 0.2);
     }
@@ -91,7 +103,7 @@
     <div class="panel">
       <div class="row">
         <div>
-          <div class="pill op-sectionSpace op-hidden" id="modePill">Create Post</div>
+          <div class="pill op-section-space op-hidden" id="modePill">Create Post</div>
           <h1 id="pageTitle">Create a post</h1>
           <p class="sub" id="pageSub">Creator-only. This writes into <b>posts</b>.</p>
         </div>
@@ -100,14 +112,14 @@
       <div class="locked op-hidden" id="creatorLockBox">
         <b>🔒 Creator tools locked</b>
 
-        <div class="btnRow op-btnRowTop">
+        <div class="btnRow op-top-actions">
           <a class="btn" id="unlockBtn" href="#" target="_blank" rel="noopener">
             Unlock Creator Access — €10/month
           </a>
           <button class="ghost" id="refreshBtn" type="button">Refresh</button>
         </div>
 
-        <div class="op-helpText">After checkout, tap Refresh.</div>
+        <div class="op-help-text">After checkout, tap Refresh.</div>
       </div>
 
       <div class="field">
@@ -148,9 +160,19 @@
 
       <div class="field op-hidden" id="mediaPreviewWrap">
         <label>Preview</label>
-        <div class="panel op-previewPanel">
-          <img id="mediaPreviewImage" class="op-hidden" alt="Media preview" />
-          <video id="mediaPreviewVideo" class="op-hidden" controls playsinline></video>
+
+        <div class="panel op-preview-panel">
+          <img
+            id="mediaPreviewImage"
+            class="op-preview-media op-preview-image op-hidden"
+            alt="Media preview"
+          />
+          <video
+            id="mediaPreviewVideo"
+            class="op-preview-media op-preview-video op-hidden"
+            controls
+            playsinline
+          ></video>
           <div id="mediaPreviewEmpty" class="sub">No media selected.</div>
         </div>
       </div>
@@ -174,55 +196,97 @@
   <script src="/js/auth-guard.js"></script>
 
   <script>
+    /* =========================================================
+       OnlyPaws - Create / Edit Post page logic
+       ========================================================= */
+
     const CREATOR_PLAN_URL = "https://buy.stripe.com/5kQbJ25UY5qegpM4kD5wI02";
 
-    const BUCKET = "posts";
-    const BUCKET_IS_PUBLIC = true;
-    const MAX_MB = 25;
-
-    const msg = document.getElementById("msg");
-    const publishBtn = document.getElementById("publishBtn");
-
-    const creatorLockBox = document.getElementById("creatorLockBox");
-    const unlockBtn = document.getElementById("unlockBtn");
-    const refreshBtn = document.getElementById("refreshBtn");
-
-    const modePill = document.getElementById("modePill");
-    const pageTitle = document.getElementById("pageTitle");
-    const pageSub = document.getElementById("pageSub");
-    const cancelEditBtn = document.getElementById("cancelEditBtn");
-
-    const mediaFileInput = document.getElementById("mediaFile");
-    const mediaPreviewWrap = document.getElementById("mediaPreviewWrap");
-    const mediaPreviewImage = document.getElementById("mediaPreviewImage");
-    const mediaPreviewVideo = document.getElementById("mediaPreviewVideo");
-    const mediaPreviewEmpty = document.getElementById("mediaPreviewEmpty");
-
-    unlockBtn.href = CREATOR_PLAN_URL;
-    cancelEditBtn.href = OP_PATHS.app.creators.creatorDash;
-
-    let user = null;
-    let profile = null;
-    let creatorPlanActive = false;
-    let editingPost = null;
-    let currentPreviewUrl = null;
+    const STORAGE_BUCKET = "posts";
+    const STORAGE_BUCKET_IS_PUBLIC = true;
+    const MAX_FILE_SIZE_MB = 25;
 
     const params = new URLSearchParams(window.location.search);
     const editId = params.get("edit");
 
-    function setMsg(text) {
-      msg.textContent = text || "";
+    const state = {
+      user: null,
+      profile: null,
+      creatorPlanActive: false,
+      editingPost: null,
+      currentPreviewUrl: null
+    };
+
+    const els = {
+      msg: document.getElementById("msg"),
+      publishBtn: document.getElementById("publishBtn"),
+
+      creatorLockBox: document.getElementById("creatorLockBox"),
+      unlockBtn: document.getElementById("unlockBtn"),
+      refreshBtn: document.getElementById("refreshBtn"),
+
+      modePill: document.getElementById("modePill"),
+      pageTitle: document.getElementById("pageTitle"),
+      pageSub: document.getElementById("pageSub"),
+      cancelEditBtn: document.getElementById("cancelEditBtn"),
+
+      isPublic: document.getElementById("is_public"),
+      isPaid: document.getElementById("is_paid"),
+      title: document.getElementById("title"),
+      content: document.getElementById("content"),
+      preview: document.getElementById("preview"),
+      mediaFile: document.getElementById("mediaFile"),
+
+      mediaPreviewWrap: document.getElementById("mediaPreviewWrap"),
+      mediaPreviewImage: document.getElementById("mediaPreviewImage"),
+      mediaPreviewVideo: document.getElementById("mediaPreviewVideo"),
+      mediaPreviewEmpty: document.getElementById("mediaPreviewEmpty")
+    };
+
+    function setMessage(text) {
+      els.msg.textContent = text || "";
     }
 
-    function setHidden(el, hidden) {
-      if (!el) return;
-      el.classList.toggle("op-hidden", hidden);
+    function setHidden(element, hidden) {
+      if (!element) return;
+      element.classList.toggle("op-hidden", hidden);
+    }
+
+    function setEditorEnabled(enabled) {
+      els.isPublic.disabled = !enabled;
+      els.isPaid.disabled = !enabled;
+      els.title.disabled = !enabled;
+      els.content.disabled = !enabled;
+      els.preview.disabled = !enabled;
+      els.mediaFile.disabled = !enabled;
+      els.publishBtn.disabled = !enabled;
+    }
+
+    function getFormValues() {
+      return {
+        title: (els.title.value || "").trim(),
+        content: (els.content.value || "").trim(),
+        preview: (els.preview.value || "").trim(),
+        is_paid: els.isPaid.value === "true",
+        is_public: els.isPublic.value === "true"
+      };
+    }
+
+    function resetForm() {
+      els.title.value = "";
+      els.content.value = "";
+      els.preview.value = "";
+      els.mediaFile.value = "";
+      els.isPaid.value = "false";
+      els.isPublic.value = "true";
+
+      clearMediaPreview();
     }
 
     function detectMediaType(file) {
       if (!file) return "none";
-      if (file.type && file.type.startsWith("image/")) return "image";
-      if (file.type && file.type.startsWith("video/")) return "video";
+      if (file.type?.startsWith("image/")) return "image";
+      if (file.type?.startsWith("video/")) return "video";
       return "none";
     }
 
@@ -230,38 +294,30 @@
       return (name || "file").replace(/[^\w.\-]+/g, "_");
     }
 
-    function setToolsEnabled(enabled) {
-      document.getElementById("is_public").disabled = !enabled;
-      document.getElementById("is_paid").disabled = !enabled;
-      document.getElementById("title").disabled = !enabled;
-      document.getElementById("content").disabled = !enabled;
-      document.getElementById("preview").disabled = !enabled;
-      document.getElementById("mediaFile").disabled = !enabled;
-      publishBtn.disabled = !enabled;
+    function revokePreviewUrl() {
+      if (!state.currentPreviewUrl) return;
+      URL.revokeObjectURL(state.currentPreviewUrl);
+      state.currentPreviewUrl = null;
     }
 
     function clearMediaPreview() {
-      setHidden(mediaPreviewWrap, true);
-      setHidden(mediaPreviewImage, true);
-      setHidden(mediaPreviewVideo, true);
+      setHidden(els.mediaPreviewWrap, true);
+      setHidden(els.mediaPreviewImage, true);
+      setHidden(els.mediaPreviewVideo, true);
 
-      mediaPreviewImage.removeAttribute("src");
-      mediaPreviewVideo.pause();
-      mediaPreviewVideo.removeAttribute("src");
-      mediaPreviewVideo.load();
+      els.mediaPreviewImage.removeAttribute("src");
 
-      if (currentPreviewUrl) {
-        URL.revokeObjectURL(currentPreviewUrl);
-        currentPreviewUrl = null;
-      }
+      els.mediaPreviewVideo.pause();
+      els.mediaPreviewVideo.removeAttribute("src");
+      els.mediaPreviewVideo.load();
 
-      if (mediaPreviewEmpty) {
-        mediaPreviewEmpty.textContent = "No media selected.";
-      }
+      revokePreviewUrl();
+
+      els.mediaPreviewEmpty.textContent = "No media selected.";
     }
 
     function updateMediaPreview() {
-      const file = mediaFileInput.files?.[0] || null;
+      const file = els.mediaFile.files?.[0] || null;
 
       if (!file) {
         clearMediaPreview();
@@ -269,37 +325,28 @@
       }
 
       const mediaType = detectMediaType(file);
+      revokePreviewUrl();
 
-      if (currentPreviewUrl) {
-        URL.revokeObjectURL(currentPreviewUrl);
-        currentPreviewUrl = null;
-      }
+      state.currentPreviewUrl = URL.createObjectURL(file);
 
-      currentPreviewUrl = URL.createObjectURL(file);
-
-      setHidden(mediaPreviewWrap, false);
-      setHidden(mediaPreviewImage, true);
-      setHidden(mediaPreviewVideo, true);
-
-      if (mediaPreviewEmpty) {
-        mediaPreviewEmpty.textContent = "";
-      }
+      setHidden(els.mediaPreviewWrap, false);
+      setHidden(els.mediaPreviewImage, true);
+      setHidden(els.mediaPreviewVideo, true);
+      els.mediaPreviewEmpty.textContent = "";
 
       if (mediaType === "image") {
-        mediaPreviewImage.src = currentPreviewUrl;
-        setHidden(mediaPreviewImage, false);
+        els.mediaPreviewImage.src = state.currentPreviewUrl;
+        setHidden(els.mediaPreviewImage, false);
         return;
       }
 
       if (mediaType === "video") {
-        mediaPreviewVideo.src = currentPreviewUrl;
-        setHidden(mediaPreviewVideo, false);
+        els.mediaPreviewVideo.src = state.currentPreviewUrl;
+        setHidden(els.mediaPreviewVideo, false);
         return;
       }
 
-      if (mediaPreviewEmpty) {
-        mediaPreviewEmpty.textContent = "Unsupported preview type.";
-      }
+      els.mediaPreviewEmpty.textContent = "Unsupported preview type.";
     }
 
     async function getSessionOrRedirect() {
@@ -317,89 +364,44 @@
       const session = await getSessionOrRedirect();
       if (!session) return false;
 
-      user = session.user;
-      profile = await OPAuth.getProfile(user.id);
+      state.user = session.user;
+      state.profile = await OPAuth.getProfile(state.user.id);
 
-      if (!profile || profile.role !== "creator") {
+      if (!state.profile || state.profile.role !== "creator") {
         window.location.href = OP_PATHS.marketing.home;
         return false;
       }
 
-      creatorPlanActive = await OPAuth.isCreatorPlanActive(user.id);
+      state.creatorPlanActive = await OPAuth.isCreatorPlanActive(state.user.id);
 
-      if (!creatorPlanActive) {
-        setHidden(creatorLockBox, false);
-        setToolsEnabled(false);
-        setMsg("Creator Plan required to publish posts.");
+      if (!state.creatorPlanActive) {
+        setHidden(els.creatorLockBox, false);
+        setEditorEnabled(false);
+        setMessage("Creator Plan required to publish posts.");
         return false;
       }
 
-      setHidden(creatorLockBox, true);
-      setToolsEnabled(true);
-      setMsg("");
+      setHidden(els.creatorLockBox, true);
+      setEditorEnabled(true);
+      setMessage("");
+
       return true;
     }
 
-    async function uploadMedia(postId) {
-      const file = mediaFileInput.files?.[0] || null;
-      if (!file) return { media_url: null, media_type: "none" };
+    function enableEditModeUI() {
+      setHidden(els.modePill, false);
+      setHidden(els.cancelEditBtn, false);
 
-      const media_type = detectMediaType(file);
-      if (media_type === "none") {
-        throw new Error("Unsupported file type. Use image/video only.");
-      }
-
-      const sizeMb = file.size / (1024 * 1024);
-      if (sizeMb > MAX_MB) {
-        throw new Error(`File too large (${sizeMb.toFixed(1)}MB). Max ${MAX_MB}MB.`);
-      }
-
-      const path = `uploads/${user.id}/${postId}/${Date.now()}_${safeFileName(file.name)}`;
-
-      const { error: upErr } = await onlypawsClient.storage
-        .from(BUCKET)
-        .upload(path, file, {
-          upsert: false,
-          contentType: file.type || undefined
-        });
-
-      if (upErr) {
-        const message = (upErr.message || "").toLowerCase();
-
-        if (message.includes("bucket") && message.includes("not found")) {
-          throw new Error(`Bucket "${BUCKET}" not found. Create it in Supabase Storage → Buckets.`);
-        }
-
-        throw upErr;
-      }
-
-      let media_url = null;
-
-      if (BUCKET_IS_PUBLIC) {
-        const { data } = onlypawsClient.storage.from(BUCKET).getPublicUrl(path);
-        media_url = data?.publicUrl || null;
-      } else {
-        media_url = path;
-      }
-
-      return { media_url, media_type };
-    }
-
-    function setEditModeUI() {
-      setHidden(modePill, false);
-      modePill.textContent = "Edit Post";
-
+      els.modePill.textContent = "Edit Post";
       document.title = "OnlyPaws — Edit Post";
-      pageTitle.textContent = "Edit post";
-      pageSub.innerHTML = `Update your post. Changes save into <b>posts</b>.`;
-      publishBtn.textContent = "Save changes";
-
-      setHidden(cancelEditBtn, false);
+      els.pageTitle.textContent = "Edit post";
+      els.pageSub.innerHTML = 'Update your post. Changes save into <b>posts</b>.';
+      els.publishBtn.textContent = "Save changes";
     }
 
     async function loadPostForEdit(postId) {
-      setMsg("Loading post…");
-      setEditModeUI();
+      setMessage("Loading post…");
+      enableEditModeUI();
 
       const { data, error } = await onlypawsClient
         .from("posts")
@@ -409,177 +411,213 @@
 
       if (error) throw error;
       if (!data) throw new Error("Post not found.");
-
-      if (data.creator_id !== user.id) {
+      if (data.creator_id !== state.user.id) {
         throw new Error("Not allowed: this post is not yours.");
       }
 
-      editingPost = data;
+      state.editingPost = data;
 
-      document.getElementById("title").value = data.title || "";
-      document.getElementById("content").value = data.content || "";
-      document.getElementById("preview").value = data.preview || "";
-      document.getElementById("is_paid").value = data.is_paid ? "true" : "false";
-      document.getElementById("is_public").value = data.is_public === false ? "false" : "true";
+      els.title.value = data.title || "";
+      els.content.value = data.content || "";
+      els.preview.value = data.preview || "";
+      els.isPaid.value = data.is_paid ? "true" : "false";
+      els.isPublic.value = data.is_public === false ? "false" : "true";
 
-      setMsg("Loaded ✅");
+      setMessage("Loaded ✅");
     }
 
-    function resetForm() {
-      document.getElementById("title").value = "";
-      document.getElementById("content").value = "";
-      document.getElementById("preview").value = "";
-      mediaFileInput.value = "";
-      document.getElementById("is_paid").value = "false";
-      document.getElementById("is_public").value = "true";
-      clearMediaPreview();
+    async function uploadMedia(postId) {
+      const file = els.mediaFile.files?.[0] || null;
+      if (!file) return { media_url: null, media_type: "none" };
+
+      const media_type = detectMediaType(file);
+      if (media_type === "none") {
+        throw new Error("Unsupported file type. Use image/video only.");
+      }
+
+      const sizeMb = file.size / (1024 * 1024);
+      if (sizeMb > MAX_FILE_SIZE_MB) {
+        throw new Error(`File too large (${sizeMb.toFixed(1)}MB). Max ${MAX_FILE_SIZE_MB}MB.`);
+      }
+
+      const path = `uploads/${state.user.id}/${postId}/${Date.now()}_${safeFileName(file.name)}`;
+
+      const { error: uploadError } = await onlypawsClient.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, file, {
+          upsert: false,
+          contentType: file.type || undefined
+        });
+
+      if (uploadError) {
+        const lowerMessage = (uploadError.message || "").toLowerCase();
+
+        if (lowerMessage.includes("bucket") && lowerMessage.includes("not found")) {
+          throw new Error(
+            `Bucket "${STORAGE_BUCKET}" not found. Create it in Supabase Storage → Buckets.`
+          );
+        }
+
+        throw uploadError;
+      }
+
+      let media_url = null;
+
+      if (STORAGE_BUCKET_IS_PUBLIC) {
+        const { data } = onlypawsClient.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+        media_url = data?.publicUrl || null;
+      } else {
+        media_url = path;
+      }
+
+      return { media_url, media_type };
+    }
+
+    async function createPost(values) {
+      const { data, error } = await onlypawsClient
+        .from("posts")
+        .insert([{
+          creator_id: state.user.id,
+          title: values.title,
+          content: values.content,
+          preview: values.preview || null,
+          is_paid: values.is_paid,
+          is_public: values.is_public,
+          media_type: "none",
+          media_url: null
+        }])
+        .select("id")
+        .single();
+
+      if (error) throw error;
+      return data.id;
+    }
+
+    async function updatePost(postId, values) {
+      const { error } = await onlypawsClient
+        .from("posts")
+        .update({
+          title: values.title,
+          content: values.content,
+          preview: values.preview || null,
+          is_paid: values.is_paid,
+          is_public: values.is_public,
+          creator_id: state.user.id
+        })
+        .eq("id", postId)
+        .eq("creator_id", state.user.id);
+
+      if (error) throw error;
+    }
+
+    async function attachUploadedMediaToPost(postId) {
+      const hasFile = !!els.mediaFile.files?.[0];
+      if (!hasFile) return;
+
+      setMessage("Uploading media…");
+
+      const { media_url, media_type } = await uploadMedia(postId);
+      if (!media_url) return;
+
+      const { error } = await onlypawsClient
+        .from("posts")
+        .update({ media_url, media_type })
+        .eq("id", postId)
+        .eq("creator_id", state.user.id);
+
+      if (error) throw error;
+    }
+
+    function validateBeforeSubmit(values) {
+      if (!state.user || !state.profile || state.profile.role !== "creator") {
+        throw new Error("Not allowed.");
+      }
+
+      if (!state.creatorPlanActive) {
+        throw new Error("Creator Plan required.");
+      }
+
+      if (!values.title) {
+        throw new Error("Title is required.");
+      }
+
+      if (!values.content) {
+        throw new Error("Content is required.");
+      }
+
+      if (editId && !state.editingPost) {
+        throw new Error("Edit mode not ready.");
+      }
     }
 
     async function publishOrUpdate() {
-      setMsg(editId ? "Saving…" : "Publishing…");
-      publishBtn.disabled = true;
+      els.publishBtn.disabled = true;
+      setMessage(editId ? "Saving…" : "Publishing…");
 
       try {
-        if (!user || !profile || profile.role !== "creator") {
-          throw new Error("Not allowed.");
-        }
-
-        if (!creatorPlanActive) {
-          throw new Error("Creator Plan required.");
-        }
-
-        const title = (document.getElementById("title").value || "").trim();
-        const content = (document.getElementById("content").value || "").trim();
-        const preview = (document.getElementById("preview").value || "").trim();
-
-        const is_paid = document.getElementById("is_paid").value === "true";
-        const is_public = document.getElementById("is_public").value === "true";
-
-        if (!title) throw new Error("Title is required.");
-        if (!content) throw new Error("Content is required.");
-
-        const creator_id = user.id;
+        const values = getFormValues();
+        validateBeforeSubmit(values);
 
         if (editId) {
-          if (!editingPost) {
-            throw new Error("Edit mode not ready.");
-          }
+          await updatePost(editId, values);
+          await attachUploadedMediaToPost(editId);
 
-          const { error: updateErr } = await onlypawsClient
-            .from("posts")
-            .update({
-              title,
-              content,
-              preview: preview || null,
-              is_paid,
-              is_public,
-              creator_id
-            })
-            .eq("id", editId)
-            .eq("creator_id", user.id);
-
-          if (updateErr) throw updateErr;
-
-          const hasFile = !!mediaFileInput.files?.[0];
-
-          if (hasFile) {
-            setMsg("Uploading media…");
-
-            const { media_url, media_type } = await uploadMedia(editId);
-
-            if (media_url) {
-              const { error: mediaErr } = await onlypawsClient
-                .from("posts")
-                .update({ media_url, media_type })
-                .eq("id", editId)
-                .eq("creator_id", user.id);
-
-              if (mediaErr) throw mediaErr;
-            }
-          }
-
-          setMsg("Saved ✅");
-          mediaFileInput.value = "";
+          setMessage("Saved ✅");
+          els.mediaFile.value = "";
           clearMediaPreview();
           return;
         }
 
-        const { data: inserted, error: insertErr } = await onlypawsClient
-          .from("posts")
-          .insert([{
-            creator_id,
-            title,
-            content,
-            preview: preview || null,
-            is_paid,
-            is_public,
-            media_type: "none",
-            media_url: null
-          }])
-          .select("id")
-          .single();
+        const newPostId = await createPost(values);
+        await attachUploadedMediaToPost(newPostId);
 
-        if (insertErr) throw insertErr;
-
-        const postId = inserted.id;
-        const hasFile = !!mediaFileInput.files?.[0];
-
-        if (hasFile) {
-          setMsg("Uploading media…");
-
-          const { media_url, media_type } = await uploadMedia(postId);
-
-          if (media_url) {
-            const { error: mediaErr } = await onlypawsClient
-              .from("posts")
-              .update({ media_url, media_type })
-              .eq("id", postId)
-              .eq("creator_id", user.id);
-
-            if (mediaErr) throw mediaErr;
-          }
-        }
-
-        setMsg("Published ✅");
+        setMessage("Published ✅");
         resetForm();
       } catch (error) {
         console.warn(error);
-        setMsg(error.message || String(error));
+        setMessage(error.message || String(error));
       } finally {
-        publishBtn.disabled = false;
+        els.publishBtn.disabled = false;
       }
     }
 
-    window.addEventListener("DOMContentLoaded", async () => {
+    async function handleLogoutClick() {
+      await onlypawsClient.auth.signOut();
+      window.location.href = OP_PATHS.marketing.home;
+    }
+
+    async function initPage() {
       await loadLayout();
       await initNav();
 
-      publishBtn.addEventListener("click", publishOrUpdate);
-      refreshBtn.addEventListener("click", () => window.location.reload());
-      mediaFileInput.addEventListener("change", updateMediaPreview);
+      els.unlockBtn.href = CREATOR_PLAN_URL;
+      els.cancelEditBtn.href = OP_PATHS.app.creators.creatorDash;
+
+      els.publishBtn.addEventListener("click", publishOrUpdate);
+      els.refreshBtn.addEventListener("click", () => window.location.reload());
+      els.mediaFile.addEventListener("change", updateMediaPreview);
 
       const navLogout = document.getElementById("navLogout");
       if (navLogout) {
-        navLogout.addEventListener("click", async () => {
-          await onlypawsClient.auth.signOut();
-          window.location.href = OP_PATHS.marketing.home;
-        });
+        navLogout.addEventListener("click", handleLogoutClick);
       }
 
       clearMediaPreview();
 
-      const ok = await requireCreatorAndPlan();
-      if (!ok) return;
+      const hasAccess = await requireCreatorAndPlan();
+      if (!hasAccess) return;
 
-      if (editId) {
-        try {
-          await loadPostForEdit(editId);
-        } catch (error) {
-          setMsg(error.message || String(error));
-          setToolsEnabled(false);
-        }
+      if (!editId) return;
+
+      try {
+        await loadPostForEdit(editId);
+      } catch (error) {
+        setMessage(error.message || String(error));
+        setEditorEnabled(false);
       }
-    });
+    }
+
+    window.addEventListener("DOMContentLoaded", initPage);
   </script>
 </body>
 </html>
