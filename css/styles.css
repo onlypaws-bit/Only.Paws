@@ -7,7 +7,7 @@
   --card:rgba(0,0,0,.16);
   --btn:#ffffff;
   --btnText:#6B4EFF;
-  --shadow: rgba(0,0,0,.25);
+  --shadow:rgba(0,0,0,.25);
 }
 
 *{
@@ -16,7 +16,7 @@
 
 body{
   margin:0;
-  font-family: Arial, sans-serif;
+  font-family:Arial,sans-serif;
   color:var(--text);
   background:
     radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,.18), transparent 55%),
@@ -25,12 +25,27 @@ body{
   min-height:100vh;
 }
 
-/* ===== WRAP ===== */
+[hidden]{
+  display:none !important;
+}
+
+/* ===== WRAP / PAGE ===== */
+
+.pageShell{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
 
 .wrap{
   max-width:1040px;
   margin:0 auto;
   padding:0 18px 70px;
+  width:100%;
+}
+
+.footerWrap{
+  margin-top:28px;
 }
 
 /* ===== NAV ===== */
@@ -48,7 +63,7 @@ body{
   align-items:center;
   gap:12px;
   text-decoration:none;
-  color:white;
+  color:#fff;
   font-weight:900;
 }
 
@@ -73,12 +88,59 @@ body{
   width:46px;
   height:46px;
   object-fit:contain;
+  display:block;
 }
 
 .navRight{
   display:flex;
   align-items:center;
   gap:10px;
+}
+
+/* ===== NAV BUTTONS ===== */
+
+.navBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:42px;
+  padding:10px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.12);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:
+    transform .18s ease,
+    opacity .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    color .18s ease;
+}
+
+.navBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.16);
+}
+
+.navBtn.primary{
+  background:var(--btn);
+  color:var(--btnText);
+  border:1px solid transparent;
+}
+
+.navBtn.primary:hover{
+  background:#fff;
+}
+
+.navBtn:disabled{
+  opacity:.65;
+  cursor:default;
+  transform:none;
 }
 
 /* ===== MARKETING NAV ===== */
@@ -131,7 +193,6 @@ body{
   transform:translateY(-1px);
 }
 
-/* opzionale: non serve se rimuovi il link corrente, ma lo lasciamo */
 .activeMarketingTextLink{
   background:rgba(255,255,255,.14);
   border:1px solid rgba(255,255,255,.18);
@@ -174,11 +235,35 @@ h2{
   margin:0 0 8px;
 }
 
+h3{
+  margin:0 0 8px;
+}
+
 .sub{
   margin:0;
   color:var(--muted);
   font-size:1.08rem;
   line-height:1.55;
+}
+
+.note{
+  margin-top:16px;
+  font-size:13px;
+  color:rgba(255,255,255,.78);
+}
+
+.hint{
+  margin-top:8px;
+  font-size:13px;
+  color:rgba(255,255,255,.75);
+}
+
+.authMsg{
+  margin-top:10px;
+  font-size:13px;
+  color:rgba(255,255,255,.85);
+  min-height:18px;
+  white-space:pre-wrap;
 }
 
 /* ===== BUTTONS ===== */
@@ -214,6 +299,12 @@ h2{
   transform:translateY(-1px);
 }
 
+.btn:disabled{
+  opacity:.65;
+  cursor:default;
+  transform:none;
+}
+
 .ghost{
   display:inline-flex;
   align-items:center;
@@ -222,7 +313,7 @@ h2{
   border-radius:999px;
   background:rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.18);
-  color:white;
+  color:#fff;
   text-decoration:none;
   font-weight:800;
   white-space:nowrap;
@@ -238,15 +329,19 @@ h2{
   background:rgba(255,255,255,.16);
 }
 
-/* ===== HERO ===== */
+.ghost:disabled{
+  opacity:.65;
+  cursor:default;
+  transform:none;
+}
+
+/* ===== HERO / STACK ===== */
 
 .hero{
   display:grid;
   grid-template-columns:1.1fr .9fr;
   gap:16px;
 }
-
-/* ===== STACK ===== */
 
 .cardsStack{
   margin-top:16px;
@@ -289,62 +384,35 @@ h2{
   margin:0 auto;
 }
 
-/* ===== AUTH ===== */
-
-.authMsg{
-  margin-top:10px;
-  font-size:13px;
-  color:rgba(255,255,255,.85);
-  min-height:18px;
-}
-
-.note{
-  margin-top:16px;
-  font-size:13px;
-  color:rgba(255,255,255,.78);
-}
-
-.hint{
-  margin-top:8px;
-  font-size:13px;
-  color:rgba(255,255,255,.75);
-}
-
-/* ===== FOOTER ===== */
-
-.globalFooter{
-  text-align:center;
-  padding:30px 20px;
-  font-size:14px;
-}
-
-.globalFooter a{
-  color:white;
-  text-decoration:none;
-}
-
-.globalFooter a:hover{
-  text-decoration:underline;
-}
-
-/* ===== FEED ===== */
+/* ===== FORMS / COMMON APP UI ===== */
 
 .searchRow{
   margin-top:16px;
 }
 
-.search{
+.search,
+.field input,
+.field textarea{
   width:100%;
   padding:12px 14px;
   border-radius:14px;
   border:1px solid rgba(255,255,255,.18);
   background:rgba(255,255,255,.12);
-  color:white;
+  color:#fff;
+  outline:none;
 }
 
-.search::placeholder{
+.search::placeholder,
+.field input::placeholder,
+.field textarea::placeholder{
   color:rgba(255,255,255,.65);
 }
+
+.field textarea{
+  resize:vertical;
+}
+
+/* ===== FEED / CREATOR GRID ===== */
 
 .creatorList{
   display:grid;
@@ -361,6 +429,7 @@ h2{
   border-radius:16px;
   background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.16);
+  min-width:0;
 }
 
 .avatar{
@@ -372,6 +441,15 @@ h2{
   align-items:center;
   justify-content:center;
   flex-shrink:0;
+  overflow:hidden;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  border-radius:inherit;
 }
 
 /* ===== POSTS ===== */
@@ -420,14 +498,31 @@ h2{
 .mediaWrap video{
   width:100%;
   display:block;
+  max-width:100%;
 }
 
-/* ===== DEBUG ===== */
+/* ===== UTILITY / STATE ===== */
 
 .debug{
   margin-top:10px;
   font-size:12px;
   color:#ffdede;
+}
+
+.err{
+  margin-top:12px;
+  min-height:18px;
+  color:rgba(255,210,210,.95);
+  font-size:13px;
+  white-space:pre-wrap;
+}
+
+.msg{
+  margin-top:12px;
+  min-height:18px;
+  color:rgba(255,255,255,.86);
+  font-size:13px;
+  white-space:pre-wrap;
 }
 
 /* ===== MEDIA MODAL ===== */
@@ -460,49 +555,35 @@ h2{
   background:none;
   border:none;
   font-size:28px;
-  color:white;
+  color:#fff;
   cursor:pointer;
 }
 
-/* ===== TABLET / MOBILE ===== */
+/* ===== FOOTER ===== */
 
-@media (max-width:920px){
-  .hero{
-    grid-template-columns:1fr;
-  }
+.globalFooter{
+  text-align:center;
+  padding:30px 20px;
+  font-size:14px;
 }
 
-@media (max-width:820px){
-  .nav{
-    flex-direction:column;
-    align-items:flex-start;
-    gap:12px;
-  }
-
-  .navRight{
-    width:100%;
-    justify-content:flex-start;
-    flex-wrap:wrap;
-  }
-
-  .marketingLinks{
-    width:100%;
-    justify-content:flex-start;
-    gap:8px;
-  }
-
-  .navLink{
-    min-width:auto;
-  }
-
-  .marketingTextLink{
-    height:40px;
-    padding:0 12px;
-  }
+.globalFooter a{
+  color:#fff;
+  text-decoration:none;
 }
 
-[hidden] {
-  display: none !important;
+.globalFooter a:hover{
+  text-decoration:underline;
+}
+
+.footerTop{
+  margin-bottom:6px;
+}
+
+.small{
+  font-size:13px;
+  color:rgba(255,255,255,.76);
+  line-height:1.5;
 }
 
 .footerLinks{
@@ -544,4 +625,41 @@ h2{
 
 .footerInstagram:hover{
   opacity:1;
+}
+
+/* ===== TABLET / MOBILE ===== */
+
+@media (max-width:920px){
+  .hero{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width:820px){
+  .nav{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px;
+  }
+
+  .navRight{
+    width:100%;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+
+  .marketingLinks{
+    width:100%;
+    justify-content:flex-start;
+    gap:8px;
+  }
+
+  .navLink{
+    min-width:auto;
+  }
+
+  .marketingTextLink{
+    height:40px;
+    padding:0 12px;
+  }
 }
