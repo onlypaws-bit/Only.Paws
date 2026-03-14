@@ -1,0 +1,47 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/app-post.css
+   Purpose: styles specific to the app post page
+   ========================================================= */
+
+.postMetaRow {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.postMediaBox {
+  margin-top: 16px;
+}
+
+.captionBox {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.likeBtnLabel {
+  margin-left: 6px;
+}
+
+.likeCount {
+  margin-left: 10px;
+  opacity: 0.9;
+}
+
+.err {
+  margin-top: 12px;
+  min-height: 18px;
+  color: rgba(255, 210, 210, 0.95);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
