@@ -4,42 +4,132 @@
    Purpose: styles specific to the marketing index page
    ========================================================= */
 
-
-
-.indexCardActions {
-  margin-top: 12px;
-}
-
-.indexSupportActions {
-  margin-top: 14px;
-}
-
-.supportCard {
-  margin-top: 16px;
-}
-
 .indexHeroImage {
   max-width: 420px;
 }
 
 .indexCards {
-  margin-top: 16px;
+  margin-top: 22px;
+  display: grid;
+  gap: 24px;
 }
 
 .indexCards .card {
   background: rgba(255, 255, 255, 0.09);
+  padding: 30px 32px;
+}
+
+.indexCards .card h2,
+.indexCards .card h3 {
+  margin: 0 0 16px;
+  line-height: 1.05;
 }
 
 .indexCards .card p {
   margin: 0;
+  max-width: 32ch;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.indexCardActions {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.indexCardActions .btn,
+.indexSupportActions .btn {
+  min-height: 56px;
+  padding: 0 28px;
+  white-space: nowrap;
 }
 
 .indexMiniBlock {
+  margin-top: 24px;
+}
+
+.supportCard {
+  margin-top: 20px;
+}
+
+.indexSupportActions {
   margin-top: 18px;
 }
+
+/* support email block, se lo tieni ancora un attimo */
+.indexMiniBlock .card,
+.indexSupportLine,
+.indexSupportMail {
+  text-align: center;
+}
+
+.indexSupportLine,
+.indexSupportMail {
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.indexSupportMail a,
+.indexSupportLine a {
+  font-weight: 800;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
 
 @media (max-width: 920px) {
   .indexHeroImage {
     max-width: 360px;
+  }
+
+  .indexCards .card {
+    padding: 26px 24px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .indexHeroImage {
+    max-width: 100%;
+  }
+
+  .indexCards {
+    margin-top: 18px;
+    gap: 18px;
+  }
+
+  .indexCards .card {
+    padding: 24px 18px;
+    border-radius: 28px;
+  }
+
+  .indexCards .card h2,
+  .indexCards .card h3 {
+    margin-bottom: 14px;
+  }
+
+  .indexCards .card p {
+    max-width: none;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .indexCardActions {
+    margin-top: 18px;
+    gap: 12px;
+  }
+
+  .indexCardActions .btn,
+  .indexSupportActions .btn {
+    min-height: 54px;
+    padding: 0 22px;
   }
 }
