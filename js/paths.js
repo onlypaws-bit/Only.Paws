@@ -1,17 +1,30 @@
 /* =========================================================
    OnlyPaws
    File: /js/paths.js
-   Purpose: central absolute path map for pages, assets, and components
+   Purpose: central path registry for all OnlyPaws routes
+            (app pages, marketing pages, assets, components)
+
+   Structure:
+   - app        → logged-in application pages
+   - marketing  → public website pages
+   - faq/legal  → static informational pages
+   - thanks     → post-payment confirmation pages
+   - assets     → images and media
+   - components → reusable HTML partials
+   - static     → CSS and JS file paths
+
+   This file acts as the single source of truth
+   for navigation across the entire project.
    ========================================================= */
+
+
 
 window.OP_PATHS = {
   app: {
-    shared: {
-      authCallback: "/html/app/shared/auth-callback.html",
-      feed: "/html/app/shared/feed.html",
-      post: "/html/app/shared/post.html",
-      profile: "/html/app/shared/profile.html"
-    },
+    authCallback: "/html/app/auth-callback.html",
+    feed: "/html/app/feed.html",
+    post: "/html/app/post.html",
+    profile: "/html/app/profile.html",
 
     creators: {
       createPost: "/html/app/creators/create-post.html",
