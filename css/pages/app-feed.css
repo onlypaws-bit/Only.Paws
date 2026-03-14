@@ -1,6 +1,9 @@
-/* =========================
-   OnlyPaws — App Feed 
-   ========================= */
+/* =========================================================
+   OnlyPaws
+   File: css/pages/app-feed.css
+   Purpose: styles specific to the app feed page
+   ========================================================= */
+
 
 .feedSectionPanel{
   margin-top:14px;
@@ -27,6 +30,10 @@
   align-items:center;
   gap:10px;
   flex-wrap:wrap;
+}
+
+.supportHint{
+  margin-top:8px;
 }
 
 .creatorLink{
