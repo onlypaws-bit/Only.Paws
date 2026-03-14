@@ -94,12 +94,16 @@ body{
 .navRight{
   display:flex;
   align-items:center;
+  justify-content:flex-end;
   gap:10px;
+  flex-wrap:wrap;
 }
 
 /* ===== NAV BUTTONS ===== */
 
 .navBtn{
+  appearance:none;
+  -webkit-appearance:none;
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -111,7 +115,9 @@ body{
   background:rgba(255,255,255,.12);
   color:#fff;
   text-decoration:none;
+  font:inherit;
   font-weight:800;
+  line-height:1;
   white-space:nowrap;
   cursor:pointer;
   transition:
@@ -211,6 +217,18 @@ body{
   border:1px solid rgba(255,255,255,.18);
   font-size:13px;
   color:rgba(255,255,255,.85);
+  white-space:nowrap;
+}
+
+/* ===== SUPPORT LINE ===== */
+
+.subtleLine{
+  margin-top:18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  color:rgba(255,255,255,.82);
 }
 
 /* ===== PANELS ===== */
@@ -335,84 +353,7 @@ h3{
   transform:none;
 }
 
-/* ===== HERO / STACK ===== */
-
-.hero{
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:16px;
-}
-
-.cardsStack{
-  margin-top:16px;
-  display:grid;
-  gap:14px;
-}
-
-.card{
-  border-radius:22px;
-  padding:18px;
-  background:rgba(255,255,255,.09);
-  border:1px solid var(--stroke);
-}
-
-.mini{
-  margin-top:18px;
-  border-radius:22px;
-  padding:16px;
-  background:rgba(0,0,0,.14);
-  border:1px solid var(--stroke);
-  font-size:14px;
-  text-align:center;
-}
-
-/* ===== BRAND IMAGE ===== */
-
-.brandImage{
-  border-radius:18px;
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--stroke);
-  padding:14px;
-  text-align:center;
-}
-
-.brandImage img{
-  width:100%;
-  max-width:420px;
-  border-radius:16px;
-  display:block;
-  margin:0 auto;
-}
-
-/* ===== FORMS / COMMON APP UI ===== */
-
-.searchRow{
-  margin-top:16px;
-}
-
-.search,
-.field input,
-.field textarea{
-  width:100%;
-  padding:12px 14px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.12);
-  color:#fff;
-  outline:none;
-}
-
-.search::placeholder,
-.field input::placeholder,
-.field textarea::placeholder{
-  color:rgba(255,255,255,.65);
-}
-
-.field textarea{
-  resize:vertical;
-}
-
-/* ===== FEED / CREATOR GRID ===== */
+/* ===== FEED ===== */
 
 .creatorList{
   display:grid;
@@ -451,8 +392,6 @@ h3{
   display:block;
   border-radius:inherit;
 }
-
-/* ===== POSTS ===== */
 
 .posts{
   display:grid;
@@ -501,139 +440,7 @@ h3{
   max-width:100%;
 }
 
-/* ===== UTILITY / STATE ===== */
-
-.debug{
-  margin-top:10px;
-  font-size:12px;
-  color:#ffdede;
-}
-
-.err{
-  margin-top:12px;
-  min-height:18px;
-  color:rgba(255,210,210,.95);
-  font-size:13px;
-  white-space:pre-wrap;
-}
-
-.msg{
-  margin-top:12px;
-  min-height:18px;
-  color:rgba(255,255,255,.86);
-  font-size:13px;
-  white-space:pre-wrap;
-}
-
-/* ===== MEDIA MODAL ===== */
-
-.mediaModal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.75);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-
-.mediaModalInner{
-  max-width:900px;
-  width:90%;
-}
-
-.mediaModal img,
-.mediaModal video{
-  width:100%;
-  border-radius:12px;
-}
-
-.mediaModalClose{
-  position:absolute;
-  top:16px;
-  right:18px;
-  background:none;
-  border:none;
-  font-size:28px;
-  color:#fff;
-  cursor:pointer;
-}
-
-/* ===== FOOTER ===== */
-
-.globalFooter{
-  text-align:center;
-  padding:30px 20px;
-  font-size:14px;
-}
-
-.globalFooter a{
-  color:#fff;
-  text-decoration:none;
-}
-
-.globalFooter a:hover{
-  text-decoration:underline;
-}
-
-.footerTop{
-  margin-bottom:6px;
-}
-
-.small{
-  font-size:13px;
-  color:rgba(255,255,255,.76);
-  line-height:1.5;
-}
-
-.footerLinks{
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-  justify-content:center;
-  margin-top:10px;
-}
-
-.footerLinks a{
-  opacity:.8;
-}
-
-.footerLinks a:hover{
-  opacity:1;
-}
-
-.footerSocial{
-  margin-top:14px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:6px;
-}
-
-.footerFollow{
-  font-size:13px;
-  opacity:.75;
-}
-
-.footerInstagram{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font-size:14px;
-  opacity:.85;
-}
-
-.footerInstagram:hover{
-  opacity:1;
-}
-
-/* ===== TABLET / MOBILE ===== */
-
-@media (max-width:920px){
-  .hero{
-    grid-template-columns:1fr;
-  }
-}
+/* ===== MOBILE ===== */
 
 @media (max-width:820px){
   .nav{
@@ -652,14 +459,5 @@ h3{
     width:100%;
     justify-content:flex-start;
     gap:8px;
-  }
-
-  .navLink{
-    min-width:auto;
-  }
-
-  .marketingTextLink{
-    height:40px;
-    padding:0 12px;
   }
 }
