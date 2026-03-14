@@ -1,3 +1,18 @@
+<!--
+  OnlyPaws
+  File: html/app/post.html
+
+  CSS:
+  /css/styles.css
+  /css/pages/app-post.css
+
+  JS:
+  /js/paths.js
+  /js/supabase.js
+  /js/nav.js
+  /js/partials.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,52 +20,57 @@
   <title>OnlyPaws — Post</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="../../css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/pages/app-post.css" />
 </head>
 
 <body>
-  <div class="wrap">
-    <div id="header-placeholder"></div>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
 
-    <div class="panel">
-      <div class="pill">Post</div>
-      <h1 id="pageTitle">Post</h1>
+      <div class="panel">
+        <div class="pill">Post</div>
+        <h1 id="pageTitle">Post</h1>
 
-      <div class="meta" style="margin-top:8px;">
-        <b id="author">@creator</b>
-        <span id="createdAt"></span>
+        <div class="meta postMetaRow">
+          <b id="author">@creator</b>
+          <span id="createdAt"></span>
+        </div>
+
+        <div class="mediaWrap postMediaBox" id="mediaBox" hidden></div>
+
+        <div class="captionBox" id="caption" hidden></div>
+
+        <div class="btnRow">
+          <button class="ghost" id="likeBtn" data-liked="false" type="button" title="Like or unlike">
+            <span id="likeIcon">♡</span>
+            <span class="likeBtnLabel">Like</span>
+            <span id="likeCount" class="likeCount">0</span>
+          </button>
+
+          <button class="ghost" id="copyLinkBtn" type="button">Copy link</button>
+
+          <a class="ghost" id="backBtn" href="/html/app/feed.html">Back</a>
+        </div>
+
+        <div class="hint" id="hintBox">Loading…</div>
+        <div class="err" id="errBox" hidden></div>
       </div>
 
-      <div class="mediaWrap" id="mediaBox" style="display:none;"></div>
-
-      <div class="captionBox" id="caption" style="display:none;"></div>
-
-      <div class="btnRow">
-        <button class="ghost" id="likeBtn" data-liked="false" type="button" title="like/unlike">
-          <span id="likeIcon">♡</span>
-          <span style="margin-left:6px;">Like</span>
-          <span id="likeCount" style="margin-left:10px; opacity:.9;">0</span>
-        </button>
-
-        <button class="ghost" id="copyLinkBtn" type="button">Copy link</button>
-
-        <a class="ghost" id="backBtn" href="feed.html">Back</a>
-      </div>
-
-      <div class="hint" id="hintBox">Loading…</div>
-      <div class="err" id="errBox" style="display:none;"></div>
+      <div class="footerWrap" id="footer-placeholder"></div>
     </div>
-
-    <div id="footer-placeholder"></div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../js/supabase.js"></script>
-  <script src="../../js/partials.js"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
 
   <script>
     function goIndex() {
-      window.location.replace("../marketing/index.html");
+      window.location.replace(OP_PATHS.marketing.index);
     }
 
     function $(id) {
@@ -59,7 +79,7 @@
 
     function show(el, yes) {
       if (!el) return;
-      el.style.display = yes ? "" : "none";
+      el.hidden = !yes;
     }
 
     function esc(s) {
@@ -142,10 +162,10 @@
       const creatorDash = $("navCreatorDash");
       const logoutBtn = $("navLogout");
 
-      show(profileBtn, true);
-      show(logoutBtn, true);
-      show(fanDash, false);
-      show(creatorDash, false);
+      if (profileBtn) profileBtn.style.display = "inline-flex";
+      if (logoutBtn) logoutBtn.style.display = "inline-flex";
+      if (fanDash) fanDash.style.display = "none";
+      if (creatorDash) creatorDash.style.display = "none";
 
       try {
         const { data: u } = await client.auth.getUser();
@@ -159,14 +179,14 @@
           .maybeSingle();
 
         if (p?.role === "creator") {
-          if (creatorDash) creatorDash.href = "../creators/creator-dash.html";
-          show(creatorDash, true);
+          if (creatorDash) creatorDash.href = OP_PATHS.creators.creatorDash;
+          if (creatorDash) creatorDash.style.display = "inline-flex";
         } else {
-          if (fanDash) fanDash.href = "../fans/fan-dash.html";
-          show(fanDash, true);
+          if (fanDash) fanDash.href = OP_PATHS.fans.fanDash;
+          if (fanDash) fanDash.style.display = "inline-flex";
         }
 
-        if (profileBtn) profileBtn.href = "profile.html";
+        if (profileBtn) profileBtn.href = OP_PATHS.app.profile;
       } catch (e) {}
     }
 
@@ -195,6 +215,7 @@
       const likeBtn = $("likeBtn");
       const likeIcon = $("likeIcon");
       const likeCount = $("likeCount");
+      const backBtn = $("backBtn");
 
       try {
         const client = getClient();
@@ -206,6 +227,8 @@
           return;
         }
 
+        if (backBtn) backBtn.href = OP_PATHS.app.feed;
+
         setupLogout(client);
         await hydrateNav(client);
         await hydrateUserPill(client);
@@ -215,7 +238,7 @@
 
         if (!postId) {
           hint.textContent = "";
-          err.style.display = "block";
+          show(err, true);
           err.textContent = "Missing ?id= in URL";
           return;
         }
@@ -235,7 +258,7 @@
 
         if (!post) {
           hint.textContent = "";
-          err.style.display = "block";
+          show(err, true);
           err.textContent = "Post not found";
           return;
         }
@@ -261,10 +284,10 @@
           : (post.preview || "");
 
         if (bodyText && String(bodyText).trim().length) {
-          captionEl.style.display = "block";
+          show(captionEl, true);
           captionEl.textContent = bodyText;
         } else {
-          captionEl.style.display = "none";
+          show(captionEl, false);
         }
 
         function renderMedia(p) {
@@ -309,7 +332,7 @@
         }
 
         async function toggleLike() {
-          err.style.display = "none";
+          show(err, false);
           const liked = likeBtn.getAttribute("data-liked") === "true";
           likeBtn.disabled = true;
 
@@ -332,7 +355,7 @@
 
             await refreshLikes();
           } catch (e) {
-            err.style.display = "block";
+            show(err, true);
             err.textContent = "Like error: " + (e?.message || String(e));
           } finally {
             likeBtn.disabled = false;
@@ -356,13 +379,17 @@
         hint.textContent = "";
       } catch (e) {
         $("hintBox").textContent = "";
-        $("errBox").style.display = "block";
+        show($("errBox"), true);
         $("errBox").textContent = e?.message || String(e);
       }
     }
 
     window.addEventListener("DOMContentLoaded", async () => {
       await loadLayout();
+
+      if (typeof initNav === "function") {
+        await initNav();
+      }
 
       try {
         const client = getClient();
