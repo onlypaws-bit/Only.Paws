@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Fan Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body>
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <h1>Fan Dashboard</h1>
+      <p class="sub">Manage your subscriptions, follows, and access.</p>
+      <div class="msg" id="topMsg"></div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="pill">My Subscriptions</div>
+        <p class="sub" style="margin-top:10px;">
+          Cancel anytime. Access remains active until the end of the billing period.
+        </p>
+        <div class="list" id="subsList"></div>
+        <div class="msg" id="subsMsg"></div>
+      </div>
+
+      <div class="panel">
+        <div class="pill">Following</div>
+        <p class="sub" style="margin-top:10px;">Creators you follow.</p>
+        <div class="list" id="followsList"></div>
+        <div class="msg" id="followsMsg"></div>
+      </div>
+
+      <div class="panel" style="grid-column:1/-1;">
+        <div class="pill">My Access</div>
+        <p class="sub" style="margin-top:10px;">Shortcuts to what you can view.</p>
+        <div class="btnRow">
+          <button class="ghost disabled" type="button" disabled aria-disabled="true" title="Coming soon: Purchased posts">
+            View purchased posts <span class="pill pillSoon">Soon</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js"></script>
+  <script src="../js/partials.js"></script>
+
+  <script>
+    const topMsg = document.getElementById("topMsg");
+    const subsList = document.getElementById("subsList");
+    const subsMsg = document.getElementById("subsMsg");
+    const followsList = document.getElementById("followsList");
+    const followsMsg = document.getElementById("followsMsg");
+
+    let CURRENT_USER_ID = null;
+
+    function esc(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function emptyItem(title, meta) {
+      return `
+        <div class="item">
+          <div class="left">
+            <div class="avatar">🐾</div>
+            <div style="min-width:0;">
+              <div class="title">${esc(title)}</div>
+              <div class="meta">${esc(meta || "")}</div>
+            </div>
+          </div>
+          <span class="badge">—</span>
+        </div>
+      `;
+    }
+
+    function goIndex() {
+      window.location.href = "index.html";
+    }
+
+    function show(el, yes) {
+      if (!el) return;
+      el.style.display = yes ? "inline-flex" : "none";
+    }
+
+    async function requireSession() {
+      const { data } = await onlypawsClient.auth.getSession();
+      if (!data?.session) {
+        window.location.href = "fans.html?next=fan-dash.html";
+        return null;
+      }
+      return data.session;
+    }
+
+    async function hydrateUserPill() {
+      try {
+        const userPill = document.getElementById("userPill");
+        if (!userPill) return;
+
+        const { data: sessData } = await onlypawsClient.auth.getSession();
+        const session = sessData?.session;
+
+        if (!session) {
+          userPill.textContent = "Guest";
+          return;
+        }
+
+        const uid = session.user.id;
+        const email = session.user.email || "";
+
+        const { data: prof } = await onlypawsClient
+          .from("profiles")
+          .select("username, display_name")
+          .eq("user_id", uid)
+          .maybeSingle();
+
+        const uname = (prof?.username || "").trim();
+        const dname = (prof?.display_name || "").trim();
+
+        if (uname) userPill.textContent = "@" + uname;
+        else if (dname) userPill.textContent = dname;
+        else if (email) userPill.textContent = email.split("@")[0];
+        else userPill.textContent = "User";
+      } catch (e) {}
+    }
+
+    async function hydrateNav() {
+      const profileBtn = document.getElementById("navProfile");
+      const fanDash = document.getElementById("navFanDash");
+      const creatorDash = document.getElementById("navCreatorDash");
+      const logoutBtn = document.getElementById("navLogout");
+
+      show(profileBtn, true);
+      show(logoutBtn, true);
+      show(fanDash, false);
+      show(creatorDash, false);
+
+      try {
+        const { data: u } = await onlypawsClient.auth.getUser();
+        const userId = u?.user?.id;
+        if (!userId) return;
+
+        const { data: p } = await onlypawsClient
+          .from("profiles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (p?.role === "creator") {
+          show(creatorDash, true);
+        }
+      } catch (e) {}
+    }
+
+    function setupLogout() {
+      const logoutBtn = document.getElementById("navLogout");
+      if (!logoutBtn) return;
+      if (logoutBtn.dataset.bound === "1") return;
+
+      logoutBtn.dataset.bound = "1";
+      logoutBtn.addEventListener("click", async () => {
+        try {
+          await onlypawsClient.auth.signOut();
+        } catch (e) {}
+        goIndex();
+      });
+    }
+
+    function creatorLink(username) {
+      const u = (username || "").replace(/^@/, "").trim();
+      return `creator-profile.html?u=${encodeURIComponent(u)}`;
+    }
+
+    async function unfollowCreator(followId, creatorLabel) {
+      if (!followId) return;
+      const label = creatorLabel || "this creator";
+      if (!confirm(`Unfollow ${label}?`)) return;
+
+      followsMsg.textContent = "Unfollowing…";
+      try {
+        const { error } = await onlypawsClient
+          .from("followers")
+          .delete()
+          .eq("id", followId);
+
+        if (error) throw error;
+
+        followsMsg.textContent = "Unfollowed.";
+        if (CURRENT_USER_ID) await loadFollowing(CURRENT_USER_ID);
+        followsMsg.textContent = "";
+      } catch (e) {
+        console.error(e);
+        followsMsg.textContent = "❌ Error unfollowing. Check logs.";
+      }
+    }
+
+    async function loadFollowing(userId) {
+      followsMsg.textContent = "Loading…";
+      followsList.innerHTML = "";
+
+      const { data, error } = await onlypawsClient
+        .from("followers")
+        .select(`
+          id,
+          created_at,
+          creator:creator_id (
+            user_id,
+            username,
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq("fan_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        followsMsg.textContent = "❌ " + error.message;
+        followsList.innerHTML = "";
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        followsMsg.textContent = "";
+        followsList.innerHTML = emptyItem("No follows yet", "Follow a creator and they will appear here.");
+        return;
+      }
+
+      followsMsg.textContent = "";
+      followsList.innerHTML = "";
+
+      for (const row of data) {
+        const c = row.creator;
+        const uname = (c?.username || "").trim();
+        const dname = (c?.display_name || "").trim() || uname || "Creator";
+        const avatar = (c?.avatar_url || "").trim();
+
+        const el = document.createElement("div");
+        el.className = "item";
+        el.innerHTML = `
+          <div class="left">
+            <div class="avatar">${avatar ? `<img src="${esc(avatar)}" alt="avatar">` : "🐾"}</div>
+            <div style="min-width:0;">
+              <div class="title">${esc(dname)}</div>
+              <div class="meta">${uname ? "@" + esc(uname) : ""}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="ghost danger" type="button" data-unfollow-id="${esc(row.id)}" data-unfollow-label="${esc(dname)}">Unfollow</button>
+          </div>
+        `;
+
+        const openUrl = creatorLink(uname);
+        if (uname) {
+          el.classList.add("clickable");
+          el.addEventListener("click", () => {
+            window.location.href = openUrl;
+          });
+        }
+
+        const ubtn = el.querySelector("[data-unfollow-id]");
+        if (ubtn) {
+          ubtn.addEventListener("click", (ev) => {
+            ev.stopPropagation();
+            const followId = ubtn.getAttribute("data-unfollow-id");
+            const label = ubtn.getAttribute("data-unfollow-label") || "";
+            unfollowCreator(followId, label);
+          });
+        }
+
+        followsList.appendChild(el);
+      }
+    }
+
+    async function cancelSubscription(creatorId, creatorLabel) {
+      if (!creatorId) return;
+      const label = creatorLabel ? ` to ${creatorLabel}` : "";
+      if (!confirm(`Cancel subscription${label}? Access remains active until the end of the billing period.`)) return;
+
+      subsMsg.textContent = "Canceling…";
+      try {
+        const { data: s } = await onlypawsClient.auth.getSession();
+        const token = s?.session?.access_token;
+        if (!token) throw new Error("No session");
+
+        const { data, error } = await onlypawsClient.functions.invoke("cancel-fan-subscription", {
+          body: { creator_id: creatorId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (error) throw error;
+        if (data && data.ok === false) throw new Error(data.error || "Cancel failed");
+
+        subsMsg.textContent = "Cancellation requested. Updating…";
+        await loadSubscriptions(s.session.user.id);
+        subsMsg.textContent = "Done. Access remains until period end.";
+      } catch (e) {
+        console.error(e);
+        subsMsg.textContent = "❌ " + (e?.message || "Error canceling subscription. Check logs.");
+      }
+    }
+
+    async function resumeSubscription(creatorId, creatorLabel) {
+      if (!creatorId) return;
+      const label = creatorLabel ? ` to ${creatorLabel}` : "";
+      if (!confirm(`Resume subscription${label}?`)) return;
+
+      subsMsg.textContent = "Resuming…";
+      try {
+        const { data: s } = await onlypawsClient.auth.getSession();
+        const token = s?.session?.access_token;
+        if (!token) throw new Error("No session");
+
+        const { data, error } = await onlypawsClient.functions.invoke("resume-fan-subscription", {
+          body: { creator_id: creatorId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (error) throw error;
+        if (data && data.ok === false) throw new Error(data.error || "Resume failed");
+
+        subsMsg.textContent = "Subscription resumed. Updating…";
+        await loadSubscriptions(s.session.user.id);
+        subsMsg.textContent = "";
+      } catch (e) {
+        console.error(e);
+        subsMsg.textContent = "❌ " + (e?.message || "Error resuming subscription. Check logs.");
+      }
+    }
+
+    async function loadSubscriptions(userId) {
+      subsMsg.textContent = "Loading…";
+      subsList.innerHTML = "";
+
+      const { data: rows, error } = await onlypawsClient
+        .from("fan_subscriptions")
+        .select("creator_id,status,created_at,current_period_end,cancel_at_period_end,provider_subscription_id,plan_id")
+        .eq("fan_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        subsMsg.textContent = "❌ " + error.message;
+        subsList.innerHTML = "";
+        return;
+      }
+
+      if (!rows || rows.length === 0) {
+        subsMsg.textContent = "";
+        subsList.innerHTML = emptyItem("No subscriptions yet", "When you subscribe to a creator, it will appear here.");
+        return;
+      }
+
+      const creatorIds = Array.from(new Set(rows.map(r => r.creator_id).filter(Boolean)));
+      const { data: profs, error: pErr } = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, avatar_url")
+        .in("user_id", creatorIds);
+
+      const pMap = new Map();
+      if (!pErr && Array.isArray(profs)) {
+        for (const p of profs) pMap.set(p.user_id, p);
+      }
+
+      subsMsg.textContent = "";
+      subsList.innerHTML = "";
+
+      const now = Date.now();
+
+      for (const row of rows) {
+        const c = pMap.get(row.creator_id) || {};
+        const uname = (c?.username || "").trim();
+        const dname = (c?.display_name || "").trim() || (uname ? ("@" + uname) : "") || "Creator";
+        const avatar = (c?.avatar_url || "").trim();
+
+        const status = (row.status || "active").toString().toLowerCase();
+
+        const periodEndMs = row.current_period_end
+          ? new Date(row.current_period_end).getTime()
+          : 0;
+
+        const hasAccess = !!periodEndMs && periodEndMs > now;
+        const isCanceling = hasAccess && row.cancel_at_period_end === true;
+
+        let badgeText = "Active";
+        if (status === "past_due") badgeText = "Past due";
+        else if (isCanceling) badgeText = "Canceling";
+        else if (!hasAccess) badgeText = "Expired";
+
+        const until = row.current_period_end ? new Date(row.current_period_end).toLocaleDateString() : null;
+
+        const metaLine = [
+          uname ? ("@" + uname) : "",
+          until ? ((isCanceling ? "until " : "renews ") + until) : ""
+        ].filter(Boolean).join(" • ");
+
+        const canCancel = hasAccess && !isCanceling;
+        const canResume = hasAccess && isCanceling;
+
+        let actionHtml = "";
+        if (canCancel) {
+          actionHtml = `<button class="ghost danger" type="button"
+            data-cancel-creator="${esc(row.creator_id)}"
+            data-cancel-label="${esc(dname)}">Cancel</button>`;
+        } else if (canResume) {
+          actionHtml = `<button class="btn" type="button"
+            data-resume-creator="${esc(row.creator_id)}"
+            data-resume-label="${esc(dname)}">Resume subscription</button>`;
+        }
+
+        const canOpen = !!uname;
+        const uParam = encodeURIComponent(uname || "");
+
+        const el = document.createElement("div");
+        el.className = "item";
+        el.innerHTML = `
+          <div class="left">
+            <div class="avatar">${avatar ? `<img src="${esc(avatar)}" alt="avatar">` : "🐾"}</div>
+            <div style="min-width:0;">
+              <div class="title">${esc(dname)}</div>
+              <div class="meta">${esc(metaLine)}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+            <span class="badge">${esc(badgeText)}</span>
+            ${actionHtml}
+          </div>
+        `;
+
+        const openUrl = canOpen ? `creator-profile.html?u=${uParam}` : null;
+        if (openUrl) {
+          el.classList.add("clickable");
+          el.addEventListener("click", () => {
+            window.location.href = openUrl;
+          });
+        }
+
+        subsList.appendChild(el);
+      }
+    }
+
+    function bindSubsDelegation() {
+      if (!subsList) return;
+      if (subsList.dataset.bound === "1") return;
+      subsList.dataset.bound = "1";
+
+      subsList.addEventListener("click", (ev) => {
+        const t = ev.target;
+
+        const rbtn = t.closest("[data-resume-creator]");
+        if (rbtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const creatorId = rbtn.getAttribute("data-resume-creator");
+          const label = rbtn.getAttribute("data-resume-label") || "";
+          resumeSubscription(creatorId, label);
+          return;
+        }
+
+        const cbtn = t.closest("[data-cancel-creator]");
+        if (cbtn) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          const creatorId = cbtn.getAttribute("data-cancel-creator");
+          const label = cbtn.getAttribute("data-cancel-label") || "";
+          cancelSubscription(creatorId, label);
+        }
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadLayout();
+      bindSubsDelegation();
+      setupLogout();
+
+      if (typeof onlypawsClient === "undefined") {
+        topMsg.textContent = "❌ onlypawsClient not found. Check supabase.js.";
+        return;
+      }
+
+      const session = await requireSession();
+      if (!session) return;
+
+      CURRENT_USER_ID = session.user.id;
+
+      await hydrateNav();
+      await hydrateUserPill();
+
+      await Promise.all([
+        loadFollowing(session.user.id),
+        loadSubscriptions(session.user.id),
+      ]);
+    });
+  </script>
+</body>
+</html>

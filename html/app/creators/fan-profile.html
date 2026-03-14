@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Fan Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="../../css/styles.css" />
+</head>
+
+<body>
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="pill">Fan</div>
+        <h1 id="fanName">Fan</h1>
+
+        <div class="heroRow">
+          <div class="avatar" id="fanAvatar">🐾</div>
+          <div class="meta">
+            <b id="fanHandle">@username</b>
+            <span id="fanBio"></span>
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:10px;opacity:.9;">Public fan profile</div>
+
+        <div class="miniGrid" style="margin-top:14px;">
+          <div class="miniCard">
+            <div class="miniK">Following</div>
+            <div class="miniV" id="statFollowing">—</div>
+          </div>
+          <div class="miniCard">
+            <div class="miniK">Subscriptions</div>
+            <div class="miniV" id="statSubscriptions">—</div>
+          </div>
+          <div class="miniCard">
+            <div class="miniK">Likes</div>
+            <div class="miniV">—</div>
+            <div class="hint" style="margin-top:6px;opacity:.85;">Coming soon</div>
+          </div>
+          <div class="miniCard">
+            <div class="miniK">Collections</div>
+            <div class="miniV">—</div>
+            <div class="hint" style="margin-top:6px;opacity:.85;">Coming soon</div>
+          </div>
+        </div>
+
+        <div class="hint" id="fanHint"></div>
+      </div>
+
+      <div class="panel">
+        <div class="pill">Following</div>
+        <div class="hint" style="margin-top:0;">Creators followed</div>
+        <div class="list" id="followingList"></div>
+        <div class="hint" id="followingHint">Loading…</div>
+      </div>
+    </div>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/supabase.js"></script>
+  <script src="../../js/partials.js"></script>
+
+  <script>
+    function goIndex() {
+      window.location.replace("../marketing/index.html");
+    }
+
+    function show(el, yes) {
+      if (!el) return;
+      el.style.display = yes ? "inline-flex" : "none";
+    }
+
+    function esc(s) {
+      return (s ?? "").toString()
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getParams() {
+      const p = new URLSearchParams(window.location.search);
+      return { u: (p.get("u") || "").trim() };
+    }
+
+    function isUUID(v) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v || "");
+    }
+
+    async function hydrateUserPill() {
+      try {
+        const pill = document.getElementById("userPill");
+        if (!pill) return;
+
+        const { data: sessData } = await onlypawsClient.auth.getSession();
+        const session = sessData?.session;
+        if (!session) {
+          pill.textContent = "Guest";
+          return;
+        }
+
+        const uid = session.user.id;
+        const email = session.user.email || "";
+
+        const { data: prof } = await onlypawsClient
+          .from("profiles")
+          .select("username, display_name, role")
+          .eq("user_id", uid)
+          .maybeSingle();
+
+        const uname = (prof?.username || "").trim();
+        const dname = (prof?.display_name || "").trim();
+
+        if (uname) pill.textContent = "@" + uname;
+        else if (dname) pill.textContent = dname;
+        else if (email) pill.textContent = email.split("@")[0];
+        else pill.textContent = "User";
+      } catch (e) {}
+    }
+
+    async function hydrateNav() {
+      const profileBtn = document.getElementById("navProfile");
+      const fanDash = document.getElementById("navFanDash");
+      const creatorDash = document.getElementById("navCreatorDash");
+      const logoutBtn = document.getElementById("navLogout");
+
+      if (profileBtn) profileBtn.href = "../app/profile.html";
+      if (fanDash) fanDash.href = "fan-dash.html";
+      if (creatorDash) creatorDash.href = "../creators/creator-dash.html";
+
+      show(profileBtn, true);
+      show(logoutBtn, true);
+      show(fanDash, false);
+      show(creatorDash, false);
+
+      try {
+        const { data: u } = await onlypawsClient.auth.getUser();
+        const userId = u?.user?.id;
+        if (!userId) return;
+
+        const { data: p } = await onlypawsClient
+          .from("profiles")
+          .select("role")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        if (p?.role === "creator") show(creatorDash, true);
+        else show(fanDash, true);
+      } catch (e) {}
+    }
+
+    function setupLogout() {
+      const logoutBtn = document.getElementById("navLogout");
+      if (!logoutBtn) return;
+      if (logoutBtn.dataset.bound === "1") return;
+
+      logoutBtn.dataset.bound = "1";
+      logoutBtn.addEventListener("click", async (ev) => {
+        ev.preventDefault();
+        logoutBtn.disabled = true;
+        logoutBtn.textContent = "Logging out…";
+        try {
+          await onlypawsClient.auth.signOut();
+        } catch (e) {}
+        goIndex();
+      });
+    }
+
+    function setFanUI(p) {
+      const name = (p.display_name || p.username || "Fan").trim();
+      const uname = (p.username || "username").trim();
+      const bio = (p.bio || "").trim();
+      const url = (p.avatar_url || "").trim();
+
+      document.getElementById("fanName").textContent = name;
+      document.getElementById("fanHandle").textContent = "@" + uname;
+      document.getElementById("fanBio").textContent = bio;
+
+      const av = document.getElementById("fanAvatar");
+      if (url) {
+        av.innerHTML = `<img src="${esc(url)}" alt="Fan avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
+      } else {
+        av.textContent = "🐾";
+      }
+    }
+
+    async function loadFanByParam(u) {
+      const sel = "user_id, username, display_name, bio, avatar_url, role";
+      const q = onlypawsClient.from("profiles").select(sel);
+
+      const { data, error } = isUUID(u)
+        ? await q.eq("user_id", u).maybeSingle()
+        : await q.eq("username", u).maybeSingle();
+
+      if (error) throw error;
+      if (!data) throw new Error("Fan not found");
+      return data;
+    }
+
+    async function countFollowing(fanUserId) {
+      const { count, error } = await onlypawsClient
+        .from("followers")
+        .select("id", { count: "exact", head: true })
+        .eq("fan_id", fanUserId);
+
+      if (error) throw error;
+      return count ?? 0;
+    }
+
+    async function countSubscriptions(fanUserId) {
+      const { data, error } = await onlypawsClient
+        .from("fan_subscriptions")
+        .select("status, current_period_end, cancel_at_period_end")
+        .eq("fan_id", fanUserId);
+
+      if (error) throw error;
+
+      const now = Date.now();
+      const activeCount = (data || []).filter(row => {
+        const status = String(row.status || "").toLowerCase();
+        const cpeMs = row.current_period_end ? new Date(row.current_period_end).getTime() : 0;
+        return ["active", "trialing", "past_due"].includes(status) || (cpeMs && cpeMs > now);
+      }).length;
+
+      return activeCount;
+    }
+
+    async function loadFollowingCreators(fanUserId) {
+      const { data: rows, error } = await onlypawsClient
+        .from("followers")
+        .select("creator_id")
+        .eq("fan_id", fanUserId)
+        .limit(50);
+
+      if (error) throw error;
+
+      const ids = (rows || []).map(r => r.creator_id).filter(Boolean);
+      if (ids.length === 0) return [];
+
+      const { data: creators, error: e2 } = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, avatar_url, role")
+        .in("user_id", ids)
+        .eq("role", "creator");
+
+      if (e2) throw e2;
+
+      const byId = new Map((creators || []).map(c => [c.user_id, c]));
+      return ids.map(id => byId.get(id)).filter(Boolean);
+    }
+
+    function renderFollowingList(creators) {
+      const list = document.getElementById("followingList");
+      const hint = document.getElementById("followingHint");
+
+      if (!list || !hint) return;
+
+      if (!creators || creators.length === 0) {
+        list.innerHTML = "";
+        hint.textContent = "No creators yet.";
+        return;
+      }
+
+      hint.textContent = "";
+
+      list.innerHTML = creators.map(c => {
+        const name = (c.display_name || c.username || "Creator").trim();
+        const uname = (c.username || "").trim();
+        const url = (c.avatar_url || "").trim();
+
+        const avatar = url
+          ? `<img src="${esc(url)}" alt="Creator avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+          : "🐾";
+
+        const href = `../creators/creator-profile.html?u=${encodeURIComponent(uname || c.user_id)}`;
+
+        return `
+          <a class="listItem" href="${esc(href)}">
+            <div class="listAvatar">${avatar}</div>
+            <div class="listMeta">
+              <b>${esc(name)}</b>
+              <span>${esc(uname ? "@" + uname : c.user_id)}</span>
+            </div>
+          </a>
+        `;
+      }).join("");
+    }
+
+    function setHint(msg) {
+      const el = document.getElementById("fanHint");
+      if (el) el.textContent = msg || "";
+    }
+
+    async function boot() {
+      await hydrateNav();
+      await hydrateUserPill();
+      setupLogout();
+
+      const { u } = getParams();
+      if (!u) {
+        setHint("Missing ?u=username (or UUID)");
+        const fh = document.getElementById("followingHint");
+        if (fh) fh.textContent = "";
+        return;
+      }
+
+      try {
+        const fan = await loadFanByParam(u);
+        setFanUI(fan);
+
+        if ((fan.role || "").toLowerCase() === "creator") {
+          setHint("This user is a creator (you might be looking for creator-profile.html).");
+        } else {
+          setHint("");
+        }
+
+        const [followingCount, subCount, creators] = await Promise.all([
+          countFollowing(fan.user_id),
+          countSubscriptions(fan.user_id),
+          loadFollowingCreators(fan.user_id),
+        ]);
+
+        document.getElementById("statFollowing").textContent = String(followingCount);
+        document.getElementById("statSubscriptions").textContent = String(subCount);
+
+        renderFollowingList(creators);
+      } catch (e) {
+        setHint("❌ " + (e?.message || String(e)));
+        const fh = document.getElementById("followingHint");
+        if (fh) fh.textContent = "";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadLayout();
+      await boot();
+    });
+  </script>
+</body>
+</html>

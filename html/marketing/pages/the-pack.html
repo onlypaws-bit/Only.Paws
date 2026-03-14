@@ -1,0 +1,353 @@
+<!--
+  OnlyPaws
+  File: html/marketing/the-pack.html
+
+  CSS:
+  /css/styles.css
+  /css/pages/marketing-shared.css
+  /css/pages/marketing-the-pack.css
+
+  JS:
+  /js/supabase.js
+  /js/nav.js
+  /js/partials.js
+  /js/paths.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Pack — OnlyPaws</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+
+  <link rel="stylesheet" href="/css/pages/marketing-shared.css" />
+  <link rel="stylesheet" href="/css/pages/marketing-the-pack.css" />
+</head>
+
+<body>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <div class="hero">
+        <div class="panel">
+          <div class="pill">meet the creators of onlypaws 🐾</div>
+
+          <h1>The Pack</h1>
+
+          <p class="sub packIntro">
+            Explore some of the pets on OnlyPaws before signing up.
+            Discover adorable creators, open their profiles, and get a feel for the platform.
+          </p>
+
+          <div class="btnRow">
+            <a class="btn" id="joinAsFanLink" href="/html/marketing/fans.html">Support The Pack</a>
+          </div>
+
+          <div class="marketingList">
+            <div class="marketingListItem">
+              The Pack is a public preview of OnlyPaws. Browse featured pets first, then sign up if you
+              want to follow creators, support them, or build a page for your own pet.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="marketingGrid">
+            <div class="marketingListItem">
+              <h3>What you can do here</h3>
+              <p>
+                Browse featured pets, discover their vibes, and see what OnlyPaws is all about
+                without hitting a login wall first.
+              </p>
+            </div>
+
+            <div class="marketingListItem">
+              <h3>What happens after signup</h3>
+              <p>
+                Fans can follow creators and support their favorite animals.
+                Creators can build a page for their pet, share posts, and grow their own community.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="panel">
+          <h2 class="sectionTitle">Featured pets</h2>
+          <p class="sectionSub">
+            A few of the faces currently hanging around OnlyPaws.
+          </p>
+
+          <div id="packStatus" class="packLoading">Loading The Pack...</div>
+          <div id="packGrid" class="packGrid" hidden></div>
+        </div>
+      </div>
+
+      <div class="ctaPanel panel centerText">
+        <h2>Want your pet in The Pack?</h2>
+        <p>
+          Create a page for your pet, share their photos and updates, and let people discover them on OnlyPaws.
+        </p>
+
+        <div class="btnRow statusActions">
+          <a class="btn" id="createPetPageBottomLink" href="/html/marketing/creators.html">Join The Pack</a>
+        </div>
+      </div>
+
+      <div class="footerWrap" id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/paths.js"></script>
+
+  <script>
+    function hideCurrentMarketingLink() {
+      const path = window.location.pathname.toLowerCase();
+      let current = "the-pack";
+
+      if (path.includes("creators")) current = "creators";
+      else if (path.includes("fans")) current = "fans";
+      else if (path === "/" || path.endsWith("/index.html")) current = "index";
+      else if (path.includes("the-pack")) current = "the-pack";
+
+      document.querySelectorAll("[data-page]").forEach(link => {
+        if (link.dataset.page === current) {
+          link.remove();
+        }
+      });
+    }
+
+    function applyThePackPaths() {
+      const joinAsFanLink = document.getElementById("joinAsFanLink");
+      const createPetPageTopLink = document.getElementById("createPetPageTopLink");
+      const createPetPageBottomLink = document.getElementById("createPetPageBottomLink");
+      const joinAsFanBottomLink = document.getElementById("joinAsFanBottomLink");
+
+      if (joinAsFanLink) joinAsFanLink.href = OP_PATHS.marketing.fans;
+      if (createPetPageTopLink) createPetPageTopLink.href = OP_PATHS.marketing.creators;
+      if (createPetPageBottomLink) createPetPageBottomLink.href = OP_PATHS.marketing.creators;
+      if (joinAsFanBottomLink) joinAsFanBottomLink.href = OP_PATHS.marketing.fans;
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function speciesEmoji(species = "") {
+      const s = String(species).toLowerCase().trim();
+      if (s.includes("dog")) return "🐶";
+      if (s.includes("cat")) return "🐱";
+      if (s.includes("parrot") || s.includes("bird")) return "🦜";
+      if (s.includes("rabbit") || s.includes("bunny")) return "🐰";
+      if (s.includes("gecko") || s.includes("lizard")) return "🦎";
+      if (s.includes("hamster")) return "🐹";
+      if (s.includes("snake")) return "🐍";
+      if (s.includes("turtle")) return "🐢";
+      if (s.includes("fish")) return "🐠";
+      return "🐾";
+    }
+
+    function truncateText(text = "", max = 120) {
+      const clean = String(text).trim();
+      if (!clean) return "";
+      if (clean.length <= max) return clean;
+      return `${clean.slice(0, max).trim()}…`;
+    }
+
+    function fallbackCreators() {
+      return [
+        {
+          name: "Lola",
+          tag: "dog",
+          meta: "good girl • @lola",
+          bio: "professional tail wagger. part-time cuddle machine. full-time icon.",
+          avatar: null,
+          slug: "lola"
+        },
+        {
+          name: "Pablito",
+          tag: "dog",
+          meta: "tiny menace • @pablito",
+          bio: "emotionally powered by treats, attention, and suspiciously loud zoomies.",
+          avatar: null,
+          slug: "pablito"
+        },
+        {
+          name: "Your pet here",
+          tag: "pet",
+          meta: "future icon",
+          bio: "create a page for your pet and become part of the pack.",
+          avatar: null,
+          slug: null
+        }
+      ];
+    }
+
+    function cardHref(creator) {
+      if (creator.slug) {
+        return `${OP_PATHS.marketing.fans}?creator=${encodeURIComponent(creator.slug)}`;
+      }
+      return OP_PATHS.marketing.fans;
+    }
+
+    function createPetCard(creator) {
+      const thumbMarkup = creator.avatar
+        ? `<img src="${escapeHtml(creator.avatar)}" alt="${escapeHtml(creator.name)}" loading="lazy" />`
+        : `<span aria-hidden="true">${speciesEmoji(creator.tag)}</span>`;
+
+      return `
+        <a class="packCard" href="${cardHref(creator)}">
+          <div class="packCardMedia">
+            ${thumbMarkup}
+          </div>
+
+          <div class="packCardTop">
+            <h3 class="packCardTitle">${escapeHtml(creator.name)}</h3>
+            <span class="packCardBadge">${escapeHtml(creator.tag)}</span>
+          </div>
+
+          <div class="packCardMeta">${escapeHtml(creator.meta)}</div>
+          <p class="packCardBio">${escapeHtml(creator.bio)}</p>
+
+          <div class="packCardMeta">view profile after signup →</div>
+        </a>
+      `;
+    }
+
+    async function fetchProfiles() {
+      let result = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, bio, avatar_url, role, pet, created_at")
+        .eq("role", "creator")
+        .order("created_at", { ascending: false })
+        .limit(12);
+
+      if (result.error) throw result.error;
+
+      if (result.data && result.data.length) {
+        return result.data;
+      }
+
+      result = await onlypawsClient
+        .from("profiles")
+        .select("user_id, username, display_name, bio, avatar_url, role, pet, created_at")
+        .not("pet", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(12);
+
+      if (result.error) throw result.error;
+      return result.data || [];
+    }
+
+    async function fetchPetsByIds(petIds) {
+      if (!petIds.length) return [];
+
+      const { data, error } = await onlypawsClient
+        .from("pets")
+        .select("id, owner_id, name, species, breed, bio, avatar_url, created_at")
+        .in("id", petIds);
+
+      if (error) throw error;
+      return data || [];
+    }
+
+    function mergeProfilesAndPets(profiles, pets) {
+      const petsMap = new Map(pets.map(p => [p.id, p]));
+
+      return profiles
+        .map(profile => {
+          const pet = petsMap.get(profile.pet);
+          if (!pet) return null;
+
+          const cardName =
+            pet.name?.trim() ||
+            profile.display_name?.trim() ||
+            profile.username?.trim() ||
+            "unnamed pet";
+
+          const tag = pet.species?.trim() || "pet";
+
+          const metaParts = [];
+          if (pet.breed?.trim()) metaParts.push(pet.breed.trim());
+          if (profile.username?.trim()) metaParts.push(`@${profile.username.trim()}`);
+          else if (profile.display_name?.trim()) metaParts.push(profile.display_name.trim());
+
+          const bio = truncateText(
+            pet.bio?.trim() ||
+            profile.bio?.trim() ||
+            "one of the adorable creators hanging around onlypaws."
+          );
+
+          return {
+            name: cardName,
+            tag,
+            meta: metaParts.join(" • ") || "pet creator",
+            bio,
+            avatar: pet.avatar_url || profile.avatar_url || null,
+            slug: profile.username || profile.user_id
+          };
+        })
+        .filter(Boolean);
+    }
+
+    async function loadPack() {
+      const statusEl = document.getElementById("packStatus");
+      const gridEl = document.getElementById("packGrid");
+
+      try {
+        const profiles = await fetchProfiles();
+        const petIds = profiles.map(p => p.pet).filter(Boolean);
+        const pets = await fetchPetsByIds(petIds);
+        const creators = mergeProfilesAndPets(profiles, pets);
+
+        if (!creators.length) {
+          const fallback = fallbackCreators();
+          gridEl.innerHTML = fallback.map(createPetCard).join("");
+          statusEl.hidden = true;
+          gridEl.hidden = false;
+          return;
+        }
+
+        gridEl.innerHTML = creators.map(createPetCard).join("");
+        statusEl.hidden = true;
+        gridEl.hidden = false;
+      } catch (error) {
+        console.error("failed to load the pack:", error);
+
+        const creators = fallbackCreators();
+        gridEl.innerHTML = creators.map(createPetCard).join("");
+        statusEl.className = "packEmpty";
+        statusEl.textContent = "Could not load live creators right now, so here is a preview of The Pack instead.";
+        gridEl.hidden = false;
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      applyThePackPaths();
+
+      await loadMarketingLayout();
+      hideCurrentMarketingLink();
+
+      if (typeof initNav === "function") {
+        await initNav();
+      }
+
+      await loadPack();
+    });
+  </script>
+</body>
+</html>
