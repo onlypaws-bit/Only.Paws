@@ -1,8 +1,14 @@
+/* =========================================================
+   OnlyPaws
+   File: /js/support-us.js
+   Purpose: handle support checkout, cancel, and resume flows
+   ========================================================= */
+
 window.initSupportUsButton = async function initSupportUsButton(options = {}) {
   const {
     buttonId = "supportUsBtn",
     messageId = "supportUsMsg",
-    successPath = "/thank-you.html",
+    successPath = OP_PATHS?.thanks?.supportUs || "/html/thanks/thanks-support-us.html",
     cancelPath = window.location.pathname || "/",
     supportLabel = "Support OnlyPaws 🐾",
     cancelLabel = "Cancel support",
@@ -17,7 +23,9 @@ window.initSupportUsButton = async function initSupportUsButton(options = {}) {
   const activeStatuses = ["trialing", "active", "past_due", "unpaid"];
 
   function setMsg(text) {
-    if (msg) msg.textContent = text || "";
+    if (msg) {
+      msg.textContent = text || "";
+    }
   }
 
   function setButton(label, disabled = false) {
