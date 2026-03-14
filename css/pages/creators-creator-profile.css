@@ -1,0 +1,183 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/creator-profile.css
+   Purpose: styles specific to the creator profile page
+   ========================================================= */
+
+.creatorProfileGrid{
+  display:grid;
+  grid-template-columns:1.25fr .75fr;
+  gap:12px;
+}
+
+.creatorAvatarLarge{
+  width:64px;
+  height:64px;
+  border-radius:20px;
+  font-size:22px;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.14);
+  overflow:hidden;
+}
+
+.creatorAvatarLarge img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.heroRow{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.meta{
+  min-width:0;
+}
+
+.meta b{
+  display:block;
+  font-size:1.05rem;
+}
+
+.meta span{
+  display:block;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  margin-top:2px;
+  white-space:pre-wrap;
+}
+
+.petsList{
+  margin-top:12px;
+  display:grid;
+  gap:10px;
+}
+
+.petCard{
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  display:flex;
+  gap:12px;
+  align-items:center;
+  overflow:hidden;
+}
+
+.petAvatar{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  font-size:18px;
+  overflow:hidden;
+}
+
+.petAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.petCard b{
+  display:block;
+}
+
+.petCard span{
+  display:block;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  margin-top:2px;
+}
+
+.creatorPostsPanel{
+  margin-top:14px;
+}
+
+.postsHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.postsHeader h2{
+  margin:0;
+  font-size:1.15rem;
+}
+
+.postsHeaderHint{
+  margin-top:0;
+}
+
+.creatorPostActions{
+  margin-top:12px;
+}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(10px);
+  color:#fff;
+  padding:10px 14px;
+  border-radius:14px;
+  font-size:13px;
+  font-weight:800;
+  box-shadow:0 20px 45px rgba(0,0,0,.25);
+  display:none;
+  max-width:min(560px,92vw);
+  text-align:center;
+  z-index:999;
+}
+
+.toast.show{
+  display:block;
+}
+
+/* ===== IMPORTANT: post cards/media inside creator profile ===== */
+
+.creatorPostsPanel .op-postCard,
+.creatorPostsPanel .postCard{
+  width:100%;
+  max-width:100%;
+  overflow:hidden;
+}
+
+.creatorPostsPanel .op-mediaWrap,
+.creatorPostsPanel .mediaWrap{
+  width:100%;
+  max-width:100%;
+  overflow:hidden;
+  border-radius:14px;
+}
+
+.creatorPostsPanel .op-mediaWrap img,
+.creatorPostsPanel .op-mediaWrap video,
+.creatorPostsPanel .mediaWrap img,
+.creatorPostsPanel .mediaWrap video{
+  width:100%;
+  max-width:100%;
+  display:block;
+}
+
+@media (max-width:920px){
+  .creatorProfileGrid{
+    grid-template-columns:1fr;
+  }
+}
