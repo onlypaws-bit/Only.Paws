@@ -1,51 +1,62 @@
 /* =========================================================
    OnlyPaws
-   File: js/paths.js
+   File: /js/paths.js
    Purpose: central absolute path map for pages, assets, and components
    ========================================================= */
 
 window.OP_PATHS = {
   app: {
-    authCallback: "/html/app/auth-callback.html",
-    feed: "/html/app/feed.html",
-    post: "/html/app/post.html",
-    profile: "/html/app/profile.html"
-  },
+    shared: {
+      authCallback: "/html/app/shared/auth-callback.html",
+      feed: "/html/app/shared/feed.html",
+      post: "/html/app/shared/post.html",
+      profile: "/html/app/shared/profile.html"
+    },
 
-  creators: {
-    createPost: "/html/creators/create-post.html",
-    creatorDash: "/html/creators/creator-dash.html",
-    creatorProfile: "/html/creators/creator-profile.html",
-    payoutsSetup: "/html/creators/payouts-setup.html",
-    pets: "/html/creators/pets.html"
-  },
+    creators: {
+      createPost: "/html/app/creators/create-post.html",
+      creatorDash: "/html/app/creators/creator-dash.html",
+      fanProfile: "/html/app/creators/fan-profile.html",
+      payoutsSetup: "/html/app/creators/payouts-setup.html",
+      pets: "/html/app/creators/pets.html"
+    },
 
-  fans: {
-    fanDash: "/html/fans/fan-dash.html",
-    fanProfile: "/html/fans/fan-profile.html",
-    purchasedPosts: "/html/fans/purchased-posts.html",
-    subscriptions: "/html/fans/subscriptions.html"
+    fans: {
+      fanDash: "/html/app/fans/fan-dash.html",
+      creatorProfile: "/html/app/fans/creator-profile.html",
+      purchasedPosts: "/html/app/fans/purchased-posts.html",
+      subscriptions: "/html/app/fans/subscriptions.html"
+    }
   },
 
   faq: {
-    creators: "/html/faq/faq-creators.html",
-    fans: "/html/faq/faq-fans.html"
+    creators: "/html/marketing/faq/faq-creators.html",
+    fans: "/html/marketing/faq/faq-fans.html"
   },
 
   legal: {
-    contentPolicy: "/html/legal/content-policy.html",
-    privacyPolicy: "/html/legal/privacy-policy.html",
-    stripe: "/html/legal/stripe.html",
-    terms: "/html/legal/terms.html"
+    contentPolicy: "/html/marketing/legal/content-policy.html",
+    privacyPolicy: "/html/marketing/legal/privacy-policy.html",
+    stripe: "/html/marketing/legal/stripe.html",
+    terms: "/html/marketing/legal/terms.html"
   },
 
   marketing: {
     index: "/index.html",
-    creators: "/html/marketing/creators.html",
-    fans: "/html/marketing/fans.html",
-    thePack: "/html/marketing/the-pack.html",
-    emailConfirmed: "/html/marketing/email-confirmed.html",
-    resetPassword: "/html/marketing/reset-password.html"
+    home: "/html/marketing/pages/index.html",
+    creators: "/html/marketing/pages/creators.html",
+    fans: "/html/marketing/pages/fans.html",
+    thePack: "/html/marketing/pages/the-pack.html",
+    emailConfirmed: "/html/marketing/pages/email-confirmed.html",
+    resetPassword: "/html/marketing/pages/reset-password.html",
+
+    faqCreators: "/html/marketing/faq/faq-creators.html",
+    faqFans: "/html/marketing/faq/faq-fans.html",
+
+    terms: "/html/marketing/legal/terms.html",
+    privacyPolicy: "/html/marketing/legal/privacy-policy.html",
+    contentPolicy: "/html/marketing/legal/content-policy.html",
+    stripe: "/html/marketing/legal/stripe.html"
   },
 
   thanks: {
@@ -89,11 +100,20 @@ window.OP_PATHS = {
     appPostCss: "/css/pages/app-post.css",
     creatorDashCss: "/css/pages/creator-dash.css",
 
-    onlypawsClientJs: "/js/onlypawsClient.js",
-    postCardJs: "/js/post-card.js",
-    partialsJs: "/js/partials.js",
-    supportUsJs: "/js/support-us.js",
+    authGuardJs: "/js/auth-guard.js",
+    feedJs: "/js/feed.js",
+    marketingAuthJs: "/js/marketing-auth.js",
+    marketingIndexJs: "/js/marketing-index.js",
+    marketingSharedJs: "/js/marketing-shared.js",
+    marketingThePackJs: "/js/marketing-the-pack.js",
     navJs: "/js/nav.js",
-    pathsJs: "/js/paths.js"
+    onlypawsClientJs: "/js/onlypawsClient.js",
+    onlypawsLikesJs: "/js/onlypawsLikes.js",
+    partialsJs: "/js/partials.js",
+    pathsJs: "/js/paths.js",
+    postCardJs: "/js/post-card.js",
+    resetPasswordJs: "/js/reset-password.js",
+    supportUsJs: "/js/support-us.js",
+    walletJs: "/js/wallet.js"
   }
 };
