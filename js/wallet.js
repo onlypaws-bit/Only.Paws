@@ -1,5 +1,9 @@
-// wallet.js
-// Uses global onlypawsClient
+/* =========================================================
+   OnlyPaws
+   File: /js/wallet.js
+   Purpose: load wallet status and request withdrawals
+   Requires: window.onlypawsClient
+   ========================================================= */
 
 async function loadWalletStatus() {
   const { data, error } = await onlypawsClient
@@ -30,7 +34,6 @@ async function requestWithdrawal(amountEuro) {
   return data;
 }
 
-// expose
 window.OPWallet = {
   loadWalletStatus,
   requestWithdrawal,
