@@ -1,11 +1,10 @@
-// onlypawsClient.js
-// Initializes Supabase client for OnlyPaws
-// Exposes:
-//   window.onlypawsClient
-//   window.onlypawsLikes
+/* =========================================================
+   OnlyPaws
+   File: /js/onlypawsClient.js
+   Purpose: initialize Supabase client and expose like helpers
+   ========================================================= */
 
 (() => {
-
   const ONLYPAWS_SUPABASE_URL = "https://sdhpbwkhdovyunvtdtbq.supabase.co";
 
   const ONLYPAWS_SUPABASE_ANON_KEY =
@@ -30,7 +29,6 @@
     }
   );
 
-  // expose client globally
   window.onlypawsClient = onlypawsClient;
 
   /* =====================================================
@@ -86,7 +84,6 @@
     };
   }
 
-  // expose like helpers
   window.onlypawsLikes = {
     getPostLikeCount,
     getPostLikedByMe,
@@ -95,5 +92,4 @@
 
   console.log("✅ onlypawsClient ready");
   console.log("✅ onlypawsLikes ready");
-
 })();
