@@ -74,6 +74,7 @@ window.OP_PATHS = {
 
   static: {
     css: "/css/styles.css",
+
     marketingSharedCss: "/css/pages/marketing-shared.css",
     marketingIndexCss: "/css/pages/marketing-index.css",
     marketingAuthCss: "/css/pages/marketing-auth.css",
@@ -82,10 +83,13 @@ window.OP_PATHS = {
     marketingThePackCss: "/css/pages/marketing-the-pack.css",
     marketingStatusCss: "/css/pages/marketing-status.css",
     marketingResetPasswordCss: "/css/pages/marketing-reset-password.css",
-    appFeedCss: "/css/pages/app-feed.css",
 
-    supabaseJs: "/js/supabase.js",
-    supabaseLikesJs: "/js/supabase-likes.js",
+    appFeedCss: "/css/pages/app-feed.css",
+    appProfileCss: "/css/pages/app-profile.css",
+    appPostCss: "/css/pages/app-post.css",
+    creatorDashCss: "/css/pages/creator-dash.css",
+
+    onlypawsClientJs: "/js/onlypawsClient.js",
     postCardJs: "/js/post-card.js",
     partialsJs: "/js/partials.js",
     supportUsJs: "/js/support-us.js",
