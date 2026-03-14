@@ -1,0 +1,114 @@
+/* =========================================================
+   OnlyPaws
+   File: css/pages/app-profile.css
+   Purpose: styles specific to the app profile page
+   ========================================================= */
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.field {
+  margin-top: 16px;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  outline: none;
+}
+
+.field input[readonly] {
+  opacity: 0.92;
+}
+
+.field textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.avatarBox {
+  margin-top: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.avatarImg {
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  object-fit: cover;
+  border: 1px solid var(--stroke);
+  background: rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.avatarControls {
+  flex: 1;
+  min-width: 220px;
+}
+
+.uploadHint {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+}
+
+.msg {
+  margin-top: 12px;
+  min-height: 18px;
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.dangerZone {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.dangerBtn {
+  border-color: rgba(255, 160, 160, 0.35);
+  color: #fff;
+}
+
+#usernameHint.ok {
+  color: rgba(180, 255, 200, 0.95);
+}
+
+#usernameHint.bad {
+  color: rgba(255, 210, 210, 0.95);
+}
+
+@media (max-width: 640px) {
+  .avatarBox {
+    flex-direction: column;
+  }
+}
