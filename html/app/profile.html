@@ -1,3 +1,17 @@
+<!--
+  OnlyPaws
+  File: html/app/profile.html
+
+  CSS:
+  /css/styles.css
+  /css/pages/app-profile.css
+
+  JS:
+  /js/supabase.js
+  /js/partials.js
+  /js/paths.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,75 +19,82 @@
   <title>OnlyPaws — Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="../../css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/pages/app-profile.css" />
 </head>
 
 <body>
-  <div class="wrap">
-    <div id="header-placeholder"></div>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
 
-    <div class="panel">
-      <div class="row">
-        <div>
-          <div class="pill" id="emailPill">…</div>
-          <h1>Your profile</h1>
-          <p class="sub">Set your basics + avatar.</p>
-        </div>
-      </div>
-
-      <div class="field">
-        <label>Email</label>
-        <input id="email" readonly />
-      </div>
-
-      <div class="avatarBox">
-        <img id="avatarImg" class="avatarImg" alt="Avatar">
-        <div style="flex:1; min-width:220px;">
-          <input id="avatarFile" type="file" accept="image/*">
-          <div class="btnRow">
-            <button class="ghost" id="uploadAvatarBtn" type="button">Upload</button>
-            <button class="ghost" id="removeAvatarBtn" type="button">Remove</button>
+      <div class="panel">
+        <div class="row">
+          <div>
+            <div class="pill" id="emailPill">…</div>
+            <h1>Your profile</h1>
+            <p class="sub">Set your basics + avatar.</p>
           </div>
-          <div class="uploadHint" id="avatarHint"></div>
         </div>
-      </div>
 
-      <div class="field">
-        <label>Display name</label>
-        <input id="display_name">
-      </div>
+        <div class="field">
+          <label>Email</label>
+          <input id="email" readonly />
+        </div>
 
-      <div class="field">
-        <label>Username</label>
-        <input id="username" autocomplete="off" />
-        <div class="hint" id="usernameHint"></div>
-      </div>
+        <div class="avatarBox">
+          <img id="avatarImg" class="avatarImg" alt="Avatar" />
+          <div class="avatarControls">
+            <input id="avatarFile" type="file" accept="image/*" />
+            <div class="btnRow">
+              <button class="ghost" id="uploadAvatarBtn" type="button">Upload</button>
+              <button class="ghost" id="removeAvatarBtn" type="button">Remove</button>
+            </div>
+            <div class="uploadHint" id="avatarHint"></div>
+          </div>
+        </div>
 
-      <div class="field">
-        <label>Bio</label>
-        <textarea id="bio"></textarea>
-      </div>
+        <div class="field">
+          <label>Display name</label>
+          <input id="display_name" />
+        </div>
 
-      <div class="btnRow">
-        <button class="btn" id="saveBtn" type="button">Save profile</button>
-      </div>
-      <div class="msg" id="msg"></div>
+        <div class="field">
+          <label>Username</label>
+          <input id="username" autocomplete="off" />
+          <div class="hint" id="usernameHint"></div>
+        </div>
 
-      <div class="dangerZone">
-        <b>Danger zone</b>
+        <div class="field">
+          <label>Bio</label>
+          <textarea id="bio"></textarea>
+        </div>
+
         <div class="btnRow">
-          <button class="ghost dangerBtn" id="deleteBtn" type="button">Delete account</button>
+          <button class="btn" id="saveBtn" type="button">Save profile</button>
         </div>
-        <div class="msg" id="deleteMsg"></div>
-      </div>
-    </div>
 
-    <div id="footer-placeholder"></div>
+        <div class="msg" id="msg"></div>
+
+        <div class="dangerZone">
+          <b>Danger zone</b>
+
+          <div class="btnRow">
+            <button class="ghost dangerBtn" id="deleteBtn" type="button">Delete account</button>
+          </div>
+
+          <div class="msg" id="deleteMsg"></div>
+        </div>
+      </div>
+
+      <div class="footerWrap" id="footer-placeholder"></div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../js/supabase.js"></script>
-  <script src="../../js/partials.js"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/partials.js"></script>
 
   <script>
     const AVATAR_BUCKET = "avatars";
@@ -102,12 +123,20 @@
     const USERNAME_RE = /^[a-z0-9._]{3,24}$/;
     const HAS_LETTER_RE = /[a-z]/;
 
-    function setMsg(t) { msg.textContent = t || ""; }
-    function setDeleteMsg(t) { deleteMsg.textContent = t || ""; }
-    function setHint(t) { avatarHint.textContent = t || ""; }
+    function setMsg(text) {
+      msg.textContent = text || "";
+    }
 
-    function normalizeUsername(v) {
-      return String(v || "").trim().toLowerCase();
+    function setDeleteMsg(text) {
+      deleteMsg.textContent = text || "";
+    }
+
+    function setHint(text) {
+      avatarHint.textContent = text || "";
+    }
+
+    function normalizeUsername(value) {
+      return String(value || "").trim().toLowerCase();
     }
 
     function setUsernameHint(ok, text) {
@@ -117,59 +146,67 @@
       usernameHint.classList.toggle("bad", !ok);
     }
 
-    function validateUsername(vRaw) {
-      const v = normalizeUsername(vRaw);
+    function validateUsername(rawValue) {
+      const value = normalizeUsername(rawValue);
 
-      if (!v) {
+      if (!value) {
         return {
           ok: false,
-          v,
-          msg: "Username required.\nAllowed: a–z, 0–9, '.', '_' (3–24 chars). Must include at least one letter."
+          v: value,
+          msg: "Username required. Allowed: a–z, 0–9, '.', '_' (3–24 chars). Must include at least one letter."
         };
       }
-      if (v.length < 3) {
-        return { ok: false, v, msg: "Too short (min 3 characters)." };
+
+      if (value.length < 3) {
+        return { ok: false, v: value, msg: "Too short (min 3 characters)." };
       }
-      if (v.length > 24) {
-        return { ok: false, v, msg: "Too long (max 24 characters)." };
+
+      if (value.length > 24) {
+        return { ok: false, v: value, msg: "Too long (max 24 characters)." };
       }
-      if (!USERNAME_RE.test(v)) {
+
+      if (!USERNAME_RE.test(value)) {
         return {
           ok: false,
-          v,
-          msg: "Invalid characters.\nAllowed: lowercase letters, numbers, '.', '_' only."
+          v: value,
+          msg: "Invalid characters. Allowed: lowercase letters, numbers, '.', '_' only."
         };
       }
-      if (!HAS_LETTER_RE.test(v)) {
-        return { ok: false, v, msg: "Must include at least one letter (a–z)." };
+
+      if (!HAS_LETTER_RE.test(value)) {
+        return { ok: false, v: value, msg: "Must include at least one letter (a–z)." };
       }
-      return { ok: true, v, msg: "Looks good ✅" };
+
+      return { ok: true, v: value, msg: "Looks good ✅" };
     }
 
     function refreshUsernameUI() {
-      const res = validateUsername(usernameEl.value);
+      const result = validateUsername(usernameEl.value);
 
-      if (usernameEl.value !== res.v) {
+      if (usernameEl.value !== result.v) {
         const start = usernameEl.selectionStart;
         const end = usernameEl.selectionEnd;
-        usernameEl.value = res.v;
+        usernameEl.value = result.v;
+
         if (start != null && end != null) {
-          try { usernameEl.setSelectionRange(start, end); } catch (e) {}
+          try {
+            usernameEl.setSelectionRange(start, end);
+          } catch (e) {}
         }
       }
 
-      setUsernameHint(res.ok, res.msg);
-      saveBtn.disabled = !res.ok;
-      return res;
+      setUsernameHint(result.ok, result.msg);
+      saveBtn.disabled = !result.ok;
+      return result;
     }
 
-    function hydrateUserPillFromProfile(prof, email) {
+    function hydrateUserPillFromProfile(profile, email) {
       try {
         const userPill = document.getElementById("userPill");
         if (!userPill) return;
 
-        const uname = (prof?.username || "").trim();
-        const dname = (prof?.display_name || "").trim();
+        const uname = (profile?.username || "").trim();
+        const dname = (profile?.display_name || "").trim();
 
         if (uname) {
           userPill.textContent = "@" + uname;
@@ -184,13 +221,14 @@
     }
 
     function goIndex() {
-      window.location.replace("../marketing/index.html");
+      window.location.replace(OP_PATHS.marketing.index);
     }
 
     async function guardAuthOrRedirect() {
       try {
         const { data: sessData } = await onlypawsClient.auth.getSession();
         const session = sessData?.session;
+
         if (!session) {
           goIndex();
           return null;
@@ -198,15 +236,20 @@
 
         const { data: u, error: uErr } = await onlypawsClient.auth.getUser();
         const user = u?.user;
+
         if (uErr || !user) {
-          try { await onlypawsClient.auth.signOut(); } catch (e) {}
+          try {
+            await onlypawsClient.auth.signOut();
+          } catch (e) {}
           goIndex();
           return null;
         }
 
         return user;
       } catch (e) {
-        try { await onlypawsClient.auth.signOut(); } catch (_) {}
+        try {
+          await onlypawsClient.auth.signOut();
+        } catch (_) {}
         goIndex();
         return null;
       }
@@ -229,7 +272,7 @@
       show(navFanDash, false);
       show(navCreatorDash, false);
 
-      if (navProfile) navProfile.href = "profile.html";
+      if (navProfile) navProfile.href = OP_PATHS.app.profile;
 
       try {
         const { data: u } = await onlypawsClient.auth.getUser();
@@ -247,15 +290,15 @@
         if (dashTopLink) {
           dashTopLink.style.display = "inline-flex";
           dashTopLink.href = role === "creator"
-            ? "../creators/creator-dash.html"
-            : "../fans/fan-dash.html";
+            ? OP_PATHS.creators.creatorDash
+            : OP_PATHS.fans.fanDash;
         }
 
         if (role === "creator") {
-          if (navCreatorDash) navCreatorDash.href = "../creators/creator-dash.html";
+          if (navCreatorDash) navCreatorDash.href = OP_PATHS.creators.creatorDash;
           show(navCreatorDash, true);
         } else {
-          if (navFanDash) navFanDash.href = "../fans/fan-dash.html";
+          if (navFanDash) navFanDash.href = OP_PATHS.fans.fanDash;
           show(navFanDash, true);
         }
       } catch (e) {}
@@ -268,7 +311,9 @@
 
       logoutBtn.dataset.bound = "1";
       logoutBtn.addEventListener("click", async () => {
-        try { await onlypawsClient.auth.signOut(); } catch (e) {}
+        try {
+          await onlypawsClient.auth.signOut();
+        } catch (e) {}
         goIndex();
       });
     }
@@ -334,10 +379,13 @@
 
         if (insErr) {
           if (String(insErr.message || "").toLowerCase().includes("foreign key")) {
-            try { await onlypawsClient.auth.signOut(); } catch (e) {}
+            try {
+              await onlypawsClient.auth.signOut();
+            } catch (e) {}
             goIndex();
             return;
           }
+
           setMsg("❌ Could not create profile: " + insErr.message);
           return;
         }
@@ -352,6 +400,7 @@
           setMsg("❌ Load profile error: " + again.error.message);
           return;
         }
+
         prof = again.data;
       }
 
@@ -361,8 +410,8 @@
       usernameEl.value = prof?.username || "";
       bioEl.value = prof?.bio || "";
 
-      const a = (prof?.avatar_url || "").trim();
-      avatarImg.src = a ? a : "../../assets/logo.png";
+      const avatar = (prof?.avatar_url || "").trim();
+      avatarImg.src = avatar ? avatar : OP_PATHS.assets.logo;
 
       setHint("Upload an image to change your avatar.");
       refreshUsernameUI();
@@ -402,15 +451,17 @@
         await loadProfile();
       } catch (e) {
         const code = e?.code || "";
-        const m = (e?.message || String(e));
+        const m = e?.message || String(e);
+        const mm = String(m).toLowerCase();
 
-        if (String(m).toLowerCase().includes("foreign key")) {
-          try { await onlypawsClient.auth.signOut(); } catch (_) {}
+        if (mm.includes("foreign key")) {
+          try {
+            await onlypawsClient.auth.signOut();
+          } catch (_) {}
           goIndex();
           return;
         }
 
-        const mm = String(m).toLowerCase();
         if (code === "23505" || mm.includes("duplicate key") || mm.includes("profiles_username_unique")) {
           setMsg("❌ Username already taken. Try a different one.");
           return;
@@ -462,12 +513,16 @@
         setMsg("Avatar updated ✅");
         await loadProfile();
       } catch (e) {
-        const m = (e?.message || String(e));
+        const m = e?.message || String(e);
+
         if (String(m).toLowerCase().includes("foreign key")) {
-          try { await onlypawsClient.auth.signOut(); } catch (_) {}
+          try {
+            await onlypawsClient.auth.signOut();
+          } catch (_) {}
           goIndex();
           return;
         }
+
         setHint("Upload failed");
         setMsg("❌ " + m);
       } finally {
@@ -489,17 +544,21 @@
 
         if (error) throw error;
 
-        avatarImg.src = "../../assets/logo.png";
+        avatarImg.src = OP_PATHS.assets.logo;
         setHint("Removed ✅");
         setMsg("Avatar removed ✅");
         await loadProfile();
       } catch (e) {
-        const m = (e?.message || String(e));
+        const m = e?.message || String(e);
+
         if (String(m).toLowerCase().includes("foreign key")) {
-          try { await onlypawsClient.auth.signOut(); } catch (_) {}
+          try {
+            await onlypawsClient.auth.signOut();
+          } catch (_) {}
           goIndex();
           return;
         }
+
         setMsg("❌ " + m);
       }
     });
@@ -521,11 +580,15 @@
         if (!user) return;
 
         const { error } = await onlypawsClient.functions.invoke("delete-profile", {
-          body: { confirm: true },
+          body: { confirm: true }
         });
+
         if (error) throw error;
 
-        try { await onlypawsClient.auth.signOut(); } catch (e) {}
+        try {
+          await onlypawsClient.auth.signOut();
+        } catch (e) {}
+
         goIndex();
       } catch (e) {
         setDeleteMsg("❌ " + (e?.message || String(e)));
