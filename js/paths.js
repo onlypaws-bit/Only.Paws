@@ -1,119 +1,158 @@
 /* =========================================================
    OnlyPaws
-   File: /js/paths.js
-   Purpose: central absolute path map for pages, assets, and components
+   File: /js/auth-guard.js
+   Purpose: central auth, role, and entitlement helpers for OnlyPaws
+   Requires: supabase-js CDN + onlypawsClient.js + paths.js
    ========================================================= */
 
-window.OP_PATHS = {
-  app: {
-    shared: {
-      authCallback: "/html/app/shared/auth-callback.html",
-      feed: "/html/app/shared/feed.html",
-      post: "/html/app/shared/post.html",
-      profile: "/html/app/shared/profile.html"
-    },
-
-    creators: {
-      createPost: "/html/app/creators/create-post.html",
-      creatorDash: "/html/app/creators/creator-dash.html",
-      fanProfile: "/html/app/creators/fan-profile.html",
-      payoutsSetup: "/html/app/creators/payouts-setup.html",
-      pets: "/html/app/creators/pets.html"
-    },
-
-    fans: {
-      fanDash: "/html/app/fans/fan-dash.html",
-      creatorProfile: "/html/app/fans/creator-profile.html",
-      purchasedPosts: "/html/app/fans/purchased-posts.html",
-      subscriptions: "/html/app/fans/subscriptions.html"
+(function () {
+  function getClient() {
+    if (!window.onlypawsClient) {
+      throw new Error("[auth-guard] onlypawsClient not found.");
     }
-  },
-
-  faq: {
-    creators: "/html/marketing/faq/faq-creators.html",
-    fans: "/html/marketing/faq/faq-fans.html"
-  },
-
-  legal: {
-    contentPolicy: "/html/marketing/legal/content-policy.html",
-    privacyPolicy: "/html/marketing/legal/privacy-policy.html",
-    stripe: "/html/marketing/legal/stripe.html",
-    terms: "/html/marketing/legal/terms.html"
-  },
-
-  marketing: {
-    index: "/index.html",
-    home: "/html/marketing/pages/index.html",
-    creators: "/html/marketing/pages/creators.html",
-    fans: "/html/marketing/pages/fans.html",
-    thePack: "/html/marketing/pages/the-pack.html",
-    emailConfirmed: "/html/marketing/pages/email-confirmed.html",
-    resetPassword: "/html/marketing/pages/reset-password.html",
-
-    faqCreators: "/html/marketing/faq/faq-creators.html",
-    faqFans: "/html/marketing/faq/faq-fans.html",
-
-    terms: "/html/marketing/legal/terms.html",
-    privacyPolicy: "/html/marketing/legal/privacy-policy.html",
-    contentPolicy: "/html/marketing/legal/content-policy.html",
-    stripe: "/html/marketing/legal/stripe.html"
-  },
-
-  thanks: {
-    creatorMembership: "/html/thanks/thanks-creator-membership.html",
-    creatorPlan: "/html/thanks/thanks-creator-plan.html",
-    fanMembership: "/html/thanks/thanks-fan-membership.html",
-    supportUs: "/html/thanks/thanks-support-us.html"
-  },
-
-  assets: {
-    logo: "/assets/images/logo.png",
-    creatorsImage: "/assets/images/onlypaws-creators.png",
-    fansImage: "/assets/images/onlypaws-fans.png",
-    indexImage: "/assets/images/onlypaws-index.png",
-    pawCrown: "/assets/images/paw-crown.png",
-    pawDiamond: "/assets/images/paw-diamond.png",
-    pawStars: "/assets/images/paw-stars.png"
-  },
-
-  components: {
-    header: "/components/header.html",
-    footer: "/components/footer.html",
-    headerMarketing: "/components/header-marketing.html",
-    footerMarketing: "/components/footer-marketing.html"
-  },
-
-  static: {
-    css: "/css/styles.css",
-
-    marketingSharedCss: "/css/pages/marketing-shared.css",
-    marketingIndexCss: "/css/pages/marketing-index.css",
-    marketingAuthCss: "/css/pages/marketing-auth.css",
-    marketingFansCss: "/css/pages/marketing-fans.css",
-    marketingCreatorsCss: "/css/pages/marketing-creators.css",
-    marketingThePackCss: "/css/pages/marketing-the-pack.css",
-    marketingStatusCss: "/css/pages/marketing-status.css",
-    marketingResetPasswordCss: "/css/pages/marketing-reset-password.css",
-
-    appFeedCss: "/css/pages/app-feed.css",
-    appProfileCss: "/css/pages/app-profile.css",
-    appPostCss: "/css/pages/app-post.css",
-    creatorDashCss: "/css/pages/creator-dash.css",
-
-    authGuardJs: "/js/auth-guard.js",
-    feedJs: "/js/feed.js",
-    marketingAuthJs: "/js/marketing-auth.js",
-    marketingIndexJs: "/js/marketing-index.js",
-    marketingSharedJs: "/js/marketing-shared.js",
-    marketingThePackJs: "/js/marketing-the-pack.js",
-    navJs: "/js/nav.js",
-    onlypawsClientJs: "/js/onlypawsClient.js",
-    onlypawsLikesJs: "/js/onlypawsLikes.js",
-    partialsJs: "/js/partials.js",
-    pathsJs: "/js/paths.js",
-    postCardJs: "/js/post-card.js",
-    resetPasswordJs: "/js/reset-password.js",
-    supportUsJs: "/js/support-us.js",
-    walletJs: "/js/wallet.js"
+    return window.onlypawsClient;
   }
-};
+
+  function getHomePath() {
+    return OP_PATHS?.marketing?.home || "/html/marketing/pages/index.html";
+  }
+
+  function getCreatorsMarketingPath() {
+    return OP_PATHS?.marketing?.creators || "/html/marketing/pages/creators.html";
+  }
+
+  async function getSession() {
+    const sb = getClient();
+    const { data, error } = await sb.auth.getSession();
+    if (error) throw error;
+    return data?.session || null;
+  }
+
+  async function getUser() {
+    const sb = getClient();
+    const { data, error } = await sb.auth.getUser();
+    if (error) throw error;
+    return data?.user || null;
+  }
+
+  async function getProfile(userId) {
+    const sb = getClient();
+
+    const { data, error } = await sb
+      .from("profiles")
+      .select("user_id, role, username, display_name, bio")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data || null;
+  }
+
+  async function ensureProfileRow(user, roleFallback) {
+    const sb = getClient();
+
+    const existing = await getProfile(user.id);
+    if (existing) return existing;
+
+    const role = roleFallback || user?.user_metadata?.role || "fan";
+
+    const { error } = await sb
+      .from("profiles")
+      .upsert(
+        { user_id: user.id, role },
+        { onConflict: "user_id" }
+      );
+
+    if (error) throw error;
+
+    return await getProfile(user.id);
+  }
+
+  async function isCreatorPlanActive(userId) {
+    const sb = getClient();
+
+    try {
+      const { data, error } = await sb
+        .from("entitlements")
+        .select("creator_plan")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data?.creator_plan === true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function requireAuth({
+    redirectTo = getHomePath(),
+    ensureProfile = true
+  } = {}) {
+    const user = await getUser();
+
+    if (!user) {
+      window.location.href = redirectTo;
+      return null;
+    }
+
+    if (ensureProfile) {
+      await ensureProfileRow(user);
+    }
+
+    return user;
+  }
+
+  async function requireCreator({
+    redirectTo = getCreatorsMarketingPath(),
+    ensureProfile = true
+  } = {}) {
+    const user = await requireAuth({
+      redirectTo: getHomePath(),
+      ensureProfile
+    });
+
+    if (!user) return null;
+
+    const profile = await getProfile(user.id);
+
+    if (profile?.role !== "creator") {
+      window.location.href = redirectTo;
+      return null;
+    }
+
+    return { user, profile };
+  }
+
+  async function requireCreatorUnlocked({
+    redirectTo = getCreatorsMarketingPath(),
+    ensureProfile = true
+  } = {}) {
+    const ctx = await requireCreator({
+      redirectTo,
+      ensureProfile
+    });
+
+    if (!ctx) return null;
+
+    const active = await isCreatorPlanActive(ctx.user.id);
+
+    if (!active) {
+      window.location.href = redirectTo;
+      return null;
+    }
+
+    return ctx;
+  }
+
+  window.OPAuth = {
+    getSession,
+    getUser,
+    getProfile,
+    ensureProfileRow,
+    isCreatorPlanActive,
+    requireAuth,
+    requireCreator,
+    requireCreatorUnlocked
+  };
+})();
