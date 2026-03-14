@@ -1,4 +1,4 @@
-// supabase.js (pure JS file - no <script> tags)
+// onlypaws Client.js (pure JS file - no <script> tags)
 (() => {
   const SUPABASE_URL = "https://sdhpbwkhdovyunvtdtbq.supabase.co";
   const SUPABASE_ANON_KEY =
