@@ -1,6 +1,6 @@
 /* =========================================================
    OnlyPaws
-   File: js/partials.js
+   File: /js/partials.js
    Purpose: load shared header/footer partials and hydrate marketing nav state
    ========================================================= */
 
@@ -33,14 +33,14 @@ function highlightMarketingNav() {
       (
         path === "/" ||
         path.endsWith("/index.html") ||
-        path.endsWith("/marketing/index.html")
+        path.endsWith("/html/marketing/pages/index.html")
       );
 
-    const isMatch =
-      path.includes(`/marketing/${page}.html`) ||
-      path.endsWith(`/${page}.html`);
+    const isPagesMatch = path.endsWith(`/html/marketing/pages/${page}.html`);
+    const isFaqMatch = path.endsWith(`/html/marketing/faq/${page}.html`);
+    const isLegalMatch = path.endsWith(`/html/marketing/legal/${page}.html`);
 
-    if (isHome || isMatch) {
+    if (isHome || isPagesMatch || isFaqMatch || isLegalMatch) {
       link.classList.add("activeMarketingTextLink");
     }
   });
@@ -48,15 +48,15 @@ function highlightMarketingNav() {
 
 async function loadLayout() {
   await Promise.all([
-    loadPartial("#header-placeholder", "/components/header.html"),
-    loadPartial("#footer-placeholder", "/components/footer.html")
+    loadPartial("#header-placeholder", OP_PATHS.components.header),
+    loadPartial("#footer-placeholder", OP_PATHS.components.footer)
   ]);
 }
 
 async function loadMarketingLayout() {
   await Promise.all([
-    loadPartial("#header-placeholder", "/components/header-marketing.html"),
-    loadPartial("#footer-placeholder", "/components/footer-marketing.html")
+    loadPartial("#header-placeholder", OP_PATHS.components.headerMarketing),
+    loadPartial("#footer-placeholder", OP_PATHS.components.footerMarketing)
   ]);
 
   highlightMarketingNav();
