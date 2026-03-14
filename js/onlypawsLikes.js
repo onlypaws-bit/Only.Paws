@@ -1,4 +1,4 @@
-// supabase.likes.fixed.js
+// onlypawsLikes.js
 // Reuses window.onlypawsClient if present; otherwise creates it.
 (() => {
   const SUPABASE_URL = "https://sdhpbwkhdovyunvtdtbq.supabase.co";
