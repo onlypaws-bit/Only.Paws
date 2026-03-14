@@ -50,7 +50,6 @@ async function hydrateUserPill() {
 
 async function hydrateNav() {
   const profileBtn = document.getElementById("navProfile");
-  const logoutBtn = document.getElementById("navLogout");
   const fanDashBtn = document.getElementById("navFanDash");
   const creatorDashBtn = document.getElementById("navCreatorDash");
 
@@ -60,7 +59,6 @@ async function hydrateNav() {
 
     if (!userId) {
       show(profileBtn, false);
-      show(logoutBtn, false);
       show(fanDashBtn, false);
       show(creatorDashBtn, false);
       return;
@@ -71,7 +69,6 @@ async function hydrateNav() {
     if (creatorDashBtn) creatorDashBtn.href = OP_PATHS.creators.creatorDash;
 
     show(profileBtn, true);
-    show(logoutBtn, true);
     show(fanDashBtn, false);
     show(creatorDashBtn, false);
 
@@ -88,39 +85,12 @@ async function hydrateNav() {
     }
   } catch (e) {
     show(profileBtn, false);
-    show(logoutBtn, false);
     show(fanDashBtn, false);
     show(creatorDashBtn, false);
   }
 }
 
-function setupLogout() {
-  const btn = document.getElementById("navLogout");
-  if (!btn) return;
-  if (btn.dataset.bound === "1") return;
-
-  btn.dataset.bound = "1";
-
-  btn.addEventListener("click", async (ev) => {
-    ev.preventDefault();
-
-    btn.disabled = true;
-    const oldText = btn.textContent;
-    btn.textContent = "Logging out...";
-
-    try {
-      await onlypawsClient.auth.signOut();
-    } catch (e) {
-      // ignore and redirect anyway
-    }
-
-    window.location.replace(OP_PATHS.marketing.index);
-    btn.textContent = oldText;
-  });
-}
-
 async function initNav() {
   await hydrateUserPill();
   await hydrateNav();
-  setupLogout();
 }
