@@ -11,6 +11,7 @@
   - Checks active Creator Plan before allowing publishing
   - Supports FREE and PREMIUM posts
   - Optional media upload (image/video) to Supabase Storage
+  - Live media preview before publishing
   - Handles both CREATE and EDIT modes
   - Locked UI if creator plan is missing
 
@@ -32,10 +33,6 @@
   - storage bucket: "posts"
   =========================================================
 -->
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,6 +58,28 @@
     .op-helpText {
       margin-top: 8px;
       opacity: 0.9;
+    }
+
+    .op-previewPanel {
+      padding: 12px;
+    }
+
+    #mediaPreviewImage,
+    #mediaPreviewVideo {
+      width: 100%;
+      max-width: 100%;
+      display: block;
+      border-radius: 14px;
+    }
+
+    #mediaPreviewImage {
+      max-height: 420px;
+      object-fit: cover;
+    }
+
+    #mediaPreviewVideo {
+      max-height: 420px;
+      background: rgba(0, 0, 0, 0.2);
     }
   </style>
 </head>
@@ -127,6 +146,15 @@
         <input id="mediaFile" type="file" accept="image/*,video/*" />
       </div>
 
+      <div class="field op-hidden" id="mediaPreviewWrap">
+        <label>Preview</label>
+        <div class="panel op-previewPanel">
+          <img id="mediaPreviewImage" class="op-hidden" alt="Media preview" />
+          <video id="mediaPreviewVideo" class="op-hidden" controls playsinline></video>
+          <div id="mediaPreviewEmpty" class="sub">No media selected.</div>
+        </div>
+      </div>
+
       <div class="btnRow">
         <button class="btn" id="publishBtn" type="button">Publish</button>
         <a class="ghost op-hidden" id="cancelEditBtn" href="#">Cancel</a>
@@ -164,6 +192,12 @@
     const pageSub = document.getElementById("pageSub");
     const cancelEditBtn = document.getElementById("cancelEditBtn");
 
+    const mediaFileInput = document.getElementById("mediaFile");
+    const mediaPreviewWrap = document.getElementById("mediaPreviewWrap");
+    const mediaPreviewImage = document.getElementById("mediaPreviewImage");
+    const mediaPreviewVideo = document.getElementById("mediaPreviewVideo");
+    const mediaPreviewEmpty = document.getElementById("mediaPreviewEmpty");
+
     unlockBtn.href = CREATOR_PLAN_URL;
     cancelEditBtn.href = OP_PATHS.app.creators.creatorDash;
 
@@ -171,6 +205,7 @@
     let profile = null;
     let creatorPlanActive = false;
     let editingPost = null;
+    let currentPreviewUrl = null;
 
     const params = new URLSearchParams(window.location.search);
     const editId = params.get("edit");
@@ -203,6 +238,68 @@
       document.getElementById("preview").disabled = !enabled;
       document.getElementById("mediaFile").disabled = !enabled;
       publishBtn.disabled = !enabled;
+    }
+
+    function clearMediaPreview() {
+      setHidden(mediaPreviewWrap, true);
+      setHidden(mediaPreviewImage, true);
+      setHidden(mediaPreviewVideo, true);
+
+      mediaPreviewImage.removeAttribute("src");
+      mediaPreviewVideo.pause();
+      mediaPreviewVideo.removeAttribute("src");
+      mediaPreviewVideo.load();
+
+      if (currentPreviewUrl) {
+        URL.revokeObjectURL(currentPreviewUrl);
+        currentPreviewUrl = null;
+      }
+
+      if (mediaPreviewEmpty) {
+        mediaPreviewEmpty.textContent = "No media selected.";
+      }
+    }
+
+    function updateMediaPreview() {
+      const file = mediaFileInput.files?.[0] || null;
+
+      if (!file) {
+        clearMediaPreview();
+        return;
+      }
+
+      const mediaType = detectMediaType(file);
+
+      if (currentPreviewUrl) {
+        URL.revokeObjectURL(currentPreviewUrl);
+        currentPreviewUrl = null;
+      }
+
+      currentPreviewUrl = URL.createObjectURL(file);
+
+      setHidden(mediaPreviewWrap, false);
+      setHidden(mediaPreviewImage, true);
+      setHidden(mediaPreviewVideo, true);
+
+      if (mediaPreviewEmpty) {
+        mediaPreviewEmpty.textContent = "";
+      }
+
+      if (mediaType === "image") {
+        mediaPreviewImage.src = currentPreviewUrl;
+        setHidden(mediaPreviewImage, false);
+        return;
+      }
+
+      if (mediaType === "video") {
+        mediaPreviewVideo.src = currentPreviewUrl;
+        setHidden(mediaPreviewVideo, false);
+        return;
+      }
+
+      if (mediaPreviewEmpty) {
+        mediaPreviewEmpty.textContent = "Unsupported preview type.";
+      }
     }
 
     async function getSessionOrRedirect() {
@@ -244,7 +341,7 @@
     }
 
     async function uploadMedia(postId) {
-      const file = document.getElementById("mediaFile").files?.[0] || null;
+      const file = mediaFileInput.files?.[0] || null;
       if (!file) return { media_url: null, media_type: "none" };
 
       const media_type = detectMediaType(file);
@@ -332,9 +429,10 @@
       document.getElementById("title").value = "";
       document.getElementById("content").value = "";
       document.getElementById("preview").value = "";
-      document.getElementById("mediaFile").value = "";
+      mediaFileInput.value = "";
       document.getElementById("is_paid").value = "false";
       document.getElementById("is_public").value = "true";
+      clearMediaPreview();
     }
 
     async function publishOrUpdate() {
@@ -382,7 +480,7 @@
 
           if (updateErr) throw updateErr;
 
-          const hasFile = !!document.getElementById("mediaFile").files?.[0];
+          const hasFile = !!mediaFileInput.files?.[0];
 
           if (hasFile) {
             setMsg("Uploading media…");
@@ -401,7 +499,8 @@
           }
 
           setMsg("Saved ✅");
-          document.getElementById("mediaFile").value = "";
+          mediaFileInput.value = "";
+          clearMediaPreview();
           return;
         }
 
@@ -423,7 +522,7 @@
         if (insertErr) throw insertErr;
 
         const postId = inserted.id;
-        const hasFile = !!document.getElementById("mediaFile").files?.[0];
+        const hasFile = !!mediaFileInput.files?.[0];
 
         if (hasFile) {
           setMsg("Uploading media…");
@@ -457,6 +556,7 @@
 
       publishBtn.addEventListener("click", publishOrUpdate);
       refreshBtn.addEventListener("click", () => window.location.reload());
+      mediaFileInput.addEventListener("change", updateMediaPreview);
 
       const navLogout = document.getElementById("navLogout");
       if (navLogout) {
@@ -465,6 +565,8 @@
           window.location.href = OP_PATHS.marketing.home;
         });
       }
+
+      clearMediaPreview();
 
       const ok = await requireCreatorAndPlan();
       if (!ok) return;
