@@ -1,0 +1,56 @@
+/* =========================================================
+   OnlyPaws
+   File: css/marketing/stirpe.css
+   Purpose: stripe info
+   ========================================================= */
+
+
+.list{
+  margin-top:16px;
+  display:grid;
+  gap:10px;
+}
+
+.listItem{
+  border-radius:16px;
+  padding:12px 14px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  line-height:1.45;
+}
+
+.infoBox{
+  margin-top:16px;
+  border-radius:18px;
+  padding:16px;
+  background:rgba(0,0,0,.14);
+  border:1px solid var(--stroke);
+  line-height:1.6;
+  color:var(--muted);
+}
+
+.infoBox strong{
+  color:var(--text);
+}
+
+.infoBox a{
+  color:var(--text);
+  font-weight:700;
+  text-decoration:none;
+}
+
+.infoBox a:hover{
+  text-decoration:underline;
+}
+
+.kbd{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:10px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.16);
+  font-family:monospace;
+  font-size:.92em;
+  line-height:1;
+  color:var(--text);
+}

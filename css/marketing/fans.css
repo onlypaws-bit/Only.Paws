@@ -1,0 +1,20 @@
+/* =========================================================
+   OnlyPaws
+   File: css/marketing/fans.css
+   Purpose: styles specific to the marketing fans page
+   ========================================================= */
+
+.fansSupportInfo {
+  margin-top: 14px;
+  font-size: 14px;
+}
+
+.fansSupportNote {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+}
+
+.fansAuthSpacer {
+  margin-top: 16px;
+}

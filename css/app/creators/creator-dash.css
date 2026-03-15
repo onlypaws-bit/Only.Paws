@@ -1,0 +1,159 @@
+/* =========================================================
+   OnlyPaws
+   File: css/app/creators/creator-dash.css
+   Purpose: styles specific to the creator dashboard page
+   ========================================================= */
+
+.dashboardGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.dashboardSectionTitle {
+  margin-bottom: 10px;
+}
+
+.dashboardBadgeWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ===== KPI CARDS ===== */
+
+.dashboardKpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dashboardKpiCard {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+}
+
+.dashboardKpiLabel {
+  font-size: 12px;
+  color: rgba(255,255,255,.72);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.dashboardKpiValue {
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.dashboardKpiSubtext {
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(255,255,255,.72);
+}
+
+/* ===== CARDS / LISTS ===== */
+
+.dashboardList {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.dashboardCardRow {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.08);
+}
+
+.dashboardCardRow.clickable {
+  cursor: pointer;
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    border-color .18s ease;
+}
+
+.dashboardCardRow.clickable:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+}
+
+.dashboardLockedCard {
+  opacity: .72;
+}
+
+.dashboardLockedHint {
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255,255,255,.72);
+}
+
+/* ===== POSTS ===== */
+
+.dashboardPostMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+}
+
+.dashboardPostActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* ===== PETS ===== */
+
+.dashboardPetMeta {
+  display: grid;
+  gap: 6px;
+}
+
+.dashboardPetLine {
+  font-size: 14px;
+  color: rgba(255,255,255,.9);
+}
+
+/* ===== SUBSCRIPTIONS / SUPPORT ===== */
+
+.dashboardSubLine {
+  font-size: 14px;
+  color: rgba(255,255,255,.9);
+}
+
+/* ===== STATES ===== */
+
+.dashboardDanger {
+  color: #ffdede;
+}
+
+.dashboardIsDisabled {
+  opacity: .6;
+  pointer-events: none;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 980px) {
+  .dashboardKpiGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboardKpiGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,13 @@
+/* =========================================================
+   OnlyPaws
+   File: css/marketing/email-confirmed.css
+   Purpose: styles specific to the email confirmed page
+   ========================================================= */
+
+.emailConfirmedCard {
+  text-align: center;
+}
+
+.emailConfirmedIcon {
+  font-size: 42px;
+}

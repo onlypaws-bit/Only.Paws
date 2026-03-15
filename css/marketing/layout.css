@@ -1,0 +1,130 @@
+/* =========================================================
+   OnlyPaws
+   File: css/marketing/layout.css
+   Purpose: shared layout styles for marketing pages
+   ========================================================= */
+
+.marketingIntro {
+  margin-top: 16px;
+}
+
+.marketingHeroIntro {
+  margin-top: 14px;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+}
+
+.brandImageCompact img {
+  max-width: 340px;
+}
+
+.supportCard {
+  margin-top: 16px;
+}
+
+.tinyLink {
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.tinyLink:hover {
+  color: #ffffff;
+}
+
+.centerWrap {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding-top: 48px;
+}
+
+.centerText {
+  text-align: center;
+}
+
+.marketingFeatureList {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.marketingFeatureItem {
+  padding: 14px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.marketingFeatureItem strong {
+  display: block;
+}
+
+.marketingFeatureItem p {
+  margin: 6px 0 0;
+}
+
+.marketingList {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.marketingListItem {
+  padding: 14px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.marketingAsideImage {
+  margin-top: 16px;
+}
+
+.marketingAsideImage img {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  display: block;
+  border-radius: 16px;
+}
+
+.marketingGrid {
+  display: grid;
+  gap: 16px;
+}
+
+.marketingTwoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.marketingThreeCols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.footerWrap {
+  margin-top: 18px;
+}
+
+@media (max-width: 920px) {
+  .marketingTwoCols,
+  .marketingThreeCols {
+    grid-template-columns: 1fr;
+  }
+
+  .marketingAsideImage img {
+    max-width: 340px;
+  }
+
+  .centerWrap {
+    padding-top: 28px;
+  }
+}

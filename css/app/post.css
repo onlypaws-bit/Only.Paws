@@ -1,0 +1,323 @@
+/* =========================================================
+   OnlyPaws
+   File: css/app/post.css
+   Purpose: shared post UI + post page styles
+   ========================================================= */
+
+
+/* =========================================================
+   SHARED POST CARD UI
+   ========================================================= */
+
+.op-postCard{
+  width:100%;
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 18px 40px rgba(0,0,0,.16);
+}
+
+.op-postMain{
+  display:grid;
+  gap:12px;
+  padding:14px;
+}
+
+.op-postHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.op-postCreator{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.op-postCreatorAvatar{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  font-size:16px;
+}
+
+.op-postCreatorAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.op-postCreatorMeta{
+  min-width:0;
+}
+
+.op-postCreatorName{
+  font-size:14px;
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.op-postDate{
+  margin-top:2px;
+  font-size:12px;
+  color:rgba(255,255,255,.72);
+}
+
+.op-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+  border:1px solid rgba(255,255,255,.14);
+}
+
+.op-badge--free{
+  background:rgba(255,255,255,.10);
+  color:#fff;
+}
+
+.op-badge--price{
+  background:rgba(255,255,255,.92);
+  color:rgba(107,78,255,1);
+}
+
+.op-badge--locked{
+  background:rgba(0,0,0,.20);
+  color:#fff;
+}
+
+.op-postBody{
+  display:grid;
+  gap:10px;
+}
+
+.op-title{
+  margin:0;
+  font-size:16px;
+  font-weight:900;
+  line-height:1.35;
+}
+
+.op-excerpt{
+  margin:0;
+  color:rgba(255,255,255,.86);
+  font-size:14px;
+  line-height:1.5;
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
+.op-mediaWrap{
+  position:relative;
+  overflow:hidden;
+  border-radius:14px;
+  background:rgba(0,0,0,.18);
+}
+
+.op-mediaWrap img,
+.op-mediaWrap video{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.op-mediaWrap.op-isLocked img,
+.op-mediaWrap.op-isLocked video{
+  filter:blur(18px);
+  transform:scale(1.03);
+}
+
+.op-lockOverlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(0,0,0,.40);
+  backdrop-filter:blur(2px);
+}
+
+.op-lockBox{
+  width:100%;
+  max-width:260px;
+  padding:16px;
+  text-align:center;
+  border-radius:18px;
+  background:rgba(18,18,30,.42);
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(10px);
+}
+
+.op-lockTitle{
+  margin:10px 0 6px;
+  font-size:15px;
+  font-weight:900;
+}
+
+.op-lockText{
+  margin:0 0 12px;
+  font-size:13px;
+  line-height:1.35;
+  opacity:.9;
+}
+
+.op-openCreatorBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:900;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.92);
+  color:rgba(107,78,255,1);
+}
+
+.op-postBottom{
+  display:flex;
+  justify-content:flex-start;
+  padding:10px 14px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+
+.op-likeBtn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.15);
+  color:inherit;
+  cursor:pointer;
+  user-select:none;
+}
+
+.op-likeBtn:disabled{
+  opacity:.6;
+  cursor:default;
+}
+
+.op-likeIcon{
+  font-size:14px;
+  line-height:1;
+}
+
+.op-likeCount{
+  min-width:16px;
+  text-align:right;
+  font-size:12px;
+  font-weight:900;
+  opacity:.95;
+}
+
+.op-liked{
+  background:rgba(255,255,255,.14);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width:760px){
+  .op-mediaWrap{
+    aspect-ratio:16 / 9;
+    max-height:340px;
+  }
+}
+
+@media (max-width:640px){
+  .op-postMain{
+    padding:12px;
+  }
+
+  .op-postHeader{
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .op-title{
+    font-size:14px;
+  }
+
+  .op-excerpt{
+    font-size:13px;
+    -webkit-line-clamp:2;
+  }
+
+  .op-mediaWrap{
+    aspect-ratio:4 / 5;
+    max-height:300px;
+  }
+
+  .op-lockBox{
+    max-width:220px;
+    padding:14px;
+  }
+
+  .op-postBottom{
+    padding:10px 12px;
+  }
+}
+
+
+/* =========================================================
+   SINGLE POST PAGE
+   ========================================================= */
+
+.postMetaRow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+
+.postMediaBox{
+  margin-top:14px;
+}
+
+.captionBox{
+  margin-top:14px;
+  line-height:1.6;
+  color:rgba(255,255,255,.92);
+}
+
+.likeBtnLabel{
+  margin-left:6px;
+}
+
+.likeCount{
+  margin-top:10px;
+  font-size:13px;
+  color:rgba(255,255,255,.78);
+}
+
+.postError{
+  margin-top:12px;
+  color:#ffdede;
+}

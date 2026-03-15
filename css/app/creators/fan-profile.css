@@ -1,0 +1,24 @@
+/* =========================================================
+   OnlyPaws
+   File: css/app/creators/fan-profile.css
+   Purpose: styles specific to the fan profile page
+   ========================================================= */
+
+
+.fanProfileTopHint {
+  margin-top: 10px;
+  opacity: .9;
+}
+
+.fanProfileMiniGrid {
+  margin-top: 14px;
+}
+
+.fanProfileSoonHint {
+  margin-top: 6px;
+  opacity: .85;
+}
+
+.fanProfileNoTopMargin {
+  margin-top: 0;
+}

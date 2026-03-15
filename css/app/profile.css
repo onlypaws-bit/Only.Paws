@@ -1,0 +1,398 @@
+/* =========================================================
+   OnlyPaws
+   File: /css/app/profile.css
+   Purpose: styles specific to the app profile page
+   ========================================================= */
+
+.profilePage {
+  min-height: 100vh;
+}
+
+.profileWrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 18px 70px;
+}
+
+.profileLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.profilePanel,
+.previewPanel {
+  border-radius: 22px;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+}
+
+.profileHero {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.profileHeroActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.profilePanel h1 {
+  margin: 10px 0 6px;
+  font-size: 2.1rem;
+}
+
+.previewHeader h2,
+.sectionTitle {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.sub {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.field,
+.profileField {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.field label,
+.profileField label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea,
+.profileField input,
+.profileField textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  outline: none;
+}
+
+.field input::placeholder,
+.field textarea::placeholder,
+.profileField input::placeholder,
+.profileField textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.field input:focus,
+.field textarea:focus,
+.profileField input:focus,
+.profileField textarea:focus {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.field input[readonly],
+.profileField input[readonly] {
+  opacity: 0.75;
+}
+
+.field textarea,
+.profileField textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.avatarBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.avatarImg {
+  width: 92px;
+  height: 92px;
+  border-radius: 24px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+}
+
+.avatarControls {
+  flex: 1 1 260px;
+  min-width: 240px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 14px;
+}
+
+.btn {
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: #fff;
+  color: #6b4eff;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.uploadHint,
+.hint {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.hint.ok,
+#usernameHint.ok {
+  border-color: rgba(170, 255, 200, 0.35);
+  color: #d7ffd7;
+}
+
+.hint.bad,
+#usernameHint.bad {
+  border-color: rgba(255, 170, 170, 0.45);
+  color: #ffdede;
+}
+
+.msg,
+.profileMsg {
+  margin-top: 12px;
+  min-height: 18px;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.socialSection {
+  margin-top: 18px;
+  padding-top: 4px;
+}
+
+.previewPanel {
+  position: sticky;
+  top: 20px;
+}
+
+.profilePreview {
+  margin-top: 14px;
+}
+
+.profilePreviewCard {
+  border-radius: 22px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.profilePreviewTop {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.profilePreviewAvatar {
+  width: 108px;
+  height: 108px;
+  border-radius: 28px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.profilePreviewBody {
+  text-align: center;
+}
+
+.profilePreviewBody h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.profilePreviewHandle {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.profilePreviewBio {
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
+}
+
+.profilePreviewSocials {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.socialChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.previewHint {
+  margin-top: 16px;
+  text-align: left;
+}
+
+.previewActions {
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.dangerZone {
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 120, 120, 0.35);
+}
+
+.dangerZone > b {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.dangerBtn {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 1px solid rgba(255, 120, 120, 0.55);
+}
+
+.small {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 6px;
+}
+
+.isDisabled,
+[aria-disabled="true"] {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.isBusy {
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+@media (max-width: 980px) {
+  .profileLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .previewPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .profileWrap {
+    padding: 20px 14px 56px;
+  }
+
+  .profilePanel,
+  .previewPanel {
+    padding: 18px;
+  }
+
+  .profileHero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profileHeroActions {
+    justify-content: flex-start;
+  }
+
+  .avatarBox {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .avatarImg {
+    width: 84px;
+    height: 84px;
+  }
+
+  .profilePreviewAvatar {
+    width: 96px;
+    height: 96px;
+  }
+
+  .btnRow {
+    align-items: stretch;
+  }
+
+  .btn,
+  .ghost {
+    width: 100%;
+  }
+
+  .previewActions .ghost,
+  .previewActions .btn {
+    width: 100%;
+  }
+}

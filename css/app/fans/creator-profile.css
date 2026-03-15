@@ -1,0 +1,259 @@
+/* =========================================================
+   OnlyPaws
+   File: /css/app/fans/creator-profile.css
+   Purpose: styles specific to the creator profile page
+   ========================================================= */
+
+.creatorProfilePage {
+  min-height: 100vh;
+}
+
+.creatorProfileWrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 28px 18px 70px;
+}
+
+.creatorProfileGrid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.creatorHeroPanel,
+.creatorPetsPanel,
+.creatorPostsPanel {
+  border-radius: 22px;
+}
+
+.heroRow {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  font-size: 22px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.meta {
+  min-width: 0;
+}
+
+.meta b {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.meta span {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: pre-wrap;
+}
+
+.creatorSocials {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.socialChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 12px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: white;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.btnRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  align-items: center;
+}
+
+.petsList {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.petCard {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  overflow: hidden;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.petAvatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  font-size: 18px;
+  overflow: hidden;
+}
+
+.petAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.petCard b {
+  display: block;
+}
+
+.petCard span {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.postsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.postsHeader h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.postsLegend {
+  margin-top: 0;
+}
+
+.posts {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: none;
+  z-index: 999;
+  max-width: min(560px, 92vw);
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+.toast.show {
+  display: block;
+}
+
+/* ===== important: post cards/media inside creator profile ===== */
+
+.creatorPostsPanel .op-postCard,
+.creatorPostsPanel .postCard {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.creatorPostsPanel .op-mediaWrap,
+.creatorPostsPanel .mediaWrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.creatorPostsPanel .op-mediaWrap img,
+.creatorPostsPanel .op-mediaWrap video,
+.creatorPostsPanel .mediaWrap img,
+.creatorPostsPanel .mediaWrap video {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+@media (max-width: 920px) {
+  .creatorProfileGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .creatorProfileWrap {
+    padding: 20px 14px 56px;
+  }
+
+  .heroRow {
+    align-items: flex-start;
+  }
+
+  .creatorSocials,
+  .btnRow {
+    align-items: stretch;
+  }
+
+  .btnRow .btn,
+  .btnRow .ghost,
+  .btnRow .navBtn,
+  .creatorSocials .socialChip {
+    width: 100%;
+  }
+
+  .postsHeader {
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,66 @@
+/* =========================================================
+   OnlyPaws
+   File: css/marketing/status.css
+   Purpose: centered status / confirmation pages
+   ========================================================= */
+
+.statusLayout {
+  display: flex;
+  justify-content: center;
+  padding-top: 50px;
+}
+
+.statusCard {
+  width: 100%;
+  max-width: 520px;
+  margin-top: 16px;
+  padding: 18px;
+  border: 1px solid var(--stroke);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.statusCard:first-child {
+  margin-top: 0;
+}
+
+.statusTitle {
+  margin-top: 10px;
+}
+
+.statusText {
+  margin-top: 10px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.statusActions {
+  margin-top: 18px;
+}
+
+.statusIcon {
+  font-size: 2.4rem;
+}
+
+.statusNote {
+  margin-top: 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,.78);
+}
+
+.statusFooter {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.statusFooter a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (max-width: 820px) {
+  .statusLayout {
+    padding-top: 32px;
+  }
+}
