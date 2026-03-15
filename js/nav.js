@@ -46,7 +46,7 @@
     return PATHS?.home || PATHS?.index || "/index.html";
   }
 
-  function currentMarketingPageKey() {
+  function currentMarketingPageKeys() {
     const pathname = (window.location.pathname || "").toLowerCase();
 
     if (
@@ -54,31 +54,31 @@
       pathname.endsWith("/index.html") ||
       pathname.endsWith("/html/marketing/index.html")
     ) {
-      return "index";
+      return ["index", "home"];
     }
 
     if (pathname.endsWith("/html/marketing/creators.html")) {
-      return "creators";
+      return ["creators"];
     }
 
     if (pathname.endsWith("/html/marketing/fans.html")) {
-      return "fans";
+      return ["fans"];
     }
 
     if (pathname.endsWith("/html/marketing/the-pack.html")) {
-      return "the-pack";
+      return ["the-pack"];
     }
 
-    return "";
+    return [];
   }
 
   function hideCurrentMarketingLink() {
-    const current = currentMarketingPageKey();
-    if (!current) return;
+    const currentKeys = currentMarketingPageKeys();
+    if (!currentKeys.length) return;
 
     document.querySelectorAll("[data-page]").forEach((link) => {
       const page = (link.dataset.page || "").trim().toLowerCase();
-      if (page === current) {
+      if (currentKeys.includes(page)) {
         link.hidden = true;
       }
     });
