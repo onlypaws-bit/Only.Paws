@@ -1,0 +1,198 @@
+# OnlyPaws paths map
+Current structure
+
+IMPORTANT:
+- follow THIS map, not old comments scattered in files
+- real source of truth for runtime paths is /js/paths.js
+- root index and marketing index are intentionally both present
+
+INDEX RULE:
+- index = /index.html
+- home  = /html/marketing/index.html
+
+WHY:
+- Vercel can be annoying serving the marketing index directly from nested folders
+- so root /index.html exists as fallback entry
+- actual marketing homepage still lives in /html/marketing/index.html
+
+
+/assets/images
+├─ logo.png
+├─ onlypaws-creators.png
+├─ onlypaws-fans.png
+├─ onlypaws-index.png
+├─ paw-crown.png
+├─ paw-diamond.png
+└─ paw-stars.png
+
+
+/components
+├─ footer.html
+├─ footer-marketing.html
+├─ header.html
+├─ header-marketing.html
+└─ header-stripe.html
+
+
+/css
+├─ styles.css
+│
+├─ marketing
+│  ├─ auth.css
+│  ├─ creators.css
+│  ├─ email-confirmed.css
+│  ├─ fans.css
+│  ├─ index.css
+│  ├─ layout.css
+│  ├─ reset-password.css
+│  ├─ status.css
+│  ├─ stripe.css
+│  └─ the-pack.css
+│
+└─ app
+   ├─ feed.css
+   ├─ post.css
+   ├─ profile.css
+   │
+   ├─ creators
+   │  ├─ create-post.css
+   │  ├─ creator-dash.css
+   │  ├─ fan-profile.css
+   │  ├─ payouts-setup.css
+   │  └─ pets.css
+   │
+   └─ fans
+      ├─ creator-profile.css
+      ├─ fan-dash.css
+      ├─ purchased-posts.css
+      └─ subscriptions.css
+
+
+js/
+    ├── auth-guard.js
+    ├── nav.js
+    ├── onlypawsClient.js
+    ├── partials.js
+    ├── paths.js
+    ├── support-us.js
+    │
+    ├── marketing/
+    │   ├── creators.js
+    │   ├── fans.js
+    │   ├── index.js
+    │   ├── reset-password.js
+    │   ├── shared.js
+    │   └── the-pack.js
+    │
+    └── app/
+        ├── feed.js
+        ├── likes.js
+        ├── post.js
+        ├── profile.js
+        ├── auth-callback.js
+        │
+        ├── creators/
+        │   ├── create-post.js
+        │   ├── creator-dash.js
+        │   ├── creator-plan.js
+        │   ├── fan-profile.js
+        │   ├── payouts-setup.js
+        │   ├── pets.js
+        │   └── wallet.js
+        │
+        └── fans/
+            ├── creator-profile.js
+            ├── fan-dash.js
+            ├── purchased-posts.js
+            └── subscriptions.js
+
+
+/html
+├── index.html
+│
+├── app
+│   ├─ auth-callback.html
+│   ├─ feed.html
+│   ├─ post.html
+│   ├─ profile.html
+│   │
+│   ├── creators
+│   │   ├─ create-post.html
+│   │   ├─ creator-dash.html
+│   │   ├─ fan-profile.html
+│   │   ├─ payouts-setup.html
+│   │   └─ pets.html
+│   │
+│   └── fans
+│       ├─ creator-profile.html
+│       ├─ fan-dash.html
+│       ├─ purchased-posts.html
+│       └─ subscriptions.html
+│
+├── marketing
+│   ├─ creators.html
+│   ├─ email-confirmed.html
+│   ├─ fans.html
+│   ├─ index.html
+│   ├─ reset-password.html
+│   └─ the-pack.html
+│
+│   ├── faq
+│   │   ├─ faq-creators.html
+│   │   └─ faq-fans.html
+│   │
+│   └── legal
+│       ├─ content-policy.html
+│       ├─ privacy-policy.html
+│       ├─ stripe.html
+│       └─ terms.html
+│
+└── thanks
+    ├─ thanks-creator-membership.html
+    ├─ thanks-creator-plan.html
+    ├─ thanks-fan-membership.html
+    └─ thanks-support-us.html
+
+
+## Base rule
+
+DO NOT rely on handwritten relative paths when JS can use OP_PATHS.
+If a page/script needs navigation, prefer window.OP_PATHS.
+
+Static include rule for nested HTML pages:
+
+- From files inside:
+  - html/app/
+  - html/app/creators/
+  - html/app/fans/
+  - html/marketing/
+  - html/marketing/faq/
+  - html/marketing/legal/
+  - html/thanks/
+
+- shared assets / css / js / components use root-aware project paths through OP_PATHS when possible
+- if hardcoded relatively inside nested html pages, many files currently use ../../
+- BUT this is only safe when the actual folder depth matches
+- so for future cleanup: prefer OP_PATHS over handwritten relative links
+
+IMPORTANT:
+- html/app/*.html and html/marketing/*.html are NOT at the same depth as:
+  - html/app/creators/*.html
+  - html/app/fans/*.html
+  - html/marketing/faq/*.html
+  - html/marketing/legal/*.html
+- so one universal ../../ rule is NOT truly reliable for every html file
+- central paths.js is the safe fix
+
+
+## Shared assets paths
+
+Preferred:
+- use /js/paths.js
+- resolve everything from window.OP_PATHS
+
+Example shared files:
+```html
+<link rel="stylesheet" href="../../css/styles.css" />
+<script src="../../js/paths.js"></script>
+<script src="../../js/partials.js"></script>

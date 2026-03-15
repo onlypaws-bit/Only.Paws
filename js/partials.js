@@ -1,0 +1,96 @@
+/* =========================================================
+   OnlyPaws
+   File: /js/partials.js
+   Purpose: load shared HTML partials and highlight nav state
+   Dependencies:
+   - window.OP_PATHS
+   ========================================================= */
+
+(function () {
+  const PATHS = window.OP_PATHS || {};
+
+  function getMount(id) {
+    return document.getElementById(id);
+  }
+
+  async function loadPartial(targetOrId, url) {
+    const target =
+      typeof targetOrId === "string"
+        ? document.getElementById(targetOrId)
+        : targetOrId;
+
+    if (!target || !url) return;
+
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to load partial: ${url}`);
+    }
+
+    target.innerHTML = await res.text();
+  }
+
+  function highlightMarketingNav() {
+    const currentPage = (document.body?.dataset?.page || "").trim();
+    if (!currentPage) return;
+
+    document.querySelectorAll("[data-page]").forEach((el) => {
+      const page = (el.dataset.page || "").trim();
+      el.classList.toggle("activeMarketingTextLink", page === currentPage);
+    });
+  }
+
+  async function loadLayout() {
+    const headerMount = getMount("header-placeholder");
+    const footerMount = getMount("footer-placeholder");
+
+    await loadPartial(
+      headerMount,
+      PATHS?.components?.header || "/components/header.html"
+    );
+
+    await loadPartial(
+      footerMount,
+      PATHS?.components?.footer || "/components/footer.html"
+    );
+  }
+
+  async function loadMarketingLayout() {
+    const headerMount = getMount("header-placeholder");
+    const footerMount = getMount("footer-placeholder");
+
+    await loadPartial(
+      headerMount,
+      PATHS?.components?.headerMarketing || "/components/header-marketing.html"
+    );
+
+    await loadPartial(
+      footerMount,
+      PATHS?.components?.footerMarketing || "/components/footer-marketing.html"
+    );
+
+    highlightMarketingNav();
+  }
+
+  async function loadStripeLayout() {
+    const headerMount = getMount("header-placeholder");
+    const footerMount = getMount("footer-placeholder");
+
+    await loadPartial(
+      headerMount,
+      PATHS?.components?.headerStripe || "/components/header-stripe.html"
+    );
+
+    await loadPartial(
+      footerMount,
+      PATHS?.components?.footerMarketing || "/components/footer-marketing.html"
+    );
+  }
+
+  window.OPPartials = {
+    loadPartial,
+    loadLayout,
+    loadMarketingLayout,
+    loadStripeLayout,
+    highlightMarketingNav,
+  };
+})();
