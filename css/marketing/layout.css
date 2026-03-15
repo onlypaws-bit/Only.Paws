@@ -124,8 +124,6 @@
   margin: 6px 0 0;
 }
 
-/* rows like:
-   icon + text inside soft cards */
 .marketingInfoRow {
   display: flex;
   align-items: center;
@@ -174,6 +172,12 @@
   margin-top: 0;
 }
 
+.marketingPriceTitle {
+  margin: 0 0 8px;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 700;
+}
+
 .marketingPriceValue {
   margin: 8px 0 4px;
   font-size: clamp(1.8rem, 3vw, 2.4rem);
@@ -181,8 +185,30 @@
   line-height: 1;
 }
 
+.marketingPriceValue span {
+  font-size: 0.55em;
+  font-weight: 700;
+}
+
 .marketingMuted {
   color: rgba(255, 255, 255, 0.72);
+}
+
+/* =========================================================
+   Shared action rows
+   ========================================================= */
+
+.marketingActionsRow {
+  margin-top: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.marketingActionsRow .ghost {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-weight: 700;
 }
 
 /* =========================================================
@@ -199,7 +225,7 @@
   max-width: 380px;
   margin: 0 auto;
   display: block;
-  border-radius: 16px;
+  border-radius: 18px;
 }
 
 /* =========================================================
