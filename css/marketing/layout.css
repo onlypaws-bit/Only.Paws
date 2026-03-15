@@ -1,6 +1,6 @@
 /* =========================================================
    OnlyPaws
-   File: css/marketing/layout.css
+   File: /css/marketing/layout.css
    Purpose: shared layout styles for marketing pages
    ========================================================= */
 
@@ -45,53 +45,166 @@
   text-align: center;
 }
 
-.marketingFeatureList {
+/* =========================================================
+   Shared pills / small labels
+   ========================================================= */
+
+.marketingEyebrow,
+.marketingPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid var(--stroke);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* =========================================================
+   Shared content spacing
+   ========================================================= */
+
+.marketingStack {
+  display: grid;
+  gap: 16px;
+}
+
+.marketingTextBlock > :first-child {
+  margin-top: 0;
+}
+
+.marketingTextBlock > :last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   Feature / list cards
+   ========================================================= */
+
+.marketingFeatureList,
+.marketingList {
   display: grid;
   gap: 10px;
   margin-top: 16px;
 }
 
-.marketingFeatureItem {
-  padding: 14px 16px;
-  border: 1px solid var(--stroke);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.marketingFeatureItem strong {
-  display: block;
-}
-
-.marketingFeatureItem p {
-  margin: 6px 0 0;
-}
-
 .marketingList {
-  display: grid;
-  gap: 10px;
   margin: 14px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.marketingListItem {
+.marketingFeatureItem,
+.marketingListItem,
+.marketingInfoRow,
+.marketingMiniCard {
   padding: 14px 16px;
   border: 1px solid var(--stroke);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
+
+.marketingFeatureItem strong,
+.marketingListItem strong,
+.marketingInfoRow strong,
+.marketingMiniCard strong {
+  display: block;
+}
+
+.marketingFeatureItem p,
+.marketingListItem p,
+.marketingInfoRow p,
+.marketingMiniCard p {
+  margin: 6px 0 0;
+}
+
+/* rows like:
+   icon + text inside soft cards */
+.marketingInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.marketingInfoRowIcon {
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.marketingInfoRowText {
+  min-width: 0;
+}
+
+/* =========================================================
+   Big cards / side blocks
+   ========================================================= */
+
+.marketingCard,
+.marketingAsideCard,
+.marketingPanel,
+.marketingPriceCard {
+  border: 1px solid var(--stroke);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
+}
+
+.marketingCard,
+.marketingAsideCard,
+.marketingPanel {
+  padding: 20px;
+}
+
+.marketingPriceCard {
+  padding: 18px 20px;
+}
+
+.marketingPriceCard h3,
+.marketingPriceCard p,
+.marketingAsideCard h3,
+.marketingAsideCard p,
+.marketingPanel h3,
+.marketingPanel p {
+  margin-top: 0;
+}
+
+.marketingPriceValue {
+  margin: 8px 0 4px;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.marketingMuted {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* =========================================================
+   Images
+   ========================================================= */
 
 .marketingAsideImage {
   margin-top: 16px;
 }
 
-.marketingAsideImage img {
+.marketingAsideImage img,
+.marketingCardImage img {
   width: 100%;
   max-width: 380px;
   margin: 0 auto;
   display: block;
   border-radius: 16px;
 }
+
+/* =========================================================
+   Grid helpers
+   ========================================================= */
 
 .marketingGrid {
   display: grid;
@@ -114,17 +227,29 @@
   margin-top: 18px;
 }
 
+/* =========================================================
+   Responsive
+   ========================================================= */
+
 @media (max-width: 920px) {
   .marketingTwoCols,
   .marketingThreeCols {
     grid-template-columns: 1fr;
   }
 
-  .marketingAsideImage img {
+  .marketingAsideImage img,
+  .marketingCardImage img {
     max-width: 340px;
   }
 
   .centerWrap {
     padding-top: 28px;
+  }
+
+  .marketingCard,
+  .marketingAsideCard,
+  .marketingPanel,
+  .marketingPriceCard {
+    padding: 18px;
   }
 }
