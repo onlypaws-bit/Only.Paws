@@ -1,0 +1,65 @@
+<!--
+  =========================================================
+  OnlyPaws
+  File: /html/app/fans/purchased-posts.html
+
+  Purpose:
+  Fan page for viewing purchased one-time posts.
+
+  What this page does:
+  - Requires an authenticated session
+  - Shows purchased posts owned by the current fan
+  - Displays an empty state when there are no purchases yet
+
+  Dependencies:
+  CSS
+  - /css/styles.css
+  - /css/app/fans/purchased-posts.css
+
+  JS
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/auth-guard.js
+  - /js/app/fans/purchased-posts.js
+  =========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Purchased Posts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/fans/purchased-posts.css" />
+</head>
+<body class="purchasedPostsPage">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="purchasedPostsMain">
+      <section class="panel">
+        <h1>Purchased posts</h1>
+        <p class="sub">Posts you bought (one-time purchases). This page will show your purchases only.</p>
+
+        <div class="list" id="purchasesList"></div>
+        <div class="msg" id="msg"></div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/app/fans/purchased-posts.js"></script>
+</body>
+</html>

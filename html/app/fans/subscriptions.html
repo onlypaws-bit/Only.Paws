@@ -1,0 +1,126 @@
+<!--
+  =========================================================
+  OnlyPaws
+  File: /html/app/fans/subscribe.html
+
+  Purpose:
+  Fan subscription checkout page.
+
+  What this page does:
+  - Loads creator VIP plan
+  - Displays creator subscription info
+  - Opens Stripe checkout for fan subscription
+  - Handles resumed subscriptions
+
+  Dependencies:
+  CSS
+  - /css/styles.css
+  - /css/app/fans/subscribe.css
+
+  JS
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/auth-guard.js
+  - /js/app/fans/subscribe.js
+
+  Supabase:
+  - profiles
+  - creator_plans
+
+  Edge Functions:
+  - create-fan-subscription
+  =========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>OnlyPaws — Choose your plan</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<link rel="stylesheet" href="/css/styles.css" />
+<link rel="stylesheet" href="/css/app/fans/subscribe.css" />
+</head>
+
+<body class="subscribePage">
+
+<div class="wrap">
+
+<div id="header-placeholder"></div>
+
+<main class="subscribeMain">
+
+<section class="planPanel">
+
+<h1 class="planTitle">Choose your plan 🐾</h1>
+<div class="subline" id="subline">Loading…</div>
+
+<div class="plans" id="plans">
+
+<div class="plan featured" id="vipPlan">
+
+<img
+class="planIcon"
+src="/assets/images/paw-crown.png"
+alt="VIPaws"
+/>
+
+<h2 id="planName">VIPaws</h2>
+
+<div class="tag" id="planTag">
+best value 🐾
+</div>
+
+<p class="desc" id="planDesc">
+Extra content, more interaction, real influence 🐶✨
+</p>
+
+<ul class="planList">
+<li>exclusive monthly content</li>
+<li>bloopers & polls</li>
+<li>monthly Q&A</li>
+</ul>
+
+<div class="price" id="planPrice">
+€5 / month
+</div>
+
+<div class="micro" id="planMicro">
+best value 🐾
+</div>
+
+<button
+class="btn subscribeBtn"
+id="subscribeBtn"
+type="button"
+>
+Subscribe
+</button>
+
+</div>
+</div>
+
+</section>
+
+</main>
+
+<div id="footer-placeholder"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/paths.js"></script>
+<script src="/js/onlypawsClient.js"></script>
+<script src="/js/nav.js"></script>
+<script src="/js/partials.js"></script>
+<script src="/js/auth-guard.js"></script>
+<script src="/js/app/fans/subscribe.js"></script>
+
+</body>
+</html>

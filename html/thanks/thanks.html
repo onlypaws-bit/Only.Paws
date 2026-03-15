@@ -1,0 +1,66 @@
+<!--
+  OnlyPaws
+  File: /html/thanks/thanks.html
+
+  Uses central paths from /js/paths.js
+
+  CSS:
+  /css/styles.css
+  /css/marketing/layout.css
+  /css/marketing/status.css
+
+  JS:
+  /js/paths.js
+  /js/partials.js
+  /js/thanks/thanks.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Thank You</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/marketing/layout.css" />
+  <link rel="stylesheet" href="/css/marketing/status.css" />
+</head>
+
+<body>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <main class="statusLayout">
+        <section class="panel statusCard">
+          <div class="statusIcon" id="thanksIcon">🐾</div>
+
+          <h1 class="statusTitle" id="thanksTitle">Thank you!</h1>
+
+          <p class="statusText" id="thanksText">
+            Your action was completed successfully.
+          </p>
+
+          <div id="thanksExtraText"></div>
+
+          <div id="thanksFeaturesWrap" hidden>
+            <h3 id="thanksFeaturesTitle">Unlocked features</h3>
+            <ul class="statusList" id="thanksFeatures"></ul>
+          </div>
+
+          <div class="btnRow statusActions">
+            <a class="btn" id="thanksPrimaryBtn" href="/index.html">Back to home</a>
+          </div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="/js/paths.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/thanks/thanks.js"></script>
+</body>
+</html>

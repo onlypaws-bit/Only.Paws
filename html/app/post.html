@@ -1,0 +1,75 @@
+<!--
+  OnlyPaws
+  File: /html/app/post.html
+
+  CSS:
+  - /css/styles.css
+  - /css/app/post.css
+
+  JS:
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/auth-guard.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/app/post.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Post</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/post.css" />
+</head>
+<body class="postPage">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="postMain">
+      <section class="panel">
+        <div class="pill">Post</div>
+        <h1 id="pageTitle">Post</h1>
+
+        <div class="meta postMeta">
+          <b id="author">@creator</b>
+          <span id="createdAt"></span>
+        </div>
+
+        <div class="mediaWrap isHidden" id="mediaBox"></div>
+
+        <div class="captionBox isHidden" id="caption"></div>
+
+        <div class="btnRow">
+          <button class="ghost" id="likeBtn" data-liked="false" type="button" title="Like or unlike this post">
+            <span id="likeIcon">♡</span>
+            <span class="likeBtnLabel">Like</span>
+            <span id="likeCount" class="likeCount">0</span>
+          </button>
+
+          <button class="ghost" id="copyLinkBtn" type="button">Copy link</button>
+
+          <a class="ghost" id="backBtn" href="/html/app/feed.html">Back</a>
+        </div>
+
+        <div class="hint" id="hintBox">Loading…</div>
+        <div class="err isHidden" id="errBox"></div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/app/post.js"></script>
+</body>
+</html>

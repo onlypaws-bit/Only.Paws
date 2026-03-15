@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Creator Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/fans/creator-profile.css" />
+</head>
+
+<body>
+  <div id="siteHeader"></div>
+
+  <main class="creatorProfilePage">
+    <div class="creatorProfileWrap">
+      <section class="creatorProfileGrid">
+        <section class="panel creatorHeroPanel">
+          <div class="pill">Creator</div>
+
+          <h1 id="creatorName">Creator</h1>
+
+          <div class="heroRow">
+            <div class="avatar" id="creatorAvatar">🐾</div>
+
+            <div class="meta">
+              <b id="creatorHandle">@username</b>
+              <span id="creatorBio"></span>
+            </div>
+          </div>
+
+          <div class="creatorSocials" id="creatorSocials" hidden>
+            <a
+              id="creatorInstagram"
+              class="socialChip"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+            >
+              Instagram
+            </a>
+
+            <a
+              id="creatorTikTok"
+              class="socialChip"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+            >
+              TikTok
+            </a>
+          </div>
+
+          <div class="btnRow" id="actionRow">
+            <button class="ghost" id="followBtn" type="button">Follow</button>
+            <button class="btn" id="premiumBtn" type="button">Subscribe</button>
+            <button class="ghost" id="shareProfileBtn" type="button">Share profile</button>
+          </div>
+
+          <div class="hint" id="creatorHint"></div>
+        </section>
+
+        <aside class="panel creatorPetsPanel">
+          <div class="pill">Pets</div>
+          <div class="petsList" id="petsList"></div>
+          <div class="hint" id="petsHint">Loading…</div>
+        </aside>
+      </section>
+
+      <section class="panel creatorPostsPanel">
+        <div class="postsHeader">
+          <h2>Posts</h2>
+          <div class="hint postsLegend">
+            FREE is visible • PREMIUM is locked unless subscribed
+          </div>
+        </div>
+
+        <div class="posts" id="posts"></div>
+        <div class="hint" id="postsHint">Loading…</div>
+      </section>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/app/likes.js"></script>
+  <script src="/js/app/post.js"></script>
+  <script src="/js/app/fans/creator-profile.js"></script>
+</body>
+</html>

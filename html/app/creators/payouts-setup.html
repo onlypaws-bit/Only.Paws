@@ -1,0 +1,42 @@
+<div class="wrap">
+  <div id="header-placeholder"></div>
+
+  <main class="payoutsSetupMain">
+    <section class="panel">
+      <h1>Enable payouts</h1>
+      <p class="sub">
+        To withdraw earnings, you need to enable payouts through Stripe onboarding.
+        Once completed, your dashboard will unlock payout access.
+      </p>
+
+      <div class="payoutsBox">
+        <div class="payoutsStatusLine">
+          <div class="payoutsLockIcon" id="lockIcon">🔒</div>
+
+          <div class="payoutsStatusContent">
+            <div class="payoutsStatusTitle" id="statusTitle">Payouts not enabled</div>
+            <div class="payoutsStatusText" id="statusText">Start setup to enable withdrawals.</div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn" id="startBtn" type="button">Start payout setup</button>
+          <button class="ghost" id="refreshBtn" type="button">I've completed setup — Refresh</button>
+          <a class="ghost" id="backToDashboardBtn" href="/html/app/creators/creator-dash.html">Back to dashboard</a>
+        </div>
+
+        <div class="payoutsOkLine op-hidden" id="submittedLine">
+          <span>✅</span>
+          <span>Setup submitted. Press Refresh to re-check payout status.</span>
+        </div>
+
+        <div class="payoutsNote" id="note">
+          Tip: if Stripe needs verification, payouts may take a moment to become active.
+          Refresh again after about a minute.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="footer-placeholder"></div>
+</div>

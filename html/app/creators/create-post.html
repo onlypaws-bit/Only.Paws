@@ -1,0 +1,163 @@
+<!--
+  =========================================================
+  OnlyPaws
+  File: /html/app/creators/create-post.html
+
+  Purpose:
+  Creator page for creating and editing posts.
+
+  What this page does:
+  - Requires an authenticated creator
+  - Checks Creator Plan access before allowing locked creator tools
+  - Supports FREE and PREMIUM posts
+  - Supports PUBLIC and PRIVATE visibility
+  - Optionally uploads image/video media
+  - Shows a local preview for selected media
+  - Supports CREATE mode and EDIT mode via ?edit=<post_id>
+
+  Main flows:
+  - If the user is not logged in, redirect through auth/app flow
+  - If the user is not a creator, redirect away from creator tools
+  - If Creator Plan access is missing, lock the editor and show unlock CTA
+  - If ?edit= is present, load the target post and switch UI to edit mode
+  - On publish, save the post and upload media if provided
+  - On edit, update the post and replace media if a new file is selected
+
+  Dependencies:
+  JS
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/partials.js
+  - /js/nav.js
+  - /js/auth-guard.js
+  - /js/app/creators/create-post.js
+
+  CSS
+  - /css/styles.css
+  - /css/app/creators/create-post.css
+
+  Supabase:
+  - posts table
+  - profiles table
+  - entitlements table
+  - storage bucket: "posts"
+
+  Notes:
+  - Media preview is local before upload
+  - Existing media is not rendered back into the preview area in edit mode
+    unless a new file is selected
+  =========================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Create Post</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/creators/create-post.css" />
+</head>
+<body class="createPostPage">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="createPostMain">
+      <section class="panel">
+        <div class="row">
+          <div>
+            <div class="pill op-section-space op-hidden" id="modePill">Create Post</div>
+            <h1 id="pageTitle">Create a post</h1>
+            <p class="sub" id="pageSub">Creator-only. This writes into <b>posts</b>.</p>
+          </div>
+        </div>
+
+        <div class="locked op-hidden" id="creatorLockBox">
+          <b>🔒 Creator tools locked</b>
+
+          <div class="btnRow op-top-actions">
+            <a class="btn" id="unlockBtn" href="#" target="_blank" rel="noopener">
+              Unlock Creator Access — €10/month
+            </a>
+            <button class="ghost" id="refreshBtn" type="button">Refresh</button>
+          </div>
+
+          <div class="op-help-text">After checkout, tap Refresh.</div>
+        </div>
+
+        <div class="field">
+          <label for="is_public">Visibility</label>
+          <select id="is_public">
+            <option value="true">Public (shows in feeds)</option>
+            <option value="false">Private (creator only)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="is_paid">Type</label>
+          <select id="is_paid">
+            <option value="false">🆓 FREE</option>
+            <option value="true">🔒 PREMIUM</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="title">Title</label>
+          <input id="title" type="text" placeholder="e.g. Lola doing chaos stuff 🐾" />
+        </div>
+
+        <div class="field">
+          <label for="content">Content</label>
+          <textarea id="content" placeholder="Write the post content…"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="preview">Preview (recommended for PREMIUM)</label>
+          <textarea id="preview" placeholder="Short teaser shown when locked…"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="mediaFile">Media (optional)</label>
+          <input id="mediaFile" type="file" accept="image/*,video/*" />
+        </div>
+
+        <div class="field op-hidden" id="mediaPreviewWrap">
+          <label>Preview</label>
+
+          <div class="panel op-preview-panel">
+            <img
+              id="mediaPreviewImage"
+              class="op-preview-media op-preview-image op-hidden"
+              alt="Media preview"
+            />
+            <video
+              id="mediaPreviewVideo"
+              class="op-preview-media op-preview-video op-hidden"
+              controls
+              playsinline
+            ></video>
+            <div id="mediaPreviewEmpty" class="sub">No media selected.</div>
+          </div>
+        </div>
+
+        <div class="btnRow">
+          <button class="btn" id="publishBtn" type="button">Publish</button>
+          <a class="ghost op-hidden" id="cancelEditBtn" href="#">Cancel</a>
+        </div>
+
+        <div class="msg" id="msg"></div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/app/creators/create-post.js"></script>
+</body>
+</html>

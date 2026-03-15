@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/profile.css" />
+</head>
+
+<body>
+  <div id="siteHeader"></div>
+
+  <main class="profilePage">
+    <div class="profileWrap">
+      <section class="panel profilePanel">
+        <div class="profileHero">
+          <div>
+            <div class="pill" id="emailPill">…</div>
+            <h1>Your profile</h1>
+            <p class="sub">Set your basics, socials, and avatar.</p>
+          </div>
+
+          <div class="profileHeroActions">
+            <a class="navBtn" id="dashTopLink" href="#" hidden>Dashboard</a>
+            <button class="navBtn" id="logoutBtn" type="button">Log out</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" readonly />
+        </div>
+
+        <section class="avatarBox">
+          <img id="avatarImg" class="avatarImg" alt="Avatar preview" />
+
+          <div class="avatarControls">
+            <div class="field">
+              <label for="avatarFile">Avatar image</label>
+              <input id="avatarFile" type="file" accept="image/*" />
+            </div>
+
+            <div class="btnRow">
+              <button class="ghost" id="uploadAvatarBtn" type="button">Upload</button>
+              <button class="ghost" id="removeAvatarBtn" type="button">Remove</button>
+            </div>
+
+            <div class="uploadHint" id="avatarHint"></div>
+          </div>
+        </section>
+
+        <div class="field">
+          <label for="display_name">Display name</label>
+          <input id="display_name" autocomplete="name" />
+        </div>
+
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" autocomplete="off" />
+          <div class="hint" id="usernameHint"></div>
+        </div>
+
+        <div class="field">
+          <label for="bio">Bio</label>
+          <textarea id="bio"></textarea>
+        </div>
+
+        <section class="socialSection">
+          <h2 class="sectionTitle">Social links</h2>
+
+          <div class="field">
+            <label for="instagram_url">Instagram</label>
+            <input
+              id="instagram_url"
+              type="text"
+              inputmode="url"
+              placeholder="https://instagram.com/username or username"
+            />
+          </div>
+
+          <div class="field">
+            <label for="tiktok_url">TikTok</label>
+            <input
+              id="tiktok_url"
+              type="text"
+              inputmode="url"
+              placeholder="https://tiktok.com/@username or @username"
+            />
+          </div>
+        </section>
+
+        <div class="btnRow">
+          <button class="btn" id="saveBtn" type="button">Save profile</button>
+        </div>
+
+        <div class="msg" id="msg"></div>
+
+        <section class="dangerZone">
+          <b>Danger zone</b>
+
+          <div class="btnRow">
+            <button class="ghost dangerBtn" id="deleteBtn" type="button">
+              Delete account
+            </button>
+          </div>
+
+          <div class="msg" id="deleteMsg"></div>
+        </section>
+      </section>
+
+      <aside class="panel previewPanel">
+        <div class="previewHeader">
+          <div class="pill" id="userPill">…</div>
+          <h2>Public profile preview</h2>
+          <p class="sub">
+            Quick live preview of how your creator profile can look.
+          </p>
+        </div>
+
+        <div class="profilePreview" id="profilePreview">
+          <div class="profilePreviewCard">
+            <div class="profilePreviewTop">
+              <img
+                id="previewAvatar"
+                class="profilePreviewAvatar"
+                src="/assets/images/logo.png"
+                alt="Profile preview avatar"
+              />
+            </div>
+
+            <div class="profilePreviewBody">
+              <h3 id="previewName">Your name</h3>
+              <div class="profilePreviewHandle" id="previewHandle">@username</div>
+
+              <p class="profilePreviewBio" id="previewBio">
+                Your bio preview will appear here.
+              </p>
+
+              <div class="profilePreviewSocials" id="previewSocials" hidden>
+                <a
+                  id="previewInstagram"
+                  class="socialChip"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  hidden
+                >
+                  Instagram
+                </a>
+
+                <a
+                  id="previewTikTok"
+                  class="socialChip"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  hidden
+                >
+                  TikTok
+                </a>
+              </div>
+
+              <div class="hint previewHint" id="previewHint"></div>
+
+              <div class="btnRow previewActions">
+                <a
+                  id="previewOpenBtn"
+                  class="ghost"
+                  href="#"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  hidden
+                >
+                  Open public preview
+                </a>
+
+                <button id="previewCopyBtn" class="ghost" type="button" hidden>
+                  Copy public link
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <div id="siteFooter"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/app/profile.js"></script>
+</body>
+</html>

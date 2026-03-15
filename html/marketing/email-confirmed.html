@@ -1,0 +1,177 @@
+<!--
+  OnlyPaws
+  File: /html/marketing/creators.html
+
+  Uses central paths from /js/paths.js
+
+  CSS:
+  /css/styles.css
+  /css/marketing/layout.css
+  /css/marketing/auth.css
+  /css/marketing/creators.css
+
+  JS:
+  /js/paths.js
+  /js/onlypawsClient.js
+  /js/partials.js
+  /js/nav.js
+  /js/support-us.js
+  /js/marketing/creators.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — For Creators</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/marketing/layout.css" />
+  <link rel="stylesheet" href="/css/marketing/auth.css" />
+  <link rel="stylesheet" href="/css/marketing/creators.css" />
+</head>
+
+<body>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <main class="hero authLayout">
+        <section class="panel">
+          <div class="pill">Publish pet content. Earn support.</div>
+
+          <h1>Become a creator</h1>
+
+          <p class="sub creatorsHeroIntro">
+            Build your creator profile, showcase your pets, and monetize your content with subscriptions.
+            Payments are handled securely through Stripe.
+          </p>
+
+          <div class="creatorsFeatureList">
+            <div class="creatorsFeatureItem">📸 Post exclusive photos &amp; videos</div>
+            <div class="creatorsFeatureItem">🐾 Build a creator profile with your pets</div>
+            <div class="creatorsFeatureItem">💳 Secure payouts &amp; billing via Stripe</div>
+            <div class="creatorsFeatureItem">🔒 Pet-first content policy</div>
+          </div>
+
+          <div class="authBox">
+            <form id="creator-auth-form" class="authForm">
+              <div class="authFieldGroup">
+                <input
+                  type="email"
+                  id="creator-email"
+                  class="authField"
+                  placeholder="Email"
+                  required
+                />
+
+                <input
+                  type="password"
+                  id="creator-password"
+                  class="authField"
+                  placeholder="Password (min 6)"
+                  required
+                />
+              </div>
+
+              <div class="btnRow authActionsRow">
+                <button type="submit" class="btn" id="creatorLoginBtn">Log in</button>
+                <button type="button" class="ghost" id="creatorSignupBtn">Create creator account</button>
+              </div>
+
+              <div class="forgotRow">
+                <button type="button" class="tinyLink" id="forgotBtn">Forgot password?</button>
+                <span class="hint">You’ll receive an email link</span>
+              </div>
+
+              <div class="resetBox" id="resetBox">
+                <div class="hint">
+                  Send a password reset email to the address above.
+                </div>
+
+                <div class="btnRow resetActions">
+                  <button type="button" class="btn" id="sendResetBtn">Send reset email</button>
+                  <button type="button" class="ghost" id="cancelResetBtn">Cancel</button>
+                </div>
+              </div>
+
+              <div id="creatorMsg" class="authMsg"></div>
+            </form>
+          </div>
+
+          <div class="note">
+            After signup or login you’ll be redirected to your creator area.
+          </div>
+        </section>
+
+        <section class="panel authPanelStack">
+          <div class="pill">For creators</div>
+
+          <h2 class="sectionTitle creatorsSectionSpacer">Creator Plan</h2>
+
+          <p class="sub">
+            Creator Plan costs €10/month and requires an active account.
+            Registration is required before purchasing.
+          </p>
+
+          <div class="creatorPlanCard">
+            <div class="creatorPlanTitle">Monthly creator access</div>
+            <div class="creatorPlanPrice">€10<span>/month</span></div>
+            <div class="creatorPlanNote">
+              Cancel anytime • Secure payments via Stripe
+            </div>
+          </div>
+
+          <div class="btnRow creatorsSectionSpacer">
+            <a class="ghost" id="creatorFaqLink" href="/html/marketing/faq/faq-creators.html">
+              Creator FAQ
+            </a>
+            <a class="ghost" id="fanLandingLink" href="/html/marketing/fans.html">
+              I’m a fan
+            </a>
+          </div>
+
+          <div class="supportCard">
+            <div class="brandImage creatorsAsideImage">
+              <img
+                id="creatorsImage"
+                src="/assets/images/onlypaws-creators.png"
+                alt="OnlyPaws creators"
+              />
+            </div>
+
+            <h3>Support Us 🐾</h3>
+
+            <p>
+              Love OnlyPaws and want to support the project?
+              This is a recurring support contribution billed every 3 months.
+              It does not unlock any features or memberships.
+              It simply helps us keep OnlyPaws alive, improve the platform,
+              and take care of our furry friends 💜
+            </p>
+
+            <div class="btnRow indexSupportActions">
+              <button class="btn" id="supportUsBtn" type="button">
+                Support OnlyPaws 🐾
+              </button>
+            </div>
+
+            <div id="supportUsMsg" class="authMsg"></div>
+          </div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/support-us.js"></script>
+  <script src="/js/marketing/creators.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!--
+  OnlyPaws
+  File: /html/app/feed.html
+
+  CSS:
+  - /css/styles.css
+  - /css/app/feed.css
+
+  JS:
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/auth-guard.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/support-us.js
+  - /js/app/feed.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/feed.css" />
+</head>
+<body class="feedPage">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="feedMain">
+      <section class="panel">
+        <h1>Feed</h1>
+        <p class="sub">Browse creators, discover cute content, and support what you love.</p>
+
+        <div class="searchRow">
+          <input
+            id="searchInput"
+            class="search"
+            type="search"
+            placeholder="Search creators (by name or @username)..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="subtleLine">
+          <span>Want to help keep OnlyPaws running?</span>
+          <button id="supportBtn" class="navBtn" type="button">Support OnlyPaws</button>
+        </div>
+
+        <div id="debug" class="debug" hidden></div>
+      </section>
+
+      <section class="panel panelSpaced">
+        <div class="pill">Featured creators</div>
+        <div class="creatorList" id="creatorList"></div>
+        <div class="hint" id="creatorHint">Loading creators…</div>
+      </section>
+
+      <section class="panel panelSpaced">
+        <div class="postsHeader">
+          <h2>Latest posts</h2>
+          <div class="hint postsHeaderHint">Visible posts (premium appears after purchase)</div>
+        </div>
+
+        <div class="posts" id="posts"></div>
+        <div class="hint" id="postsHint">Loading posts…</div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <div id="mediaModal" class="mediaModal" aria-hidden="true">
+    <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
+      <button id="mediaModalClose" class="mediaModalClose" type="button" aria-label="Close preview">✕</button>
+      <img id="mediaModalImg" class="mediaModalImg isHidden" alt="Preview" />
+      <video id="mediaModalVid" class="mediaModalVid isHidden" controls playsinline></video>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/support-us.js"></script>
+  <script src="/js/app/feed.js"></script>
+</body>
+</html>

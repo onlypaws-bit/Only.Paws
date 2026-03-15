@@ -1,0 +1,154 @@
+<!--
+  OnlyPaws
+  File: /html/marketing/fans.html
+
+  Uses central paths from /js/paths.js
+
+  CSS:
+  /css/styles.css
+  /css/marketing/layout.css
+  /css/marketing/auth.css
+  /css/marketing/fans.css
+
+  JS:
+  /js/paths.js
+  /js/onlypawsClient.js
+  /js/partials.js
+  /js/nav.js
+  /js/support-us.js
+  /js/marketing/fans.js
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — For Fans</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/marketing/layout.css" />
+  <link rel="stylesheet" href="/css/marketing/auth.css" />
+  <link rel="stylesheet" href="/css/marketing/fans.css" />
+</head>
+
+<body>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <main class="hero authLayout">
+        <section class="panel">
+          <div class="pill">Follow creators. Unlock premium.</div>
+
+          <h1>Become a fan</h1>
+
+          <p class="sub fansHeroIntro">
+            Follow your favorite creators, see free posts, and unlock premium content with subscriptions or single purchases.
+            Payments are handled securely through Stripe.
+          </p>
+
+          <div class="fansFeatureList">
+            <div class="fansFeatureItem">🆓 Follow creators for free</div>
+            <div class="fansFeatureItem">👀 See free posts instantly</div>
+            <div class="fansFeatureItem">🔓 Unlock premium posts (subscription or single purchase)</div>
+            <div class="fansFeatureItem">💳 Secure payments via Stripe</div>
+          </div>
+
+          <div class="authBox">
+            <form id="fan-auth-form" class="authForm">
+              <div class="authFieldGroup">
+                <input
+                  type="email"
+                  id="fan-email"
+                  class="authField"
+                  placeholder="Email"
+                  required
+                />
+
+                <input
+                  type="password"
+                  id="fan-password"
+                  class="authField"
+                  placeholder="Password (min 6)"
+                  required
+                />
+              </div>
+
+              <div class="btnRow authActionsRow">
+                <button type="submit" class="btn" id="fanLoginBtn">Log in</button>
+                <button type="button" class="ghost" id="fanSignupBtn">Create fan account</button>
+              </div>
+
+              <div class="forgotRow">
+                <button type="button" class="tinyLink" id="forgotBtn">Forgot password?</button>
+                <span class="hint">You’ll receive an email link</span>
+              </div>
+
+              <div class="resetBox" id="resetBox">
+                <div class="hint">
+                  Send a password reset email to the address above.
+                </div>
+
+                <div class="btnRow resetActions">
+                  <button type="button" class="btn" id="sendResetBtn">Send reset email</button>
+                  <button type="button" class="ghost" id="cancelResetBtn">Cancel</button>
+                </div>
+              </div>
+
+              <div id="fanMsg" class="authMsg"></div>
+            </form>
+          </div>
+        </section>
+
+        <section class="panel authPanelStack">
+          <div class="btnRow">
+            <a class="ghost" id="fanFaqLink" href="/html/marketing/faq/faq-fans.html">Fan FAQ</a>
+            <a class="ghost" id="creatorLandingLink" href="/html/marketing/creators.html">I’m a creator</a>
+          </div>
+
+          <div class="supportCard fanSupportCard">
+            <div class="brandImage fansAsideImage">
+              <img
+                id="fansImage"
+                src="/assets/images/onlypaws-fans.png"
+                alt="OnlyPaws fans"
+              />
+            </div>
+
+            <h3>Support Us 🐾</h3>
+
+            <p class="fansSupportInfo">
+              Love OnlyPaws and want to support the project?
+              This is a recurring support contribution billed every 3 months.
+              It does not unlock any features or memberships.
+              It simply helps us keep OnlyPaws alive, improve the platform,
+              and take care of our furry friends 💜
+            </p>
+
+            <div class="btnRow indexSupportActions">
+              <button class="btn" id="supportUsBtn" type="button">
+                Support OnlyPaws 🐾
+              </button>
+            </div>
+
+            <div id="supportUsMsg" class="authMsg"></div>
+
+            <div class="note">Cancel anytime • Secure payments via Stripe</div>
+          </div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/support-us.js"></script>
+  <script src="/js/marketing/fans.js"></script>
+</body>
+</html>

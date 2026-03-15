@@ -1,0 +1,196 @@
+<!--
+  =========================================================
+  OnlyPaws
+  File: /html/app/creators/creator-dash.html
+
+  Purpose:
+  Main dashboard for authenticated creators.
+
+  What this page does:
+  - Verifies the current session
+  - Loads the creator profile and role
+  - Checks whether Creator Plan access is active
+  - Shows creator status and main actions
+  - Displays Stripe balance summary (indicative only)
+  - Displays earnings history from wallet transactions
+  - Displays creator pets
+  - Displays subscribers and followers
+  - Displays creator posts with edit/delete actions
+
+  Main sections:
+  - Status
+  - Balance
+  - Earnings
+  - Pets
+  - Subscribers
+  - Followers
+  - Posts
+
+  Dependencies:
+  CSS
+  - /css/styles.css
+  - /css/app/creators/creator-dash.css
+
+  JS
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/app/creators/creator-dash.js
+
+  Supabase:
+  - profiles
+  - entitlements
+  - posts
+  - pets
+  - fan_subscriptions
+  - wallet_transactions
+  - creator_plans
+  - v_followers_creator
+
+  Edge Functions:
+  - creator-balance
+  - connect-login
+  - update-connect-account
+  - create-creator-plan-checkout
+  - cancel-creator-plan
+
+  Notes:
+  - Balance is indicative only and managed by Stripe
+  - Payouts and withdrawals are handled in Stripe
+  =========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Creator Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/creators/creator-dash.css" />
+</head>
+<body class="creatorDashPage">
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <main class="creatorDashMain">
+        <section class="panel">
+          <h1>Creator dashboard</h1>
+          <p class="sub">Manage creator tools: posts, audience, and an indicative Stripe balance.</p>
+
+          <div class="dashboardGrid">
+            <div class="dashboardCol">
+              <div class="card">
+                <h3>Status</h3>
+                <div class="hint" id="stateBox">Loading…</div>
+
+                <div class="btnRow dashboardBtnRow">
+                  <a class="btn" id="createPostBtn" href="#" aria-disabled="true">Create post</a>
+                </div>
+
+                <div class="locked dashboardInfoBox">
+                  <b>Tip</b>
+                  <div class="hint">Post consistently to grow followers and convert them into subscribers 💜</div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Balance (indicative)</h3>
+                <div class="hint" id="walletHint">Loading…</div>
+
+                <div class="walletGrid">
+                  <div class="kpi">
+                    <div class="k">Available</div>
+                    <div class="v" id="walletAvailable">—</div>
+                    <div class="s">Indicative — managed by Stripe.</div>
+                  </div>
+
+                  <div class="kpi">
+                    <div class="k">Pending</div>
+                    <div class="v" id="walletPending">—</div>
+                    <div class="s">Indicative — managed by Stripe.</div>
+                  </div>
+                </div>
+
+                <div class="btnRow dashboardSmallRow">
+                  <button class="ghost" id="refreshWalletBtn" type="button">Refresh</button>
+                  <a class="ghost" id="enablePayoutBtn" href="#" hidden>Open Stripe</a>
+                </div>
+
+                <div class="locked dashboardInfoBox">
+                  <b>Note</b>
+                  <div class="hint">
+                    Withdrawals, payouts, and account management happen directly in Stripe.
+                    This page only shows an indicative balance.
+                  </div>
+                </div>
+
+                <div id="walletMsg" class="locked dashboardWalletMsg" hidden>
+                  <b>Wallet message</b>
+                  <div class="hint" id="walletMsgText"></div>
+                </div>
+              </div>
+
+              <div class="card dashboardCardTop">
+                <h3>Earnings</h3>
+                <div class="hint" id="earningsHint">Loading…</div>
+
+                <div id="earningsTable" class="list dashboardListTop"></div>
+
+                <div class="locked dashboardInfoBox">
+                  <b>Note</b>
+                  <div class="hint">Shows completed payments only. Stripe fees and OnlyPaws fee already excluded.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sectionTitle dashboardSectionTitle">
+            <h2>Your pets</h2>
+            <div class="hint" id="petsHint">Loading…</div>
+          </div>
+
+          <div class="btnRow dashboardTightRow">
+            <a class="ghost" id="managePetsBtn" href="#">➕ Add / manage pets</a>
+          </div>
+
+          <div class="list" id="petsList"></div>
+
+          <div class="sectionTitle dashboardSectionTitle">
+            <h2>Your subscribers</h2>
+            <div class="hint" id="subsHint">Loading…</div>
+          </div>
+
+          <div class="list" id="subsList"></div>
+
+          <div class="sectionTitle dashboardSectionTitle">
+            <h2>Your followers</h2>
+            <div class="hint" id="followersHint">Loading…</div>
+          </div>
+
+          <div class="list" id="followersList"></div>
+
+          <div class="sectionTitle dashboardSectionTitle">
+            <h2>Your posts</h2>
+            <div class="hint" id="myPostsHint">Loading…</div>
+          </div>
+
+          <div class="list" id="myPosts"></div>
+        </section>
+      </main>
+
+      <div class="footerWrap" id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/app/creators/creator-dash.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!--
+  =========================================================
+  OnlyPaws
+  File: /html/app/creators/fan-profile.html
+
+  Purpose:
+  Public profile page for a fan, visible from the creator side.
+
+  What this page does:
+  - Loads a public fan profile by ?u=<username_or_user_id>
+  - Shows fan identity and public bio
+  - Displays following and subscription counts
+  - Lists creators followed by the fan
+  - Keeps logged-in app navigation available
+
+  Main sections:
+  - Fan profile summary
+  - Stats
+  - Following creators
+
+  Dependencies:
+  CSS
+  - /css/styles.css
+  - /css/app/creators/fan-profile.css
+
+  JS
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/app/creators/fan-profile.js
+
+  Supabase:
+  - profiles
+  - followers
+  - fan_subscriptions
+
+  Notes:
+  - Accepts both username and UUID via ?u=
+  - If the resolved profile is a creator, the page shows a hint
+  =========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Fan Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/creators/fan-profile.css" />
+</head>
+<body class="fanProfilePage">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="fanProfileMain">
+      <div class="grid">
+        <section class="panel">
+          <div class="pill">Fan</div>
+          <h1 id="fanName">Fan</h1>
+
+          <div class="heroRow">
+            <div class="avatar" id="fanAvatar">🐾</div>
+            <div class="meta">
+              <b id="fanHandle">@username</b>
+              <span id="fanBio"></span>
+            </div>
+          </div>
+
+          <div class="hint fanProfilePublicHint">Public fan profile</div>
+
+          <div class="miniGrid fanProfileStatsGrid">
+            <div class="miniCard">
+              <div class="miniK">Following</div>
+              <div class="miniV" id="statFollowing">—</div>
+            </div>
+
+            <div class="miniCard">
+              <div class="miniK">Subscriptions</div>
+              <div class="miniV" id="statSubscriptions">—</div>
+            </div>
+
+            <div class="miniCard">
+              <div class="miniK">Likes</div>
+              <div class="miniV">—</div>
+              <div class="hint fanProfileSoonHint">Coming soon</div>
+            </div>
+
+            <div class="miniCard">
+              <div class="miniK">Collections</div>
+              <div class="miniV">—</div>
+              <div class="hint fanProfileSoonHint">Coming soon</div>
+            </div>
+          </div>
+
+          <div class="hint" id="fanHint"></div>
+        </section>
+
+        <section class="panel">
+          <div class="pill">Following</div>
+          <div class="hint followingSectionHint">Creators followed</div>
+          <div class="list" id="followingList"></div>
+          <div class="hint" id="followingHint">Loading…</div>
+        </section>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/app/creators/fan-profile.js"></script>
+</body>
+</html>
