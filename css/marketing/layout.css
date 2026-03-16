@@ -24,16 +24,6 @@
   margin-top: 16px;
 }
 
-.tinyLink {
-  color: rgba(255, 255, 255, 0.88);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.tinyLink:hover {
-  color: #fff;
-}
-
 .centerWrap {
   width: 100%;
   max-width: 560px;
