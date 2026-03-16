@@ -8,6 +8,7 @@
   /css/styles.css
   /css/marketing/layout.css
   /css/marketing/auth.css
+  /css/marketing/reset-password.css
   /css/marketing/fans.css
 
   JS:
@@ -27,10 +28,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-<link rel="stylesheet" href="/css/marketing/layout.css" />
-<link rel="stylesheet" href="/css/marketing/auth.css" />
-<link rel="stylesheet" href="/css/marketing/reset-password.css" />
-<link rel="stylesheet" href="/css/marketing/fans.css" />
+  <link rel="stylesheet" href="/css/marketing/layout.css" />
+  <link rel="stylesheet" href="/css/marketing/auth.css" />
+  <link rel="stylesheet" href="/css/marketing/reset-password.css" />
+  <link rel="stylesheet" href="/css/marketing/fans.css" />
 </head>
 
 <body>
@@ -87,7 +88,7 @@
               </div>
 
               <div class="resetBox" id="resetBox">
-                <div class="hint">
+                <div class="resetHint">
                   Send a password reset email to the address above.
                 </div>
 
@@ -103,6 +104,33 @@
         </section>
 
         <section class="panel authPanelStack">
+          <div class="pill">For fans</div>
+
+          <h2 class="sectionTitle fansSectionTitle">Fan Membership</h2>
+
+          <p class="sub fansSubCompact">
+            Fan Membership costs €5/month and will unlock fan features, special perks, and future discounts across OnlyPaws.
+            Payments are handled securely through Stripe.
+          </p>
+
+          <div class="fanMembershipBox">
+            <div class="fanMembershipLabel">
+              Monthly fan membership
+            </div>
+
+            <div class="fanMembershipPrice">
+              €5<span>/month</span>
+            </div>
+
+            <div class="fanMembershipMini">
+              Unlock fan features • Discounts • Secure payments via Stripe
+            </div>
+          </div>
+
+          <div class="fanMembershipComingSoon">
+            Coming soon 🐾
+          </div>
+
           <div class="btnRow fansTopActions">
             <a class="ghost" id="fanFaqLink" href="/html/marketing/faq/faq-fans.html">Fan FAQ</a>
             <a class="ghost" id="creatorLandingLink" href="/html/marketing/creators.html">I’m a creator</a>
