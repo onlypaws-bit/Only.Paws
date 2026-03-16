@@ -17,6 +17,9 @@
       <div id="header-placeholder"></div>
 
       <main class="hero authLayout">
+
+        <!-- LEFT PANEL -->
+
         <section class="panel">
           <div class="pill">Publish pet content. Earn support.</div>
 
@@ -36,6 +39,7 @@
 
           <div class="authBox">
             <form id="creator-auth-form" class="authForm">
+
               <div class="authFieldGroup">
                 <input
                   type="email"
@@ -76,34 +80,66 @@
               </div>
 
               <div id="creatorMsg" class="authMsg"></div>
+
             </form>
           </div>
         </section>
 
+
+        <!-- RIGHT PANEL -->
+
         <section class="panel authPanelStack">
+
           <div class="pill">For creators</div>
 
-          <h2 class="sectionTitle creatorsSectionSpacer">Creator Plan</h2>
+          <h2 class="sectionTitle creatorsSectionSpacer">
+            Creator Plan
+          </h2>
 
           <p class="sub">
             Creator Plan costs €10/month and requires an active account.
             Registration is required before purchasing.
           </p>
 
-          <div class="marketingPriceCard">
-            <div class="marketingPriceTitle">Monthly creator access</div>
-            <div class="marketingPriceValue">€10<span>/month</span></div>
-            <div class="marketingMuted">
-              Cancel anytime • Secure payments via Stripe
+
+          <!-- CREATOR PLAN CARD -->
+
+          <div class="creatorPlanCard">
+
+            <div class="creatorPlanTitle">
+              Monthly creator access
             </div>
+
+            <div class="creatorPlanBox">
+
+              <div class="creatorPlanPrice">
+                €10
+              </div>
+
+              <div class="creatorPlanNote">
+                Cancel anytime • Secure payments via Stripe
+              </div>
+
+            </div>
+
           </div>
+
 
           <div class="btnRow creatorsSectionSpacer">
-            <a class="ghost" id="creatorFaqLink" href="/html/marketing/faq/faq-creators.html">Creator FAQ</a>
-            <a class="ghost" id="fanLandingLink" href="/html/marketing/fans.html">I’m a fan</a>
+            <a class="ghost" id="creatorFaqLink" href="/html/marketing/faq/faq-creators.html">
+              Creator FAQ
+            </a>
+
+            <a class="ghost" id="fanLandingLink" href="/html/marketing/fans.html">
+              I’m a fan
+            </a>
           </div>
 
+
+          <!-- SUPPORT CARD -->
+
           <div class="supportCard">
+
             <div class="brandImage marketingAsideImage">
               <img
                 id="creatorsImage"
@@ -130,14 +166,20 @@
 
             <div id="supportUsMsg" class="authMsg"></div>
 
-            <div class="note">Cancel anytime • Secure payments via Stripe</div>
+            <div class="note">
+              Cancel anytime • Secure payments via Stripe
+            </div>
+
           </div>
+
         </section>
+
       </main>
 
       <div id="footer-placeholder"></div>
     </div>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
@@ -146,5 +188,6 @@
   <script src="/js/nav.js"></script>
   <script src="/js/support-us.js"></script>
   <script src="/js/marketing/creators.js"></script>
+
 </body>
 </html>
