@@ -81,11 +81,12 @@
           </p>
 
           <div class="list">
-            <div class="listItem">✅ No adult or explicit content</div>
-            <div class="listItem">✅ No gambling services</div>
-            <div class="listItem">✅ No restricted goods or prohibited services</div>
-            <div class="listItem">✅ Digital subscription products only</div>
-          </div>
+  <div class="listItem">✅ Safe-for-work pet content only</div>
+  <div class="listItem">❌ No adult or explicit content</div>
+  <div class="listItem">❌ No gambling services</div>
+  <div class="listItem">❌ No restricted goods or prohibited services</div>
+  <div class="listItem">✅ Digital subscription products only</div>
+</div>
 
           <div class="infoBox">
             <strong>Subscription policy:</strong><br />
@@ -106,5 +107,10 @@
 
   <script src="/js/paths.js"></script>
   <script src="/js/partials.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      await window.OPPartials?.loadStripeLayout?.();
+    });
+  </script>
 </body>
 </html>
