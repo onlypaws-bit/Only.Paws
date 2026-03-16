@@ -34,6 +34,14 @@
   margin:0 auto 14px;
 }
 
+/* ===== SUPPORT NOTE (shared marketing) ===== */
+
+.supportNote{
+  margin-top:10px;
+  font-size:13px;
+  color:rgba(255,255,255,.78);
+}
+
 .centerWrap {
   width: 100%;
   max-width: 560px;
