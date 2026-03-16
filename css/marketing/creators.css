@@ -4,13 +4,7 @@
    Purpose: styles specific to the marketing creators page
    ========================================================= */
 
-.creatorPlanCard {
-  margin-top: 16px;
-  padding: 20px;
-  border-radius: 22px;
-  border: 1px solid var(--stroke);
-  background: rgba(255,255,255,.10);
-}
+
 
 .creatorPlanBox{
       margin-top:16px;
