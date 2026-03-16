@@ -181,5 +181,11 @@
   <script src="/js/paths.js"></script>
   <script src="/js/partials.js"></script>
   <script src="/js/nav.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      await window.OPPartials?.loadMarketingLayout?.();
+      window.OPNav?.init?.();
+    });
+  </script>
 </body>
 </html>
