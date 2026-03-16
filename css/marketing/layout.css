@@ -371,3 +371,78 @@
     padding: 16px;
   }
 }
+
+
+/* =========================================================
+   Legal / policy pages
+   Shared styles for legal, policy, and long-form info pages
+   such as:
+   - content policy
+   - privacy policy
+   - terms
+   ========================================================= */
+
+.marketingPageWrapLegal {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.marketingPageIntro {
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+  margin-bottom: 26px;
+}
+
+.legalSections {
+  display: grid;
+  gap: 18px;
+}
+
+.legalSection {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.legalSection h2 {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+}
+
+.legalSection p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.legalSection p + p {
+  margin-top: 12px;
+}
+
+.legalSection ul {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.legalSection li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.legalMeta {
+  margin-top: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 640px) {
+  .legalSection {
+    padding: 18px;
+  }
+
+  .marketingPageIntro {
+    margin-bottom: 22px;
+  }
+}
