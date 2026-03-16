@@ -329,9 +329,8 @@
       creatorList.innerHTML = creators.map(creatorCardHtml).join("");
       hide(creatorHint);
     } catch (error) {
-      console.error("[feed] failed to load featured creators", error);
-      setText(creatorHint, "Failed to load creators.");
-      show(creatorHint);
+     
+console.error("[feed] failed to load featured creators", error?.message, error?.details, error?.hint, error);
     }
   }
 
@@ -430,9 +429,8 @@
         await window.OnlyPawsPost.initPosts(postsEl);
       }
     } catch (error) {
-      console.error("[feed] failed to load latest posts", error);
-      setText(postsHint, "Failed to load posts.");
-      show(postsHint);
+      console.error("[feed] failed to load latest posts", error?.message, error?.details, error?.hint, error);
+
     }
   }
 
