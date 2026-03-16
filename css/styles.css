@@ -173,9 +173,12 @@ body{
 /* ===== TYPO ===== */
 
 h1{
-  margin:10px 0;
-  font-size:clamp(2.2rem, 4vw, 3rem);
-}
+      margin:12px 0 10px;
+      font-size:clamp(2.1rem, 4vw, 2.8rem);
+      line-height:1.05;
+      letter-spacing:-0.6px;
+    }
+
 
 h2{
   margin:0 0 8px;
