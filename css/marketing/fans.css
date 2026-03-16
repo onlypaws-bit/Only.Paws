@@ -4,17 +4,69 @@
    Purpose: styles specific to the marketing fans page
    ========================================================= */
 
-.fansTopActions{
-  margin-top:0;
+/* ===== MEMBERSHIP SECTION ===== */
+
+.fansSectionTitle{
+  margin-top:12px;
 }
 
-.fansSupportActions{
-  margin-top:14px;
+.fansSubCompact{
+  font-size:1rem;
 }
+
+.fanMembershipBox{
+  margin-top:16px;
+  padding:14px 16px;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+}
+
+.fanMembershipLabel{
+  font-size:14px;
+  font-weight:800;
+}
+
+.fanMembershipPrice{
+  margin-top:10px;
+  font-size:1.9rem;
+  font-weight:900;
+  line-height:1;
+}
+
+.fanMembershipPrice span{
+  font-size:1rem;
+  font-weight:700;
+}
+
+.fanMembershipMini{
+  margin-top:8px;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.76);
+}
+
+.fanMembershipComingSoon{
+  margin-top:10px;
+  font-size:13px;
+  color:rgba(255,255,255,.78);
+}
+
+/* ===== ACTION ROW ===== */
+
+.fansTopActions{
+  margin-top:16px;
+}
+
+/* ===== SUPPORT CARD ===== */
 
 .fansSupportInfo{
   margin-top:14px;
   font-size:14px;
+}
+
+.fansSupportActions{
+  margin-top:14px;
 }
 
 .fansSupportNote{
