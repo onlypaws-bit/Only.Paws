@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/marketing/layout.css" />
+  <link rel="stylesheet" href="/css/marketing/index.css" />
+</head>
+
+<body>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
+
+      <main class="hero">
+        <section class="panel">
+          <div class="pill"> where pets are the creators 🐾</div>
+
+          <h1>OnlyPaws</h1>
+
+          <p class="sub">
+            Create a profile for your pet, share photos and updates, and let people follow their favorite animals.
+            OnlyPaws is a playful platform built for pet creators and pet lovers.
+          </p>
+
+          <div class="btnRow">
+            <a class="ghost" id="explorePackLink" href="/html/marketing/the-pack.html">
+              Explore The Pack 🐾
+            </a>
+          </div>
+
+          <div class="cardsStack">
+            <section class="card">
+              <h2>For fans</h2>
+              <p>
+                Discover pet profiles, follow your favorite animals, and support the creators you enjoy.
+              </p>
+
+              <div class="btnRow cardActions">
+                <a class="btn" id="fansLink" href="/html/marketing/fans.html">Fan area </a>
+                <a class="ghost" id="fanFaqLink" href="/html/marketing/faq/faq-fans.html">Fan FAQ</a>
+              </div>
+            </section>
+
+            <section class="card">
+              <h2>For creators</h2>
+              <p>
+                Build a page for your pet, share posts and updates, and grow a fun community around them.
+              </p>
+
+              <div class="btnRow cardActions">
+                <a class="btn" id="creatorsLink" href="/html/marketing/creators.html">Creator area</a>
+                <a class="ghost" id="creatorFaqLink" href="/html/marketing/faq/faq-creators.html">Creator FAQ</a>
+              </div>
+            </section>
+          </div>
+
+        </section>
+
+        <section class="panel">
+          <div class="brandImage">
+            <img
+              id="homeHeroImage"
+              src="/assets/images/onlypaws-index.png"
+              alt="OnlyPaws thumbnail"
+            />
+          </div>
+
+          <div class="supportCard">
+            <h3>Support OnlyPaws 🐾</h3>
+
+            <p>
+              This is a recurring support contribution billed every 3 months.
+              It does not unlock memberships or private content.
+              It simply helps us keep OnlyPaws online, improve the platform,
+              and build more fun things for pet lovers.
+            </p>
+
+            <div class="btnRow supportActions">
+              <button class="btn" id="supportUsBtn" type="button">
+                Support OnlyPaws 🐾
+              </button>
+            </div>
+
+            <div id="supportUsMsg" class="authMsg"></div>
+
+            <p class="supportNote">
+              Cancel anytime • Secure payments via Stripe
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/support-us.js"></script>
+  <script src="/js/marketing/index.js"></script>
+</body>
+</html>
