@@ -76,15 +76,6 @@
   border: 1px solid rgba(255,255,255,.16);
 }
 
-.supportCard img {
-  display: block;
-  width: 100%;
-  max-height: 190px;
-  margin-bottom: 14px;
-  object-fit: cover;
-  border-radius: 16px;
-}
-
 .supportCard h3 {
   margin: 0 0 10px;
   font-size: 1.2rem;
