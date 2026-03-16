@@ -9,8 +9,12 @@
 (function () {
   const PATHS = window.OP_PATHS || {};
 
-  function getMount(id) {
-    return document.getElementById(id);
+  function getMount(...ids) {
+    for (const id of ids) {
+      const el = document.getElementById(id);
+      if (el) return el;
+    }
+    return null;
   }
 
   async function loadPartial(targetOrId, url) {
@@ -40,8 +44,8 @@
   }
 
   async function loadLayout() {
-    const headerMount = getMount("header-placeholder");
-    const footerMount = getMount("footer-placeholder");
+    const headerMount = getMount("header-placeholder", "header", "headerMount");
+    const footerMount = getMount("footer-placeholder", "footer", "footerMount");
 
     await loadPartial(
       headerMount,
@@ -55,8 +59,8 @@
   }
 
   async function loadMarketingLayout() {
-    const headerMount = getMount("header-placeholder");
-    const footerMount = getMount("footer-placeholder");
+    const headerMount = getMount("header-placeholder", "header", "headerMount");
+    const footerMount = getMount("footer-placeholder", "footer", "footerMount");
 
     await loadPartial(
       headerMount,
@@ -72,8 +76,8 @@
   }
 
   async function loadStripeLayout() {
-    const headerMount = getMount("header-placeholder");
-    const footerMount = getMount("footer-placeholder");
+    const headerMount = getMount("header-placeholder", "header", "headerMount");
+    const footerMount = getMount("footer-placeholder", "footer", "footerMount");
 
     await loadPartial(
       headerMount,
