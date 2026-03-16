@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/marketing/layout.css" />
-  <link rel="stylesheet" href="/css/marketing/auth.css" />
-  <link rel="stylesheet" href="/css/marketing/creators.css" />
+<link rel="stylesheet" href="/css/marketing/layout.css" />
+<link rel="stylesheet" href="/css/marketing/auth.css" />
+<link rel="stylesheet" href="/css/marketing/reset-password.css" />
+<link rel="stylesheet" href="/css/marketing/creators.css" />
 </head>
 
 <body>
@@ -17,6 +18,9 @@
       <div id="header-placeholder"></div>
 
       <main class="hero authLayout">
+
+        <!-- LEFT PANEL -->
+
         <section class="panel">
           <div class="pill">Publish pet content. Earn support.</div>
 
@@ -27,15 +31,16 @@
             Payments are handled securely through Stripe.
           </p>
 
-          <div class="creatorsFeatureList">
-            <div class="creatorsFeatureItem">📸 Post exclusive photos &amp; videos</div>
-            <div class="creatorsFeatureItem">🐾 Build a creator profile with your pets</div>
-            <div class="creatorsFeatureItem">💳 Secure payouts &amp; billing via Stripe</div>
-            <div class="creatorsFeatureItem">🔒 Pet-first content policy</div>
+          <div class="marketingFeatureList">
+            <div class="marketingFeatureItem">📸 Post exclusive photos &amp; videos</div>
+            <div class="marketingFeatureItem">🐾 Build a creator profile with your pets</div>
+            <div class="marketingFeatureItem">💳 Secure payouts &amp; billing via Stripe</div>
+            <div class="marketingFeatureItem">🔒 Pet-first content policy</div>
           </div>
 
           <div class="authBox">
             <form id="creator-auth-form" class="authForm">
+
               <div class="authFieldGroup">
                 <input
                   type="email"
@@ -65,9 +70,9 @@
               </div>
 
               <div class="resetBox" id="resetBox">
-                <div class="hint">
-                  Send a password reset email to the address above.
-                </div>
+                <div class="resetHint">
+  Send a password reset email to the address above.
+</div>
 
                 <div class="btnRow resetActions">
                   <button type="button" class="btn" id="sendResetBtn">Send reset email</button>
@@ -76,35 +81,50 @@
               </div>
 
               <div id="creatorMsg" class="authMsg"></div>
+
             </form>
           </div>
         </section>
 
+
+        <!-- RIGHT PANEL -->
+
         <section class="panel authPanelStack">
+
           <div class="pill">For creators</div>
 
-          <h2 class="sectionTitle creatorsSectionTitle">Creator Plan</h2>
+          <h2 class="sectionTitle creatorsSectionSpacer">
+            Creator Plan
+          </h2>
 
-          <p class="sub creatorsSubCompact">
+          <p class="sub">
             Creator Plan costs €10/month and requires an active account.
             Registration is required before purchasing.
           </p>
 
-          <div class="creatorPlanBox">
-            <div class="creatorPlanLabel">
+
+          <!-- CREATOR PLAN BOX -->
+
+
+          
+            <div class="creatorPlanTitle">
               Monthly creator access
             </div>
 
             <div class="creatorPlanPrice">
-              €10<span>/month</span>
+                €10
+              </div>
+
+              <div class="creatorPlanMini">
+                Cancel anytime • Secure payments via Stripe
+              </div>  
+
             </div>
 
-            <div class="creatorPlanMini">
-              Cancel anytime • Secure payments via Stripe
-            </div>
           </div>
 
-          <div class="btnRow creatorsLinksRow">
+
+          <div class="btnRow creatorsSectionSpacer">
             <a class="ghost" id="creatorFaqLink" href="/html/marketing/faq/faq-creators.html">
               Creator FAQ
             </a>
@@ -114,7 +134,11 @@
             </a>
           </div>
 
+
+          <!-- SUPPORT CARD -->
+
           <div class="supportCard">
+
             <div class="brandImage marketingAsideImage">
               <img
                 id="creatorsImage"
@@ -133,20 +157,28 @@
               and take care of our furry friends 💜
             </p>
 
-            <div class="btnRow supportActions">
+            <div class="btnRow indexSupportActions">
               <button class="btn" id="supportUsBtn" type="button">
                 Support OnlyPaws 🐾
               </button>
             </div>
 
             <div id="supportUsMsg" class="authMsg"></div>
+
+            <div class="note">
+              Cancel anytime • Secure payments via Stripe
+            </div>
+
           </div>
+
         </section>
+
       </main>
 
       <div id="footer-placeholder"></div>
     </div>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
@@ -155,5 +187,6 @@
   <script src="/js/nav.js"></script>
   <script src="/js/support-us.js"></script>
   <script src="/js/marketing/creators.js"></script>
+
 </body>
 </html>
