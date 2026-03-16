@@ -192,7 +192,7 @@
       .from("profiles")
       .select(creatorFields)
       .eq("role", "creator")
-      .order("last_active_at", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(topCount);
 
     if (latestError) throw latestError;
@@ -374,8 +374,6 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
           is_pinned,
           likes_count,
           created_at,
-          price_cents,
-          currency,
           profiles:creator_id (
             user_id,
             username,
