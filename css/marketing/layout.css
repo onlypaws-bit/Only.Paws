@@ -24,6 +24,16 @@
   margin-top: 16px;
 }
 
+.supportCard img{
+  display:block;
+  width:100%;
+  max-width:420px;
+  height:auto;
+  object-fit:contain;
+  border-radius:16px;
+  margin:0 auto 14px;
+}
+
 .centerWrap {
   width: 100%;
   max-width: 560px;
