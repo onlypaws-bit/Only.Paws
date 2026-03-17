@@ -1,87 +1,93 @@
-<!--
-  =========================================================
-  OnlyPaws
-  File: /html/app/fans/subscriptions.html
-  =========================================================
--->
+"use strict";
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>OnlyPaws — Choose your plan</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+/* =========================================================
+   OnlyPaws
+   File: /js/app/fans/subscriptions.js
+   ========================================================= */
 
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/app/fans/subscriptions.css" />
-</head>
+(function () {
+  const client = window.onlypawsClient;
+  const PATHS = window.OP_PATHS || {};
 
-<body class="subscriptionsPage">
-  <div class="wrap">
-    <div id="header-placeholder"></div>
+  if (!client) return;
 
-    <main class="page subscriptionsMain">
-      <div class="container">
-        <section class="panel subscriptionsPanel">
-          <h1 class="subscriptionsTitle">Choose your plan 🐾</h1>
-          <div class="sub subscriptionsSubline" id="subline">Loading…</div>
+  const CREATOR_ID = new URLSearchParams(location.search).get("creator");
 
-          <div class="subscriptionsPlans">
-            <div class="subscriptionsPlanCard featured" id="vipPlan">
-              <img
-                class="subscriptionsPlanIcon"
-                src="/assets/images/paw-crown.png"
-                alt="VIPaws"
-              />
+  const els = {
+    subline: document.getElementById("subline"),
+    subscribeBtn: document.getElementById("subscribeBtn"),
+    toast: document.getElementById("toast"),
+    planName: document.getElementById("planName"),
+    planDesc: document.getElementById("planDesc"),
+    planPrice: document.getElementById("planPrice"),
+  };
 
-              <h2 class="subscriptionsPlanHeading" id="planName">VIPaws</h2>
+  function toast(msg) {
+    els.toast.textContent = msg;
+    els.toast.classList.add("show");
+    setTimeout(() => els.toast.classList.remove("show"), 2600);
+  }
 
-              <div class="subscriptionsPlanTag" id="planTag">
-                best value 🐾
-              </div>
+  function goHome() {
+    location.href = PATHS.index || "index.html";
+  }
 
-              <p class="subscriptionsPlanDesc" id="planDesc">
-                Extra content, more interaction, real influence 🐶✨
-              </p>
+  async function loadPlan() {
+    const { data } = await client
+      .from("creator_plans")
+      .select("*")
+      .eq("creator_id", CREATOR_ID)
+      .eq("is_active", true)
+      .maybeSingle();
 
-              <ul class="subscriptionsPlanFeatures">
-                <li>exclusive monthly content</li>
-                <li>bloopers & polls</li>
-                <li>monthly Q&A</li>
-              </ul>
+    return data;
+  }
 
-              <div class="subscriptionsPlanPrice" id="planPrice">
-                €5 / month
-              </div>
+  async function createCheckout() {
+    const { data: s } = await client.auth.getSession();
+    const token = s?.session?.access_token;
 
-              <div class="subscriptionsPlanMicro" id="planMicro">
-                best value 🐾
-              </div>
+    const { data, error } = await client.functions.invoke(
+      "create-fan-subscription",
+      {
+        body: { creator_id: CREATOR_ID },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
 
-              <button
-                class="btn subscriptionsBtn"
-                id="subscribeBtn"
-                type="button"
-              >
-                Subscribe
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
+    if (error) throw error;
 
-    <div id="footer-placeholder"></div>
-  </div>
+    window.open(data.url, "_blank");
+  }
 
-  <div class="toast subscriptionsToast" id="toast"></div>
+  async function init() {
+    if (!CREATOR_ID) {
+      toast("Missing creator");
+      return;
+    }
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/paths.js"></script>
-  <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/nav.js"></script>
-  <script src="/js/partials.js"></script>
-  <script src="/js/auth-guard.js"></script>
-  <script src="/js/app/fans/subscriptions.js"></script>
-</body>
-</html>
+    const plan = await loadPlan();
+
+    if (!plan) {
+      toast("No plan available");
+      return;
+    }
+
+    els.planName.textContent = plan.name;
+    els.planDesc.textContent = plan.description;
+
+    els.planPrice.textContent =
+      `€${(plan.price_cents / 100).toFixed(0)} / month`;
+
+    els.subscribeBtn.onclick = async () => {
+      try {
+        await createCheckout();
+      } catch (e) {
+        console.error(e);
+        toast("Checkout error");
+      }
+    };
+  }
+
+  init();
+})();
