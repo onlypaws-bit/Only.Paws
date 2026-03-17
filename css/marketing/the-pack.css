@@ -1,6 +1,6 @@
 /* =========================================================
    OnlyPaws
-   File: css/marketing/the-pack.css
+   File: /css/marketing/the-pack.css
    Purpose: styles specific to the marketing the-pack page
    ========================================================= */
 
@@ -8,48 +8,47 @@
   margin-top: 14px;
 }
 
-.packTopBar {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.packSearchWrap {
-  margin-top: 0;
-}
-
 .packGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
   margin-top: 18px;
 }
 
 .packCard {
-  padding: 16px;
+  display: block;
+  padding: 14px;
   border: 1px solid var(--stroke);
-  border-radius: 20px;
+  border-radius: 22px;
   background: rgba(255, 255, 255, 0.09);
   text-decoration: none;
-  color: white;
+  color: var(--text);
+  overflow: hidden;
   transition:
     transform 0.18s ease,
     background 0.18s ease,
-    border-color 0.18s ease;
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .packCard:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
 }
 
 .packCardMedia {
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
 }
 
 .packCardMedia img {
@@ -69,29 +68,44 @@
 
 .packCardTitle {
   margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.25;
+  font-size: 1.1rem;
+  line-height: 1.2;
+  color: var(--text);
 }
 
 .packCardBadge {
-  padding: 5px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 12px;
   white-space: nowrap;
+  text-transform: lowercase;
 }
 
 .packCardMeta {
   margin-top: 8px;
   color: rgba(255, 255, 255, 0.8);
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .packCardBio {
-  margin-top: 10px;
+  margin: 10px 0 0;
   color: rgba(255, 255, 255, 0.88);
   font-size: 14px;
-  line-height: 1.45;
+  line-height: 1.6;
+  min-height: 44px;
+}
+
+.packCardFooter {
+  margin-top: 12px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .packEmpty,
@@ -102,55 +116,7 @@
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.08);
   text-align: center;
-}
-
-.packFiltersRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.packFilterPill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    background 0.18s ease,
-    border-color 0.18s ease;
-}
-
-.packFilterPill:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.packFilterPill.isActive {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.24);
-}
-
-.packStats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.packStat {
-  padding: 10px 14px;
-  border: 1px solid var(--stroke);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .packHeroImage {
@@ -159,10 +125,16 @@
 
 @media (max-width: 920px) {
   .packGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .packHeroImage {
     max-width: 340px;
+  }
+}
+
+@media (max-width: 620px) {
+  .packGrid {
+    grid-template-columns: 1fr;
   }
 }
