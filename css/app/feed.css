@@ -6,6 +6,7 @@
 
 .feedSectionPanel {
   margin-top: 16px;
+  overflow: hidden;
 }
 
 .searchRow {
@@ -31,11 +32,17 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.postsHeader > * {
+  min-width: 0;
 }
 
 .postsHeaderHint {
   font-size: 13px;
   color: rgba(255,255,255,.78);
+  text-align: right;
 }
 
 .subtleLine {
