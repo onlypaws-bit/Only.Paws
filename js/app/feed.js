@@ -31,8 +31,10 @@
   const PATHS = window.OP_PATHS || {};
   const ROUTES = window.OPRoutes || null;
 
+  let creatorsAll = [];
+
   /* =========================================================
-     Core client helpers
+     Core helpers
      ========================================================= */
 
   function getClient() {
@@ -40,6 +42,41 @@
       throw new Error("[feed] onlypawsClient not found.");
     }
     return client;
+  }
+
+  function esc(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function setText(el, value) {
+    if (el) el.textContent = value;
+  }
+
+  function show(el) {
+    if (el) el.hidden = false;
+  }
+
+  function hide(el) {
+    if (el) el.hidden = true;
+  }
+
+  function setDebug(message) {
+    const el = document.getElementById("debug");
+    if (!el) return;
+
+    if (!message) {
+      el.hidden = true;
+      el.textContent = "";
+      return;
+    }
+
+    el.hidden = false;
+    el.textContent = message;
   }
 
   async function getViewerSession() {
@@ -59,7 +96,7 @@
   }
 
   /* =========================================================
-     Route / href helpers
+     Route helpers
      ========================================================= */
 
   function creatorProfileHref(usernameOrId) {
@@ -90,9 +127,104 @@
   }
 
   /* =========================================================
-     Creator feed data
-     Fetches posts for a single creator and marks locked state
-     depending on viewer role / subscription status.
+     Featured creators
+     Old behavior restored:
+     - mix latest active + newest creators
+     - de-dup
+     - deterministic daily shuffle
+     ========================================================= */
+
+  function seededRandom(seed) {
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) {
+      h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+    }
+
+    return () => {
+      h = (Math.imul(1664525, h) + 1013904223) | 0;
+      return (h >>> 0) / 4294967296;
+    };
+  }
+
+  async function fetchFeaturedCreators(limit = 6) {
+    const supabase = getClient();
+
+    const halfTop = Math.ceil(limit / 2);
+    const halfNew = Math.floor(limit / 2);
+
+    const creatorFields =
+      "user_id, username, display_name, bio, avatar_url, created_at, last_active_at";
+
+    let latestActive = [];
+    let newestCreators = [];
+
+    const latestRes = await supabase
+      .from("profiles")
+      .select(creatorFields)
+      .eq("role", "creator")
+      .not("username", "is", null)
+      .order("last_active_at", { ascending: false })
+      .limit(halfTop);
+
+    if (latestRes.error) {
+      console.warn("[feed] latest active fallback -> created_at", latestRes.error);
+
+      const fallbackRes = await supabase
+        .from("profiles")
+        .select(creatorFields)
+        .eq("role", "creator")
+        .not("username", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(halfTop);
+
+      if (fallbackRes.error) throw fallbackRes.error;
+      latestActive = fallbackRes.data || [];
+    } else {
+      latestActive = latestRes.data || [];
+    }
+
+    const newestRes = await supabase
+      .from("profiles")
+      .select(creatorFields)
+      .eq("role", "creator")
+      .not("username", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(halfNew);
+
+    if (newestRes.error) throw newestRes.error;
+    newestCreators = newestRes.data || [];
+
+    const map = new Map();
+
+    [...latestActive, ...newestCreators].forEach((creator) => {
+      const key = creator?.user_id || creator?.id;
+      if (!key || map.has(key)) return;
+
+      map.set(key, {
+        ...creator,
+        href: creatorProfileHref(creator?.username || creator?.user_id),
+      });
+    });
+
+    const merged = Array.from(map.values());
+
+    if (merged.length <= limit) {
+      return merged;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const rand = seededRandom(today.replace(/-/g, ""));
+
+    for (let i = merged.length - 1; i > 0; i--) {
+      const j = Math.floor(rand() * (i + 1));
+      [merged[i], merged[j]] = [merged[j], merged[i]];
+    }
+
+    return merged.slice(0, limit);
+  }
+
+  /* =========================================================
+     Single creator feed
      ========================================================= */
 
   async function fetchCreatorFeed(creatorId) {
@@ -161,109 +293,12 @@
   }
 
   /* =========================================================
-     Featured creators helpers
-     Uses a small deterministic shuffle so the mix rotates
-     but remains stable for the same day.
+     Creator cards
      ========================================================= */
-
-  function seededRandom(seed) {
-    let h = 0;
-
-    for (let i = 0; i < seed.length; i++) {
-      h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
-    }
-
-    return () => {
-      h = (Math.imul(1664525, h) + 1013904223) | 0;
-      return (h >>> 0) / 4294967296;
-    };
-  }
-
-  async function fetchFeaturedCreators(limit = 6) {
-    const supabase = getClient();
-
-    const topCount = Math.ceil(limit / 2);
-    const newCount = Math.floor(limit / 2);
-
-    const creatorFields =
-      "user_id, username, display_name, bio, avatar_url, created_at, instagram_url, tiktok_url";
-
-    const { data: latestActive, error: latestError } = await supabase
-      .from("profiles")
-      .select(creatorFields)
-      .eq("role", "creator")
-      .order("created_at", { ascending: false })
-      .limit(topCount);
-
-    if (latestError) throw latestError;
-
-    const { data: newestCreators, error: newestError } = await supabase
-      .from("profiles")
-      .select(creatorFields)
-      .eq("role", "creator")
-      .order("created_at", { ascending: false })
-      .limit(newCount);
-
-    if (newestError) throw newestError;
-
-    const map = new Map();
-
-    [...(latestActive || []), ...(newestCreators || [])].forEach((creator) => {
-      const key = creator?.user_id || creator?.id;
-      if (!key || map.has(key)) return;
-
-      map.set(key, {
-        ...creator,
-        href: creatorProfileHref(creator?.username || creator?.user_id),
-      });
-    });
-
-    const mergedCreators = Array.from(map.values());
-
-    if (mergedCreators.length <= limit) {
-      return mergedCreators;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    const seed = today.replace(/-/g, "");
-    const rand = seededRandom(seed);
-
-    for (let i = mergedCreators.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      [mergedCreators[i], mergedCreators[j]] = [mergedCreators[j], mergedCreators[i]];
-    }
-
-    return mergedCreators.slice(0, limit);
-  }
-
-  /* =========================================================
-     Small UI helpers
-     ========================================================= */
-
-  function esc(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function setText(el, value) {
-    if (el) el.textContent = value;
-  }
-
-  function hide(el) {
-    if (el) el.hidden = true;
-  }
-
-  function show(el) {
-    if (el) el.hidden = false;
-  }
 
   function creatorAvatarHtml(creator) {
     const name = creator?.display_name || creator?.username || "Creator";
-    const avatar = creator?.avatar_url || "";
+    const avatar = String(creator?.avatar_url || "").trim();
 
     if (avatar) {
       return `
@@ -273,6 +308,7 @@
           alt="${esc(name)} avatar"
           loading="lazy"
           decoding="async"
+          referrerpolicy="no-referrer"
         />
       `;
     }
@@ -282,12 +318,12 @@
 
   function creatorCardHtml(creator) {
     const name = creator?.display_name || creator?.username || "Creator";
-    const username = creator?.username ? `@${creator.username}` : "";
+    const username = creator?.username || "creator";
     const bio = creator?.bio || "";
-    const href = creator?.href || "#";
+    const href = creator?.href || creatorProfileHref(username);
 
     return `
-      <a class="creatorCard" href="${esc(href)}">
+      <a class="creatorCard" href="${esc(href)}" aria-label="Open ${esc(name)} profile">
         <div class="creatorCardHead">
           <div class="creatorAvatarWrap">
             ${creatorAvatarHtml(creator)}
@@ -295,55 +331,88 @@
 
           <div class="creatorMeta">
             <strong>${esc(name)}</strong>
-            ${username ? `<span>${esc(username)}</span>` : ""}
+            <span>@${esc(username)}${bio ? ` • ${esc(bio).slice(0, 40)}` : ""}</span>
           </div>
         </div>
-
-        ${bio ? `<p class="creatorBio">${esc(bio)}</p>` : ""}
       </a>
     `.trim();
   }
 
-  /* =========================================================
-     Featured creators section
-     Fetches and renders the mixed featured creator set.
-     ========================================================= */
+  function renderCreators(list) {
+    const el = document.getElementById("creatorList");
+    const hint = document.getElementById("creatorHint");
+    if (!el) return;
 
-  async function loadFeaturedCreators() {
-    const creatorList = document.getElementById("creatorList");
-    const creatorHint = document.getElementById("creatorHint");
+    if (!Array.isArray(list) || !list.length) {
+      el.innerHTML = "";
+      setText(hint, "No creators yet.");
+      show(hint);
+      return;
+    }
 
-    if (!creatorList) return;
+    el.innerHTML = list.map(creatorCardHtml).join("");
+    hide(hint);
+  }
 
-    try {
-      const creators = await fetchFeaturedCreators(6);
+  function setupSearch() {
+    const input = document.getElementById("searchInput");
+    if (!input) return;
 
-      creatorList.innerHTML = "";
+    input.addEventListener("input", () => {
+      const q = String(input.value || "").trim().toLowerCase();
 
-      if (!Array.isArray(creators) || creators.length === 0) {
-        setText(creatorHint, "No creators available right now.");
-        show(creatorHint);
+      if (!q) {
+        renderCreators(creatorsAll);
         return;
       }
 
-      creatorList.innerHTML = creators.map(creatorCardHtml).join("");
-      hide(creatorHint);
+      const filtered = creatorsAll.filter((creator) => {
+        const name = String(creator.display_name || "").toLowerCase();
+        const username = String(creator.username || "").toLowerCase();
+        return name.includes(q) || username.includes(q);
+      });
+
+      renderCreators(filtered);
+    });
+  }
+
+  async function loadFeaturedCreators() {
+    const creatorHint = document.getElementById("creatorHint");
+
+    try {
+      const session = await getViewerSession();
+      const viewerId = session?.user?.id || null;
+
+      const creators = await fetchFeaturedCreators(6);
+
+      creatorsAll = (creators || [])
+        .filter((creator) => String(creator.user_id || "") !== String(viewerId || ""))
+        .slice(0, 12);
+
+      renderCreators(creatorsAll);
     } catch (error) {
-     
-console.error("[feed] failed to load featured creators", error?.message, error?.details, error?.hint, error);
+      console.error("[feed] failed to load featured creators", error);
+      setText(creatorHint, "Could not load creators.");
+      show(creatorHint);
+      setDebug(
+        `Creators query failed:\n${error?.message || "Unknown error"}`
+      );
+      creatorsAll = [];
+      renderCreators([]);
     }
   }
 
   /* =========================================================
-     Latest posts section
-     Fetches recent posts across creators and renders them
-     using the shared post renderer.
+     Latest posts
+     Old lock/unlock behavior restored:
+     - private => only creator
+     - public free => everyone
+     - public premium => creator or active subscriber
      ========================================================= */
 
   async function loadLatestPosts() {
     const postsEl = document.getElementById("posts");
     const postsHint = document.getElementById("postsHint");
-
     if (!postsEl) return;
 
     if (!window.OnlyPawsPost?.renderPost) {
@@ -356,23 +425,24 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
     const supabase = getClient();
 
     try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const viewerId = session?.user?.id || null;
+
       const { data, error } = await supabase
         .from("posts")
-        .select(
-          `
+        .select(`
           id,
           creator_id,
-          pet_id,
           title,
           content,
           preview,
-          slug,
           media_url,
           media_type,
-          is_public,
           is_paid,
-          is_pinned,
-          likes_count,
+          is_public,
           created_at,
           profiles:creator_id (
             user_id,
@@ -380,43 +450,161 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
             display_name,
             avatar_url
           )
-        `
-        )
-        .order("is_pinned", { ascending: false })
+        `)
         .order("created_at", { ascending: false })
         .limit(12);
 
       if (error) throw error;
 
-      const posts = (data || []).map((post) => {
+      const posts = data || [];
+
+      if (!viewerId) {
+        const enrichedLoggedOut = posts.map((post) => {
+          const profile = Array.isArray(post.profiles)
+            ? post.profiles[0]
+            : post.profiles || null;
+
+          const locked = post.is_public === false || post.is_paid === true;
+
+          return {
+            ...post,
+            creator_username: profile?.username || "creator",
+            creator_name: profile?.display_name || profile?.username || "creator",
+            creator_avatar_url: profile?.avatar_url || "",
+            excerpt: locked
+              ? (post.preview || "Locked content.")
+              : (post.preview || post.content || ""),
+            is_locked: locked,
+            can_view: !locked,
+          };
+        });
+
+        if (!enrichedLoggedOut.length) {
+          postsEl.innerHTML = "";
+          setText(postsHint, "No posts yet.");
+          show(postsHint);
+          return;
+        }
+
+        postsEl.innerHTML = enrichedLoggedOut
+          .map((post) =>
+            window.OnlyPawsPost.renderPost(post, {
+              showCreator: true,
+              postUrl: (p) => postHref(p.id),
+            })
+          )
+          .join("");
+
+        hide(postsHint);
+
+        if (window.OnlyPawsPost?.initPosts) {
+          await window.OnlyPawsPost.initPosts(postsEl);
+        }
+
+        return;
+      }
+
+      const creatorIdsToCheck = [
+        ...new Set(
+          posts
+            .filter(
+              (post) =>
+                post?.creator_id &&
+                post.creator_id !== viewerId &&
+                post.is_public !== false &&
+                post.is_paid === true
+            )
+            .map((post) => post.creator_id)
+        ),
+      ];
+
+      const subMap = new Map();
+      creatorIdsToCheck.forEach((id) => subMap.set(id, false));
+
+      if (creatorIdsToCheck.length) {
+        const { data: subs, error: subsError } = await supabase
+          .from("fan_subscriptions")
+          .select("creator_id, status, current_period_end, cancel_at_period_end")
+          .eq("fan_id", viewerId)
+          .in("creator_id", creatorIdsToCheck);
+
+        if (subsError) {
+          console.warn("[feed] fan_subscriptions lookup error", subsError);
+        } else {
+          const now = Date.now();
+
+          for (const row of subs || []) {
+            const raw = row.current_period_end;
+
+            let endMs = 0;
+
+            if (raw) {
+              if (typeof raw === "number" || /^\d+$/.test(String(raw))) {
+                const n = Number(raw);
+                endMs = n < 1e12 ? n * 1000 : n;
+              } else {
+                endMs = new Date(raw).getTime();
+              }
+            }
+
+            let hasAccess = !!endMs && endMs > now;
+
+            if (!hasAccess && !raw) {
+              const status = String(row.status || "").toLowerCase();
+              if (status === "active" || status === "trialing") {
+                hasAccess = true;
+              }
+            }
+
+            if (hasAccess) {
+              subMap.set(row.creator_id, true);
+            }
+          }
+        }
+      }
+
+      const enriched = posts.map((post) => {
         const profile = Array.isArray(post.profiles)
           ? post.profiles[0]
           : post.profiles || null;
 
-        const isLocked = Boolean(post.is_paid === true || post.is_public === false);
+        const isMine = String(post.creator_id || "") === String(viewerId || "");
+        let locked = false;
+
+        if (post.is_public === false) {
+          locked = !isMine;
+        } else if (post.is_paid === true) {
+          const isSub = subMap.get(post.creator_id) === true;
+          locked = !(isMine || isSub);
+        } else {
+          locked = false;
+        }
 
         return {
           ...post,
-          excerpt: post.preview || post.content || "",
-          creator_username: profile?.username || "",
-          creator_name: profile?.display_name || "",
+          creator_username: profile?.username || "creator",
+          creator_name: profile?.display_name || profile?.username || "creator",
           creator_avatar_url: profile?.avatar_url || "",
-          is_locked: isLocked,
+          excerpt: locked
+            ? (post.preview || "Locked content.")
+            : (post.preview || post.content || ""),
+          is_locked: locked,
+          can_view: !locked,
         };
       });
 
-      postsEl.innerHTML = "";
-
-      if (!posts.length) {
+      if (!enriched.length) {
+        postsEl.innerHTML = "";
         setText(postsHint, "No posts yet.");
         show(postsHint);
         return;
       }
 
-      postsEl.innerHTML = posts
+      postsEl.innerHTML = enriched
         .map((post) =>
           window.OnlyPawsPost.renderPost(post, {
             showCreator: true,
+            postUrl: (p) => postHref(p.id),
           })
         )
         .join("");
@@ -427,14 +615,18 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
         await window.OnlyPawsPost.initPosts(postsEl);
       }
     } catch (error) {
-      console.error("[feed] failed to load latest posts", error?.message, error?.details, error?.hint, error);
-
+      console.error("[feed] failed to load latest posts", error);
+      setText(postsHint, "Could not load posts.");
+      show(postsHint);
+      setDebug(
+        `${document.getElementById("debug")?.textContent ? `${document.getElementById("debug").textContent}\n\n` : ""}Posts query failed:\n${error?.message || "Unknown error"}`
+      );
+      postsEl.innerHTML = "";
     }
   }
 
   /* =========================================================
-     Support button wiring
-     Connects the feed CTA to the shared support flow if present.
+     Support button
      ========================================================= */
 
   function initSupportButton() {
@@ -455,8 +647,6 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
 
   /* =========================================================
      Media modal
-     Lightweight preview modal for future feed media hooks.
-     Safe to initialize even if currently unused.
      ========================================================= */
 
   function initMediaModal() {
@@ -469,9 +659,11 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
 
     function closeModal() {
       modal.setAttribute("aria-hidden", "true");
+
       img.classList.add("isHidden");
-      vid.classList.add("isHidden");
       img.removeAttribute("src");
+
+      vid.classList.add("isHidden");
       vid.pause();
       vid.removeAttribute("src");
       vid.load();
@@ -515,8 +707,6 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
 
   /* =========================================================
      Page init
-     Loads shared app layout, initializes nav/support/modal,
-     then fetches creators and posts for the feed page.
      ========================================================= */
 
   async function initFeedPage() {
@@ -536,6 +726,7 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
         window.OPNav.init();
       }
 
+      setupSearch();
       initSupportButton();
       initMediaModal();
 
@@ -545,6 +736,7 @@ console.error("[feed] failed to load featured creators", error?.message, error?.
       ]);
     } catch (error) {
       console.error("[feed] init failed", error);
+      setDebug(`Feed init failed:\n${error?.message || "Unknown error"}`);
     }
   }
 
