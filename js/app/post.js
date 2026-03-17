@@ -67,7 +67,7 @@
   }
 
   function creatorProfileUrl(username) {
-    const safeUsername = username || "creator";
+    const safeUsername = String(username || "creator").trim() || "creator";
 
     if (ROUTES?.href) {
       return ROUTES.href("app.fans.creatorProfile", { u: safeUsername });
@@ -98,8 +98,8 @@
       `;
     }
 
-    const creator = post.creator_username || post.creator_name || "creator";
-    const profileUrl = creatorProfileUrl(creator);
+    const creatorUsername = post.creator_username || "creator";
+    const profileUrl = creatorProfileUrl(creatorUsername);
 
     return `
       <div class="op-mediaWrap op-isLocked">
@@ -157,19 +157,59 @@
     return `<span class="op-badge op-badge--free">Free</span>`;
   }
 
+  function renderCreatorMeta(post, opts = {}) {
+    const creatorUsernameRaw = String(post.creator_username || "").trim();
+    const creatorNameRaw = String(post.creator_name || "").trim();
+    const createdAt = formatPostDate(post.created_at);
+
+    const safeUsername = creatorUsernameRaw || "creator";
+    const profileUrl = creatorProfileUrl(safeUsername);
+
+    if (opts.showCreator === false) {
+      return `
+        <div class="op-postCreatorMeta">
+          ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
+        </div>
+      `;
+    }
+
+    const creatorName = creatorNameRaw || creatorUsernameRaw || "Creator";
+    const creatorUsername = creatorUsernameRaw || creatorNameRaw || "creator";
+
+    return `
+      <div class="op-postCreatorMeta">
+        <a
+          class="op-postCreatorName"
+          href="${esc(profileUrl)}"
+          data-op-stop-nav="1"
+        >${esc(creatorName)}</a>
+        <a
+          class="op-postCreatorUsername"
+          href="${esc(profileUrl)}"
+          data-op-stop-nav="1"
+        >@${esc(creatorUsername)}</a>
+        ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
+      </div>
+    `;
+  }
+
   function renderPost(post, opts = {}) {
     const postUrl = (opts.postUrl || defaultPostUrl)(post);
     const title = esc(post.title || "");
     const excerpt = esc(post.excerpt || post.content || "");
-    const creator = esc(post.creator_username || post.creator_name || "");
+    const creatorUsernameRaw = String(post.creator_username || "").trim();
+    const creatorNameRaw = String(post.creator_name || "").trim();
     const creatorAvatar = esc(post.creator_avatar_url || "");
-    const createdAt = formatPostDate(post.created_at);
     const locked = Boolean(post.is_locked);
     const media = mediaHtml(post, locked);
     const badge = renderBadge(post, locked);
 
+    const safeUsername = creatorUsernameRaw || creatorNameRaw || "creator";
+    const safeDisplayName = creatorNameRaw || creatorUsernameRaw || "Creator";
+    const profileUrl = creatorProfileUrl(safeUsername);
+
     const avatarHtml = creatorAvatar
-      ? `<img src="${creatorAvatar}" alt="${creator || "Creator"} avatar" loading="lazy" decoding="async">`
+      ? `<img src="${creatorAvatar}" alt="${esc(safeDisplayName)} avatar" loading="lazy" decoding="async">`
       : `<span aria-hidden="true">🐾</span>`;
 
     const likeBlock = FEATURE_LIKES
@@ -200,21 +240,14 @@
             <div class="op-postCreator">
               <a
                 class="op-postCreatorAvatar"
-                href="${esc(creatorProfileUrl(creator))}"
+                href="${esc(profileUrl)}"
                 data-op-stop-nav="1"
-                aria-label="Open ${creator || "creator"} profile"
+                aria-label="Open ${esc(safeDisplayName)} profile"
               >
                 ${avatarHtml}
               </a>
 
-              <div class="op-postCreatorMeta">
-                ${
-                  opts.showCreator !== false && creator
-                    ? `<a class="op-postCreatorName" href="${esc(creatorProfileUrl(creator))}" data-op-stop-nav="1">@${creator}</a>`
-                    : `<span class="op-postCreatorName"></span>`
-                }
-                ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
-              </div>
+              ${renderCreatorMeta(post, opts)}
             </div>
 
             <div class="op-postHeaderRight">
