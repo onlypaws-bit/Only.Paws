@@ -30,7 +30,10 @@
   }
 
   function marketingHomePath() {
-    return route("marketing.home", PATHS?.marketing?.home || "/html/marketing/index.html");
+    return route(
+      "marketing.home",
+      PATHS?.marketing?.home || "/html/marketing/index.html"
+    );
   }
 
   function appFeedPath() {
@@ -109,25 +112,26 @@
 
   function hydrateStaticLinks() {
     const navHome = document.getElementById("navHome");
-    const brandLink = document.querySelector(".nav .brand");
-
     const navProfile = document.getElementById("navProfile");
     const navDashboard = document.getElementById("navDashboard");
     const navFanDash = document.getElementById("navFanDash");
     const navCreatorDash = document.getElementById("navCreatorDash");
 
-    const marketingHome = document.querySelector('[data-page="index"], [data-page="home"]');
-    const marketingCreators = document.querySelector('[data-page="creators"]');
-    const marketingFans = document.querySelector('[data-page="fans"]');
+    const navs = document.querySelectorAll(".nav");
+
+    navs.forEach((nav) => {
+      const brand = nav.querySelector(".brand");
+      if (!brand) return;
+
+      if (nav.classList.contains("appNav")) {
+        brand.href = appFeedPath();
+      } else {
+        brand.href = homePath();
+      }
+    });
 
     if (navHome) {
-      const nav = navHome.closest(".nav");
-      navHome.href = nav?.classList.contains("appNav") ? appFeedPath() : homePath();
-    }
-
-    if (brandLink && !navHome) {
-      const nav = brandLink.closest(".nav");
-      brandLink.href = nav?.classList.contains("appNav") ? appFeedPath() : homePath();
+      navHome.href = appFeedPath();
     }
 
     if (navProfile) {
@@ -135,23 +139,31 @@
     }
 
     if (navDashboard) {
-      navDashboard.hidden = true;
+      setHidden(navDashboard, true);
       navDashboard.removeAttribute("href");
     }
 
     if (navFanDash) {
       navFanDash.href = fanDashPath();
-      navFanDash.hidden = true;
+      setHidden(navFanDash, true);
     }
 
     if (navCreatorDash) {
       navCreatorDash.href = creatorDashPath();
-      navCreatorDash.hidden = true;
+      setHidden(navCreatorDash, true);
     }
 
-    if (marketingHome) marketingHome.href = homePath();
-    if (marketingCreators) marketingCreators.href = creatorsPath();
-    if (marketingFans) marketingFans.href = fansPath();
+    document.querySelectorAll('[data-page="index"], [data-page="home"]').forEach((link) => {
+      link.href = homePath();
+    });
+
+    document.querySelectorAll('[data-page="creators"]').forEach((link) => {
+      link.href = creatorsPath();
+    });
+
+    document.querySelectorAll('[data-page="fans"]').forEach((link) => {
+      link.href = fansPath();
+    });
   }
 
   async function hydrateUserPill() {
@@ -264,13 +276,13 @@
         setHidden(profileBtn, false);
       }
 
-      const { data: p } = await client
+      const { data: profile } = await client
         .from("profiles")
         .select("role")
         .eq("user_id", userId)
         .maybeSingle();
 
-      const isCreator = p?.role === "creator";
+      const isCreator = profile?.role === "creator";
 
       if (dashboardBtn) {
         dashboardBtn.href = isCreator ? creatorDashPath() : fanDashPath();
