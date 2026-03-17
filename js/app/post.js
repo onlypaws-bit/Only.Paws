@@ -2,12 +2,6 @@
    OnlyPaws
    File: /js/app/post.js
    Purpose: render reusable posts and bind post interactions
-   Dependencies:
-   - window.onlypawsClient
-   - window.onlypawsLikes
-   - window.OP_PATHS
-   - window.OPRoutes (recommended)
-   - /css/app/post.css
    ========================================================= */
 
 (() => {
@@ -67,7 +61,7 @@
   }
 
   function creatorProfileUrl(username) {
-    const safeUsername = String(username || "creator").trim() || "creator";
+    const safeUsername = username || "creator";
 
     if (ROUTES?.href) {
       return ROUTES.href("app.fans.creatorProfile", { u: safeUsername });
@@ -91,15 +85,11 @@
       : `<img src="${esc(url)}" alt="Post media" loading="lazy" decoding="async">`;
 
     if (!locked) {
-      return `
-        <div class="op-mediaWrap">
-          ${mediaEl}
-        </div>
-      `;
+      return `<div class="op-mediaWrap">${mediaEl}</div>`;
     }
 
-    const creatorUsername = post.creator_username || "creator";
-    const profileUrl = creatorProfileUrl(creatorUsername);
+    const creator = post.creator_username || "creator";
+    const profileUrl = creatorProfileUrl(creator);
 
     return `
       <div class="op-mediaWrap op-isLocked">
@@ -146,70 +136,29 @@
         ? fmtMoney(post.price_cents, post.currency || "eur")
         : "";
 
-    if (locked) {
-      return `<span class="op-badge op-badge--locked">Locked</span>`;
-    }
-
-    if (price) {
-      return `<span class="op-badge op-badge--price">${esc(price)}</span>`;
-    }
+    if (locked) return `<span class="op-badge op-badge--locked">Locked</span>`;
+    if (price) return `<span class="op-badge op-badge--price">${esc(price)}</span>`;
 
     return `<span class="op-badge op-badge--free">Free</span>`;
-  }
-
-  function renderCreatorMeta(post, opts = {}) {
-    const creatorUsernameRaw = String(post.creator_username || "").trim();
-    const creatorNameRaw = String(post.creator_name || "").trim();
-    const createdAt = formatPostDate(post.created_at);
-
-    const safeUsername = creatorUsernameRaw || "creator";
-    const profileUrl = creatorProfileUrl(safeUsername);
-
-    if (opts.showCreator === false) {
-      return `
-        <div class="op-postCreatorMeta">
-          ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
-        </div>
-      `;
-    }
-
-    const creatorName = creatorNameRaw || creatorUsernameRaw || "Creator";
-    const creatorUsername = creatorUsernameRaw || creatorNameRaw || "creator";
-
-    return `
-      <div class="op-postCreatorMeta">
-        <a
-          class="op-postCreatorName"
-          href="${esc(profileUrl)}"
-          data-op-stop-nav="1"
-        >${esc(creatorName)}</a>
-        <a
-          class="op-postCreatorUsername"
-          href="${esc(profileUrl)}"
-          data-op-stop-nav="1"
-        >@${esc(creatorUsername)}</a>
-        ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
-      </div>
-    `;
   }
 
   function renderPost(post, opts = {}) {
     const postUrl = (opts.postUrl || defaultPostUrl)(post);
     const title = esc(post.title || "");
     const excerpt = esc(post.excerpt || post.content || "");
-    const creatorUsernameRaw = String(post.creator_username || "").trim();
-    const creatorNameRaw = String(post.creator_name || "").trim();
+
+    const creatorRaw = post.creator_username || "creator";
+    const creator = esc(creatorRaw);
+
     const creatorAvatar = esc(post.creator_avatar_url || "");
+    const createdAt = formatPostDate(post.created_at);
     const locked = Boolean(post.is_locked);
+
     const media = mediaHtml(post, locked);
     const badge = renderBadge(post, locked);
 
-    const safeUsername = creatorUsernameRaw || creatorNameRaw || "creator";
-    const safeDisplayName = creatorNameRaw || creatorUsernameRaw || "Creator";
-    const profileUrl = creatorProfileUrl(safeUsername);
-
     const avatarHtml = creatorAvatar
-      ? `<img src="${creatorAvatar}" alt="${esc(safeDisplayName)} avatar" loading="lazy" decoding="async">`
+      ? `<img src="${creatorAvatar}" alt="${creator} avatar" loading="lazy">`
       : `<span aria-hidden="true">🐾</span>`;
 
     const likeBlock = FEATURE_LIKES
@@ -217,12 +166,11 @@
         <button
           class="op-likeBtn"
           type="button"
-          aria-label="Like post"
           data-post-id="${esc(post.id)}"
           data-liked="0"
           data-op-stop-nav="1"
         >
-          <span class="op-likeIcon" aria-hidden="true">♡</span>
+          <span class="op-likeIcon">♡</span>
           <span class="op-likeCount" data-like-count>—</span>
         </button>
       `
@@ -230,24 +178,26 @@
 
     return `
       <article class="op-postCard" data-post-id="${esc(post.id)}">
-        <div
-          class="op-postMain"
-          role="link"
-          tabindex="0"
-          data-post-url="${esc(postUrl)}"
-        >
+        <div class="op-postMain" role="link" tabindex="0" data-post-url="${esc(postUrl)}">
+
           <div class="op-postHeader">
             <div class="op-postCreator">
               <a
                 class="op-postCreatorAvatar"
-                href="${esc(profileUrl)}"
+                href="${esc(creatorProfileUrl(creatorRaw))}"
                 data-op-stop-nav="1"
-                aria-label="Open ${esc(safeDisplayName)} profile"
               >
                 ${avatarHtml}
               </a>
 
-              ${renderCreatorMeta(post, opts)}
+              <div class="op-postCreatorMeta">
+                ${
+                  opts.showCreator !== false
+                    ? `<a class="op-postCreatorName" href="${esc(creatorProfileUrl(creatorRaw))}" data-op-stop-nav="1">@${creator}</a>`
+                    : `<span class="op-postCreatorName"></span>`
+                }
+                ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
+              </div>
             </div>
 
             <div class="op-postHeaderRight">
@@ -278,132 +228,22 @@
     }
   }
 
-  function setLiked(btn, liked) {
-    btn.dataset.liked = liked ? "1" : "0";
-    btn.classList.toggle("op-liked", liked);
-
-    const icon = btn.querySelector(".op-likeIcon");
-    if (icon) icon.textContent = liked ? "♥" : "♡";
-  }
-
-  function setCount(btn, count) {
-    const el = btn.querySelector("[data-like-count]");
-    if (!el) return;
-    el.textContent = String(count ?? "—");
-  }
-
-  async function hydrateLikeButton(btn, logged) {
-    const postId = btn.dataset.postId;
-    if (!postId) return;
-
-    try {
-      const count = await window.onlypawsLikes.getPostLikeCount(postId);
-      setCount(btn, count);
-    } catch (err) {
-      console.warn("getPostLikeCount failed", postId, err);
-      setCount(btn, "—");
-    }
-
-    if (!logged) {
-      setLiked(btn, false);
-      return;
-    }
-
-    try {
-      const liked = await window.onlypawsLikes.getPostLikedByMe(postId);
-      setLiked(btn, liked);
-    } catch (err) {
-      console.warn("getPostLikedByMe failed", postId, err);
-    }
-  }
-
-  function bindLikeButton(btn, logged) {
-    if (btn.dataset.likeBound === "1") return;
-    btn.dataset.likeBound = "1";
-
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!logged) {
-        alert("Login required");
-        return;
-      }
-
-      if (btn.disabled) return;
-      btn.disabled = true;
-
-      const prevLiked = btn.dataset.liked === "1";
-      const prevCountText =
-        btn.querySelector("[data-like-count]")?.textContent ?? "—";
-      const prevCount = prevCountText !== "—" ? Number(prevCountText) : NaN;
-
-      setLiked(btn, !prevLiked);
-      if (Number.isFinite(prevCount)) {
-        setCount(btn, prevLiked ? prevCount - 1 : prevCount + 1);
-      }
-
-      try {
-        const res = await window.onlypawsLikes.togglePostLike(btn.dataset.postId);
-        setLiked(btn, Boolean(res?.liked));
-        setCount(btn, Number(res?.like_count ?? 0));
-      } catch (err) {
-        setLiked(btn, prevLiked);
-        setCount(btn, prevCountText);
-        console.error("toggle like failed", err);
-        alert("Like failed");
-      } finally {
-        btn.disabled = false;
-      }
-    });
-  }
-
-  function bindPostNavigation(root = document) {
-    const mains = $$(".op-postMain", root);
-
-    mains.forEach((main) => {
-      if (main.dataset.navBound === "1") return;
-      main.dataset.navBound = "1";
-
-      const go = () => {
-        const url = main.dataset.postUrl;
-        if (url) window.location.href = url;
-      };
-
-      main.addEventListener("click", (e) => {
-        if (e.target.closest("[data-op-stop-nav='1']")) return;
-        if (e.target.closest("a, button, input, textarea, select, label")) return;
-        go();
-      });
-
-      main.addEventListener("keydown", (e) => {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        if (e.target.closest("[data-op-stop-nav='1']")) return;
-        e.preventDefault();
-        go();
-      });
-    });
-  }
-
   async function initPosts(root = document) {
-    bindPostNavigation(root);
-
-    if (!FEATURE_LIKES) return;
-
-    if (!window.onlypawsLikes || !client) {
-      console.warn("Load onlypawsClient.js and /js/app/likes.js before /js/app/post.js");
-      return;
-    }
-
-    const logged = await isLoggedIn();
     const buttons = $$(".op-likeBtn", root);
+    const logged = await isLoggedIn();
 
-    await Promise.all(
-      buttons.map(async (btn) => {
-        await hydrateLikeButton(btn, logged);
-        bindLikeButton(btn, logged);
-      })
-    );
+    buttons.forEach(btn => {
+      btn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!logged) return alert("Login required");
+
+        const res = await window.onlypawsLikes.togglePostLike(btn.dataset.postId);
+        btn.querySelector(".op-likeIcon").textContent = res.liked ? "♥" : "♡";
+        btn.querySelector("[data-like-count]").textContent = res.like_count;
+      });
+    });
   }
 
   const api = {
@@ -415,7 +255,5 @@
   };
 
   window.OnlyPawsPost = api;
-
-  // Compat alias for older files still checking OnlyPawsPostCard
   window.OnlyPawsPostCard = api;
 })();
