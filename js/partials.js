@@ -4,6 +4,7 @@
    Purpose: load shared HTML partials and highlight nav state
    Dependencies:
    - window.OP_PATHS
+   - window.OPNav
    ========================================================= */
 
 (function () {
@@ -43,6 +44,12 @@
     });
   }
 
+  async function hydrateLoadedNav() {
+    if (window.OPNav?.initNav) {
+      await window.OPNav.initNav();
+    }
+  }
+
   async function loadLayout() {
     const headerMount = getMount("header-placeholder", "header", "headerMount");
     const footerMount = getMount("footer-placeholder", "footer", "footerMount");
@@ -51,6 +58,8 @@
       headerMount,
       PATHS?.components?.header || "/components/header.html"
     );
+
+    await hydrateLoadedNav();
 
     await loadPartial(
       footerMount,
@@ -67,12 +76,13 @@
       PATHS?.components?.headerMarketing || "/components/header-marketing.html"
     );
 
+    highlightMarketingNav();
+    await hydrateLoadedNav();
+
     await loadPartial(
       footerMount,
       PATHS?.components?.footerMarketing || "/components/footer-marketing.html"
     );
-
-    highlightMarketingNav();
   }
 
   async function loadStripeLayout() {
@@ -83,6 +93,8 @@
       headerMount,
       PATHS?.components?.headerStripe || "/components/header-stripe.html"
     );
+
+    await hydrateLoadedNav();
 
     await loadPartial(
       footerMount,
