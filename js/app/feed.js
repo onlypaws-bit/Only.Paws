@@ -186,7 +186,7 @@
     const newCount = Math.floor(limit / 2);
 
     const creatorFields =
-      "user_id, username, display_name, bio, avatar_url, created_at, last_active_at, instagram_url, tiktok_url";
+      "user_id, username, display_name, bio, avatar_url, created_at, instagram_url, tiktok_url";
 
     const { data: latestActive, error: latestError } = await supabase
       .from("profiles")
