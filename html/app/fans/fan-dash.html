@@ -53,50 +53,54 @@
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/app/fans/fan-dash.css" />
 </head>
+
 <body class="fanDashPage">
   <div class="wrap">
     <div id="header-placeholder"></div>
 
-    <main class="fanDashMain">
-      <section class="panel fanDashTopPanel">
-        <h1>Fan Dashboard</h1>
-        <p class="sub">Manage your subscriptions, follows, and access.</p>
-        <div class="msg" id="topMsg"></div>
-      </section>
-
-      <div class="grid">
-        <section class="panel">
-          <div class="pill">My Subscriptions</div>
-          <p class="sub fanDashSectionSub">
-            Cancel anytime. Access remains active until the end of the billing period.
-          </p>
-          <div class="list" id="subsList"></div>
-          <div class="msg" id="subsMsg"></div>
+    <main class="page fanDashMain">
+      <div class="container">
+        <section class="panel fanDashTopPanel">
+          <h1>Fan Dashboard</h1>
+          <p class="sub">Manage your subscriptions, follows, and access.</p>
+          <div class="hint" id="topMsg"></div>
         </section>
 
-        <section class="panel">
-          <div class="pill">Following</div>
-          <p class="sub fanDashSectionSub">Creators you follow.</p>
-          <div class="list" id="followsList"></div>
-          <div class="msg" id="followsMsg"></div>
-        </section>
+        <div class="grid">
+          <section class="panel">
+            <div class="pill">My Subscriptions</div>
+            <p class="sub fanDashSectionSub">
+              Cancel anytime. Access remains active until the end of the billing period.
+            </p>
+            <div class="list" id="subsList"></div>
+            <div class="hint" id="subsMsg"></div>
+          </section>
 
-        <section class="panel fanDashWidePanel">
-          <div class="pill">My Access</div>
-          <p class="sub fanDashSectionSub">Shortcuts to what you can view.</p>
+          <section class="panel">
+            <div class="pill">Following</div>
+            <p class="sub fanDashSectionSub">Creators you follow.</p>
+            <div class="list" id="followsList"></div>
+            <div class="hint" id="followsMsg"></div>
+          </section>
 
-          <div class="btnRow">
-            <button
-              class="ghost disabled"
-              type="button"
-              disabled
-              aria-disabled="true"
-              title="Coming soon: Purchased posts"
-            >
-              View purchased posts <span class="pill pillSoon">Soon</span>
-            </button>
-          </div>
-        </section>
+          <section class="panel fanDashWidePanel">
+            <div class="pill">My Access</div>
+            <p class="sub fanDashSectionSub">Shortcuts to what you can view.</p>
+
+            <div class="btnRow">
+              <button
+                class="ghost disabled"
+                id="purchasedPostsBtn"
+                type="button"
+                disabled
+                aria-disabled="true"
+                title="Coming soon: Purchased posts"
+              >
+                View purchased posts <span class="pill pillSoon">Soon</span>
+              </button>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
 
