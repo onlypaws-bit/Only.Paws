@@ -54,13 +54,12 @@ body{
 
 
 /* =========================
-   App Nav Layout Fix
+          APP NAV
    ========================= */
 
-.appNav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.appNav{
+  margin:10px 0 6px;
+}
 
   padding: 12px 20px;
 }
@@ -131,7 +130,7 @@ body{
 }
 
 .appNav .pill {
-  margin-right: 8px;
+  margin-right: 4px;
 }
 
 .appNav .navBtn.primary:hover {
