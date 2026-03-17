@@ -19,47 +19,49 @@
   <div class="wrap">
     <div id="header-placeholder"></div>
 
-    <main class="page">
-      <div class="container">
+    <main class="page creatorProfilePage">
+      <div class="creatorProfileWrap">
 
-        <!-- HERO -->
-        <section class="panel creatorHeroPanel">
-          <div class="pill">Creator</div>
+        <div class="creatorProfileGrid">
+          <!-- HERO -->
+          <section class="panel creatorHeroPanel">
+            <div class="pill">Creator</div>
 
-          <h1 id="creatorName">Creator</h1>
+            <h1 id="creatorName">Creator</h1>
 
-          <div class="heroRow">
-            <div class="avatar" id="creatorAvatar">🐾</div>
+            <div class="heroRow">
+              <div class="avatar" id="creatorAvatar">🐾</div>
 
-            <div class="meta">
-              <b id="creatorHandle">@username</b>
-              <span id="creatorBio"></span>
+              <div class="meta">
+                <b id="creatorHandle">@username</b>
+                <span id="creatorBio"></span>
+              </div>
             </div>
-          </div>
 
-          <div class="creatorSocials" id="creatorSocials" hidden>
-            <a id="creatorInstagram" class="socialChip" hidden>Instagram</a>
-            <a id="creatorTikTok" class="socialChip" hidden>TikTok</a>
-          </div>
+            <div class="creatorSocials" id="creatorSocials" hidden>
+              <a id="creatorInstagram" class="socialChip" hidden>Instagram</a>
+              <a id="creatorTikTok" class="socialChip" hidden>TikTok</a>
+            </div>
 
-          <div class="btnRow" id="actionRow">
-            <button class="ghost" id="followBtn">Follow</button>
-            <button class="btn" id="premiumBtn">Subscribe</button>
-            <button class="ghost" id="shareProfileBtn">Share</button>
-          </div>
+            <div class="btnRow" id="actionRow">
+              <button class="ghost" id="followBtn">Follow</button>
+              <button class="btn" id="premiumBtn">Subscribe</button>
+              <button class="ghost" id="shareProfileBtn">Share</button>
+            </div>
 
-          <div class="hint" id="creatorHint"></div>
-        </section>
+            <div class="hint" id="creatorHint"></div>
+          </section>
 
-        <!-- PETS -->
-        <section class="panel creatorPetsPanel">
-          <div class="pill">Pets</div>
-          <div class="petsList" id="petsList"></div>
-          <div class="hint" id="petsHint">Loading…</div>
-        </section>
+          <!-- PETS -->
+          <section class="panel creatorPetsPanel">
+            <div class="pill">Pets</div>
+            <div class="petsList" id="petsList"></div>
+            <div class="hint" id="petsHint">Loading…</div>
+          </section>
+        </div>
 
-        <!-- POSTS (IDENTICO AL FEED) -->
-        <section class="panel">
+        <!-- POSTS -->
+        <section class="panel creatorPostsPanel">
           <div class="sectionHeader">
             <h2>Posts</h2>
             <div class="hint">
@@ -67,7 +69,6 @@
             </div>
           </div>
 
-          <!-- 🔥 STESSA CLASS DEL FEED -->
           <div class="feed" id="posts"></div>
 
           <div class="hint" id="postsHint">Loading…</div>
