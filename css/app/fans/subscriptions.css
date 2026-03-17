@@ -1,157 +1,101 @@
 /* =========================================================
    OnlyPaws
-   File: css/app/fans/subscriptions.css
-   Purpose: styles specific to the subscriptions page
+   File: /css/app/fans/subscriptions.css
    ========================================================= */
 
-.subscriptionsPageTitle {
+.subscriptionsMain {
+  padding-top: 8px;
+  padding-bottom: 24px;
+}
+
+.subscriptionsPanel {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.subscriptionsTitle {
+  text-align: center;
   margin: 8px 0 10px;
   font-size: clamp(1.8rem, 4vw, 2.4rem);
-  letter-spacing: -.3px;
-  text-align: center;
 }
 
 .subscriptionsSubline {
-  margin: 0 0 18px;
+  text-align: center;
   font-size: 13px;
   font-weight: 800;
-  color: var(--muted);
-  text-align: center;
+  margin-bottom: 18px;
 }
 
 .subscriptionsPlans {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
   max-width: 520px;
   margin: 0 auto;
 }
 
-.subscriptionPlanCard {
+.subscriptionsPlanCard {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 14px;
   min-height: 420px;
-  overflow: visible;
   padding: 22px;
   padding-top: 64px;
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.18);
   background: rgba(255,255,255,.10);
-  transition:
-    transform .16s ease,
-    background .16s ease,
-    border-color .16s ease,
-    box-shadow .16s ease;
-  will-change: transform;
+  transition: .16s;
 }
 
-.subscriptionPlanCard:hover {
-  transform: translateY(-2px) scale(1.01);
-  background: rgba(255,255,255,.12);
-  border-color: rgba(255,255,255,.24);
-  box-shadow: 0 26px 55px rgba(0,0,0,.28);
+.subscriptionsPlanCard.featured {
+  background: linear-gradient(180deg,#6B4EFF,#8B6CFF);
 }
 
-.subscriptionPlanCard:active {
-  transform: translateY(0px) scale(.995);
-}
-
-.subscriptionPlanCard.featured {
-  background: linear-gradient(180deg, rgba(107,78,255,.90), rgba(139,108,255,.90));
-}
-
-.subscriptionPlanCard.featured:hover {
-  transform: translateY(-3px) scale(1.015);
-  box-shadow: 0 30px 65px rgba(0,0,0,.30);
-}
-
-.subscriptionPlanIcon {
+.subscriptionsPlanIcon {
   position: absolute;
   top: -42px;
   left: 50%;
-  width: 84px;
-  height: auto;
   transform: translateX(-50%);
-  pointer-events: none;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,.35));
-  will-change: transform;
+  width: 84px;
 }
 
-@keyframes subscriptionPlanIconFloat {
-  0%   { transform: translateX(-50%) translateY(0px) rotate(-0.6deg); }
-  50%  { transform: translateX(-50%) translateY(-6px) rotate(0.6deg); }
-  100% { transform: translateX(-50%) translateY(0px) rotate(-0.6deg); }
+.subscriptionsPlanHeading {
+  font-size: 1.5rem;
 }
 
-.subscriptionPlanCard:hover .subscriptionPlanIcon {
-  animation: subscriptionPlanIconFloat 1.25s ease-in-out infinite;
-}
-
-.subscriptionPlanCard:active .subscriptionPlanIcon {
-  animation: none;
-  transform: translateX(-50%) translateY(-2px);
-}
-
-.subscriptionPlanTitle {
-  margin: 0;
-  font-size: 1.55rem;
-}
-
-.subscriptionPlanTag {
+.subscriptionsPlanTag {
   font-weight: 900;
   color: var(--muted);
 }
 
-.subscriptionPlanDesc {
-  margin: 0;
-  line-height: 1.5;
+.subscriptionsPlanDesc {
   color: rgba(255,255,255,.9);
 }
 
-.subscriptionPlanFeatures {
-  margin: 0;
+.subscriptionsPlanFeatures {
   padding-left: 18px;
-  color: rgba(255,255,255,.92);
 }
 
-.subscriptionPlanFeatures li {
-  margin-bottom: 6px;
-}
-
-.subscriptionPlanPrice {
+.subscriptionsPlanPrice {
   font-size: 2rem;
   font-weight: 900;
 }
 
-.subscriptionPlanMicro {
-  margin-top: -6px;
+.subscriptionsPlanMicro {
   font-size: 12px;
   font-weight: 800;
-  color: rgba(255,255,255,.85);
 }
 
-.subscriptionToast {
+.subscriptionsBtn {
+  margin-top: auto;
+}
+
+.subscriptionsToast {
   position: fixed;
   left: 50%;
   bottom: 18px;
-  z-index: 100;
-  display: none;
-  max-width: min(520px, 92vw);
-  padding: 10px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.18);
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 20px 45px rgba(0,0,0,.25);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 800;
-  text-align: center;
   transform: translateX(-50%);
+  display: none;
 }
 
-.subscriptionToast.show {
+.subscriptionsToast.show {
   display: block;
 }
