@@ -85,14 +85,14 @@
       : `<img src="${esc(url)}" alt="Post media" loading="lazy" decoding="async">`;
 
     if (!locked) {
-      return `<div class="op-mediaWrap">${mediaEl}</div>`;
+      return `<div class="op-mediaWrap" data-op-clickable="1">${mediaEl}</div>`;
     }
 
     const creator = post.creator_username || "creator";
     const profileUrl = creatorProfileUrl(creator);
 
     return `
-      <div class="op-mediaWrap op-isLocked">
+      <div class="op-mediaWrap op-isLocked" data-op-clickable="1">
         ${mediaEl}
         <div class="op-lockOverlay">
           <div class="op-lockBox">
@@ -158,7 +158,7 @@
     const badge = renderBadge(post, locked);
 
     const avatarHtml = creatorAvatar
-      ? `<img src="${creatorAvatar}" alt="${creator} avatar" loading="lazy">`
+      ? `<img src="${creatorAvatar}" alt="${creator} avatar" loading="lazy" decoding="async">`
       : `<span aria-hidden="true">🐾</span>`;
 
     const likeBlock = FEATURE_LIKES
@@ -169,8 +169,9 @@
           data-post-id="${esc(post.id)}"
           data-liked="0"
           data-op-stop-nav="1"
+          aria-label="Like post"
         >
-          <span class="op-likeIcon">♡</span>
+          <span class="op-likeIcon" aria-hidden="true">♡</span>
           <span class="op-likeCount" data-like-count>—</span>
         </button>
       `
@@ -186,6 +187,7 @@
                 class="op-postCreatorAvatar"
                 href="${esc(creatorProfileUrl(creatorRaw))}"
                 data-op-stop-nav="1"
+                aria-label="Open @${creator} profile"
               >
                 ${avatarHtml}
               </a>
@@ -193,7 +195,7 @@
               <div class="op-postCreatorMeta">
                 ${
                   opts.showCreator !== false
-                    ? `<a class="op-postCreatorName" href="${esc(creatorProfileUrl(creatorRaw))}" data-op-stop-nav="1">@${creator}</a>`
+                    ? `<a class="op-postCreatorName" href="${esc(creatorProfileUrl(creatorRaw))}" data-op-stop-nav="1" style="text-decoration:none;">@${creator}</a>`
                     : `<span class="op-postCreatorName"></span>`
                 }
                 ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
@@ -228,11 +230,46 @@
     }
   }
 
+  function bindPostNavigation(root = document) {
+    const mains = $$(".op-postMain", root);
+
+    mains.forEach((main) => {
+      if (main.dataset.navBound === "1") return;
+      main.dataset.navBound = "1";
+
+      const go = () => {
+        const url = main.dataset.postUrl;
+        if (url) window.location.href = url;
+      };
+
+      main.addEventListener("click", (e) => {
+        if (e.target.closest("[data-op-stop-nav='1']")) return;
+        if (e.target.closest("a, button, input, textarea, select, label")) return;
+
+        if (e.target.closest(".op-mediaWrap")) {
+          go();
+          return;
+        }
+
+        go();
+      });
+
+      main.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        if (e.target.closest("[data-op-stop-nav='1']")) return;
+        e.preventDefault();
+        go();
+      });
+    });
+  }
+
   async function initPosts(root = document) {
+    bindPostNavigation(root);
+
     const buttons = $$(".op-likeBtn", root);
     const logged = await isLoggedIn();
 
-    buttons.forEach(btn => {
+    buttons.forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         e.preventDefault();
         e.stopPropagation();
