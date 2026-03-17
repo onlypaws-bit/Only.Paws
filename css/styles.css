@@ -1,10 +1,8 @@
 /* =========================================================
    OnlyPaws
-   File: css/styles.css
+   File: /css/styles.css
    Purpose: global design system and shared base styles
    ========================================================= */
-
-
 
 :root{
   --bg1:#6B4EFF;
@@ -15,16 +13,21 @@
   --card:rgba(0,0,0,.16);
   --btn:#ffffff;
   --btnText:#6B4EFF;
-  --shadow: rgba(0,0,0,.25);
+  --shadow:rgba(0,0,0,.25);
 }
 
 *{
   box-sizing:border-box;
 }
 
+html,
+body{
+  min-height:100%;
+}
+
 body{
   margin:0;
-  font-family: Arial, sans-serif;
+  font-family:Arial, sans-serif;
   color:var(--text);
   background:
     radial-gradient(1200px 700px at 20% 10%, rgba(255,255,255,.18), transparent 55%),
@@ -33,10 +36,11 @@ body{
   min-height:100vh;
 }
 
-/* ===== PAGE SHELL =====
-   Full-page vertical wrapper used by marketing/app pages
-   so footer/header layouts can stretch correctly.
-*/
+img{
+  max-width:100%;
+}
+
+/* ===== PAGE SHELL ===== */
 
 .pageShell{
   min-height:100vh;
@@ -47,74 +51,90 @@ body{
 /* ===== WRAP ===== */
 
 .wrap{
+  width:100%;
   max-width:1040px;
   margin:0 auto;
   padding:0 18px 70px;
 }
 
+/* ===== SHARED NAV SHELL ===== */
 
-/* =========================
-   App Nav
-   Aligned to marketing nav
-   ========================= */
-
-.appNav{
+.nav,
+.appNav,
+.marketingNav{
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  margin:10px 0 6px;
-  padding:0;
+  padding:22px 0 18px;
+  margin:0;
 }
 
-.appNav .brand{
+.brand{
   display:inline-flex;
   align-items:center;
-  gap:10px;
+  gap:12px;
+  text-decoration:none;
+  color:#fff;
+  min-width:0;
+}
+
+.brand:hover{
   text-decoration:none;
   color:#fff;
 }
 
-.appNav .brandLogo{
-  display:inline-flex;
+.brandLogo{
+  width:60px;
+  height:60px;
+  display:flex;
   align-items:center;
   justify-content:center;
+  flex:0 0 auto;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:0 10px 26px rgba(0,0,0,.14);
+  overflow:hidden;
 }
 
-.appNav .brandLogo img{
-  width:36px;
-  height:36px;
+.brandLogo img{
+  width:44px;
+  height:44px;
+  object-fit:contain;
   display:block;
 }
 
-.appNav .brandText{
-  font-size:18px;
-  font-weight:800;
-  color:#fff;
+.brandText{
+  font-size:17px;
   line-height:1;
+  font-weight:900;
+  color:#fff;
+  white-space:nowrap;
 }
+
+/* =========================
+   App Nav
+   ========================= */
 
 .appNav .navRight{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap:6px;
+  gap:8px;
   flex-wrap:wrap;
 }
 
-/* viewer/user pill aligned to shared pill language */
 .appNav .pill{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-height:42px;
+  min-height:44px;
   padding:0 14px;
-  margin-right:0;
-
+  margin:0;
   border-radius:999px;
   background:rgba(255,255,255,.12);
   border:1px solid rgba(255,255,255,.18);
-
   font-size:13px;
   font-weight:800;
   color:rgba(255,255,255,.88);
@@ -122,22 +142,18 @@ body{
   backdrop-filter:blur(8px);
 }
 
-/* app buttons visually aligned to marketing links/buttons */
 .appNav .navBtn{
   display:inline-flex;
   align-items:center;
   justify-content:center;
   min-width:88px;
-  min-height:42px;
+  min-height:44px;
   padding:0 14px;
-
   border-radius:999px;
   text-decoration:none;
   white-space:nowrap;
-
   font-size:14px;
   font-weight:800;
-
   border:1px solid transparent;
   transition:
     background .18s ease,
@@ -148,7 +164,6 @@ body{
     box-shadow .18s ease;
 }
 
-/* secondary button = like marketing text links */
 .appNav .navBtn:not(.primary){
   background:transparent;
   color:rgba(255,255,255,.88);
@@ -162,7 +177,6 @@ body{
   opacity:1;
 }
 
-/* primary button = like shared white CTA */
 .appNav .navBtn.primary{
   background:var(--btn);
   color:var(--btnText);
@@ -175,7 +189,6 @@ body{
   box-shadow:0 8px 20px rgba(0,0,0,.18);
 }
 
-/* optional active state if ever used */
 .appNav .navBtn.is-active{
   background:rgba(255,255,255,.14);
   border-color:rgba(255,255,255,.18);
@@ -184,15 +197,11 @@ body{
 
 /* ===== MARKETING NAV ===== */
 
-.marketingNav{
-  margin:10px 0 6px;
-}
-
 .marketingLinks{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap:6px;
+  gap:8px;
   flex-wrap:wrap;
 }
 
@@ -208,7 +217,7 @@ body{
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  height:42px;
+  min-height:44px;
   padding:0 14px;
   border-radius:999px;
   color:rgba(255,255,255,.88);
@@ -294,6 +303,7 @@ h2{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  min-height:42px;
   padding:12px 16px;
   border-radius:999px;
   background:var(--btn);
@@ -314,19 +324,19 @@ h2{
   transform:translateY(-1px);
 }
 
-.ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 12px 16px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.18);
-  color: white;
-  text-decoration: none;
-  font-weight: 800;
-  white-space: nowrap;
+.ghost{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:12px 16px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  color:#fff;
+  text-decoration:none;
+  font-weight:800;
+  white-space:nowrap;
   transition:
     transform .18s ease,
     opacity .18s ease,
@@ -335,12 +345,11 @@ h2{
     box-shadow .18s ease;
 }
 
-.ghost:hover {
-  transform: translateY(-1px);
-  background: rgba(255,255,255,.16);
-  border-color: rgba(255,255,255,.24);
+.ghost:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.24);
 }
-
 
 /* ===== HERO ===== */
 
@@ -482,7 +491,7 @@ h2{
 }
 
 .globalFooter a{
-  color:white;
+  color:#fff;
   text-decoration:none;
 }
 
@@ -520,7 +529,7 @@ h2{
   background:none;
   border:none;
   font-size:28px;
-  color:white;
+  color:#fff;
   cursor:pointer;
 }
 
@@ -534,22 +543,20 @@ h2{
 
 @media (max-width:820px){
   .nav,
-  .appNav{
+  .appNav,
+  .marketingNav{
     flex-direction:column;
     align-items:flex-start;
-    gap:12px;
+    gap:14px;
+    padding:18px 0 14px;
   }
 
   .navRight,
-  .appNav .navRight{
-    width:100%;
-    justify-content:flex-start;
-    flex-wrap:wrap;
-  }
-
+  .appNav .navRight,
   .marketingLinks{
     width:100%;
     justify-content:flex-start;
+    flex-wrap:wrap;
     gap:8px;
   }
 
@@ -563,5 +570,22 @@ h2{
   .appNav .pill{
     min-height:40px;
     padding:0 12px;
+  }
+
+  .brandLogo,
+  .appNav .brandLogo{
+    width:58px;
+    height:58px;
+  }
+
+  .brandLogo img,
+  .appNav .brandLogo img{
+    width:42px;
+    height:42px;
+  }
+
+  .brandText,
+  .appNav .brandText{
+    font-size:16px;
   }
 }
