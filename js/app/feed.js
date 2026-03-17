@@ -128,99 +128,32 @@
 
   /* =========================================================
      Featured creators
-     Old behavior restored:
-     - mix latest active + newest creators
-     - de-dup
-     - deterministic daily shuffle
+     Aligned to real profiles schema:
+     - user_id
+     - username
+     - display_name
+     - bio
+     - avatar_url
+     - created_at
      ========================================================= */
-
-  function seededRandom(seed) {
-    let h = 0;
-    for (let i = 0; i < seed.length; i++) {
-      h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
-    }
-
-    return () => {
-      h = (Math.imul(1664525, h) + 1013904223) | 0;
-      return (h >>> 0) / 4294967296;
-    };
-  }
 
   async function fetchFeaturedCreators(limit = 6) {
     const supabase = getClient();
 
-    const halfTop = Math.ceil(limit / 2);
-    const halfNew = Math.floor(limit / 2);
-
-    const creatorFields =
-      "user_id, username, display_name, bio, avatar_url, created_at, last_active_at";
-
-    let latestActive = [];
-    let newestCreators = [];
-
-    const latestRes = await supabase
+    const { data, error } = await supabase
       .from("profiles")
-      .select(creatorFields)
-      .eq("role", "creator")
-      .not("username", "is", null)
-      .order("last_active_at", { ascending: false })
-      .limit(halfTop);
-
-    if (latestRes.error) {
-      console.warn("[feed] latest active fallback -> created_at", latestRes.error);
-
-      const fallbackRes = await supabase
-        .from("profiles")
-        .select(creatorFields)
-        .eq("role", "creator")
-        .not("username", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(halfTop);
-
-      if (fallbackRes.error) throw fallbackRes.error;
-      latestActive = fallbackRes.data || [];
-    } else {
-      latestActive = latestRes.data || [];
-    }
-
-    const newestRes = await supabase
-      .from("profiles")
-      .select(creatorFields)
+      .select("user_id, username, display_name, bio, avatar_url, created_at")
       .eq("role", "creator")
       .not("username", "is", null)
       .order("created_at", { ascending: false })
-      .limit(halfNew);
+      .limit(limit);
 
-    if (newestRes.error) throw newestRes.error;
-    newestCreators = newestRes.data || [];
+    if (error) throw error;
 
-    const map = new Map();
-
-    [...latestActive, ...newestCreators].forEach((creator) => {
-      const key = creator?.user_id || creator?.id;
-      if (!key || map.has(key)) return;
-
-      map.set(key, {
-        ...creator,
-        href: creatorProfileHref(creator?.username || creator?.user_id),
-      });
-    });
-
-    const merged = Array.from(map.values());
-
-    if (merged.length <= limit) {
-      return merged;
-    }
-
-    const today = new Date().toISOString().slice(0, 10);
-    const rand = seededRandom(today.replace(/-/g, ""));
-
-    for (let i = merged.length - 1; i > 0; i--) {
-      const j = Math.floor(rand() * (i + 1));
-      [merged[i], merged[j]] = [merged[j], merged[i]];
-    }
-
-    return merged.slice(0, limit);
+    return (data || []).map((creator) => ({
+      ...creator,
+      href: creatorProfileHref(creator?.username || creator?.user_id),
+    }));
   }
 
   /* =========================================================
@@ -394,9 +327,7 @@
       console.error("[feed] failed to load featured creators", error);
       setText(creatorHint, "Could not load creators.");
       show(creatorHint);
-      setDebug(
-        `Creators query failed:\n${error?.message || "Unknown error"}`
-      );
+      setDebug(`Creators query failed:\n${error?.message || "Unknown error"}`);
       creatorsAll = [];
       renderCreators([]);
     }
@@ -404,10 +335,6 @@
 
   /* =========================================================
      Latest posts
-     Old lock/unlock behavior restored:
-     - private => only creator
-     - public free => everyone
-     - public premium => creator or active subscriber
      ========================================================= */
 
   async function loadLatestPosts() {
