@@ -31,6 +31,7 @@ body{
     radial-gradient(1000px 650px at 90% 30%, rgba(0,0,0,.22), transparent 55%),
     linear-gradient(135deg, var(--bg1), var(--bg2));
   min-height:100vh;
+  overflow-x:hidden;
 }
 
 /* ===== PAGE SHELL =====
@@ -345,6 +346,7 @@ h2{
   display:grid;
   gap:16px;
   margin-top:16px;
+  min-width:0;
 }
 
 .postCard{
@@ -352,6 +354,8 @@ h2{
   padding:16px;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.16);
+  overflow:hidden;
+  min-width:0;
 }
 
 .postTop{
@@ -372,11 +376,16 @@ h2{
   margin-top:10px;
   border-radius:12px;
   overflow:hidden;
+  width:100%;
+  max-width:100%;
+  min-width:0;
 }
 
 .mediaWrap img,
 .mediaWrap video{
   width:100%;
+  max-width:100%;
+  height:auto;
   display:block;
 }
 
