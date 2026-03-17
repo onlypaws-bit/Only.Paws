@@ -18,15 +18,19 @@
     el.hidden = !!hidden;
   }
 
-  function route(key, fallback) {
+  function route(pathKey, fallback) {
     if (ROUTES?.get) {
-      return ROUTES.get(key) || fallback;
+      return ROUTES.get(pathKey) || fallback;
     }
     return fallback;
   }
 
   function homePath() {
     return route("home", PATHS?.home || PATHS?.index || "/index.html");
+  }
+
+  function marketingHomePath() {
+    return route("marketing.home", PATHS?.marketing?.home || "/html/marketing/index.html");
   }
 
   function appFeedPath() {
@@ -112,19 +116,18 @@
     const navFanDash = document.getElementById("navFanDash");
     const navCreatorDash = document.getElementById("navCreatorDash");
 
+    const marketingHome = document.querySelector('[data-page="index"], [data-page="home"]');
     const marketingCreators = document.querySelector('[data-page="creators"]');
     const marketingFans = document.querySelector('[data-page="fans"]');
-    const marketingHome = document.querySelector('[data-page="index"], [data-page="home"]');
 
-    if (navHome) navHome.href = appFeedPath();
+    if (navHome) {
+      const nav = navHome.closest(".nav");
+      navHome.href = nav?.classList.contains("appNav") ? appFeedPath() : homePath();
+    }
 
-    if (brandLink) {
+    if (brandLink && !navHome) {
       const nav = brandLink.closest(".nav");
-      if (nav?.classList.contains("appNav")) {
-        brandLink.href = appFeedPath();
-      } else {
-        brandLink.href = homePath();
-      }
+      brandLink.href = nav?.classList.contains("appNav") ? appFeedPath() : homePath();
     }
 
     if (navProfile) {
@@ -220,24 +223,45 @@
     const dashboardBtn = document.getElementById("navDashboard");
     const fanDashBtn = document.getElementById("navFanDash");
     const creatorDashBtn = document.getElementById("navCreatorDash");
+    const pill = document.getElementById("userPill");
 
     if (profileBtn) {
       profileBtn.href = profilePath();
-      setHidden(profileBtn, false);
+      setHidden(profileBtn, true);
     }
 
-    if (!client?.auth) return;
+    if (dashboardBtn) {
+      setHidden(dashboardBtn, true);
+      dashboardBtn.removeAttribute("href");
+    }
+
+    if (fanDashBtn) {
+      fanDashBtn.href = fanDashPath();
+      setHidden(fanDashBtn, true);
+    }
+
+    if (creatorDashBtn) {
+      creatorDashBtn.href = creatorDashPath();
+      setHidden(creatorDashBtn, true);
+    }
+
+    if (!client?.auth) {
+      if (pill && !pill.textContent) pill.textContent = "Guest";
+      return;
+    }
 
     try {
-      const { data: u } = await client.auth.getUser();
-      const userId = u?.user?.id;
+      const { data: sessData } = await client.auth.getSession();
+      const session = sessData?.session;
+      const userId = session?.user?.id;
 
       if (!userId) {
-        setHidden(profileBtn, true);
-        setHidden(dashboardBtn, true);
-        setHidden(fanDashBtn, true);
-        setHidden(creatorDashBtn, true);
+        if (pill && !pill.textContent) pill.textContent = "Guest";
         return;
+      }
+
+      if (profileBtn) {
+        setHidden(profileBtn, false);
       }
 
       const { data: p } = await client
@@ -252,16 +276,13 @@
         dashboardBtn.href = isCreator ? creatorDashPath() : fanDashPath();
         dashboardBtn.textContent = "Dashboard";
         setHidden(dashboardBtn, false);
-      }
-
-      if (fanDashBtn) {
-        fanDashBtn.href = fanDashPath();
-        setHidden(fanDashBtn, isCreator || !!dashboardBtn);
-      }
-
-      if (creatorDashBtn) {
-        creatorDashBtn.href = creatorDashPath();
-        setHidden(creatorDashBtn, !isCreator || !!dashboardBtn);
+      } else {
+        if (fanDashBtn) {
+          setHidden(fanDashBtn, isCreator);
+        }
+        if (creatorDashBtn) {
+          setHidden(creatorDashBtn, !isCreator);
+        }
       }
     } catch (err) {
       console.warn("hydrateAppNav failed:", err);
@@ -283,6 +304,7 @@
   window.OPNav = {
     setHidden,
     homePath,
+    marketingHomePath,
     appFeedPath,
     profilePath,
     fanDashPath,
