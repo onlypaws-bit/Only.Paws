@@ -31,7 +31,6 @@ body{
     radial-gradient(1000px 650px at 90% 30%, rgba(0,0,0,.22), transparent 55%),
     linear-gradient(135deg, var(--bg1), var(--bg2));
   min-height:100vh;
-  overflow-x:hidden;
 }
 
 /* ===== PAGE SHELL =====
@@ -53,52 +52,91 @@ body{
   padding:0 18px 70px;
 }
 
-/* ===== NAV ===== */
 
-.nav{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:14px;
-  margin:12px 0 8px;
+/* =========================
+   App Nav Layout Fix
+   ========================= */
+
+.appNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 12px 20px;
 }
 
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  text-decoration:none;
-  color:white;
-  font-weight:900;
+/* RIGHT SIDE */
+.appNav .navRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.brandText{
-  font-size:1.1rem;
+/* USER PILL */
+.appNav .pill {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.brandLogo{
-  width:62px;
-  height:62px;
-  border-radius:14px;
-  background:rgba(255,255,255,.16);
-  border:1px solid rgba(255,255,255,.18);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  flex-shrink:0;
+/* NAV BUTTONS */
+.appNav .navBtn {
+  padding: 6px 14px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  text-decoration: none;
+
+  transition: all 0.2s ease;
 }
 
-.brandLogo img{
-  width:46px;
-  height:46px;
-  object-fit:contain;
+/* PRIMARY (Profile) */
+.appNav .navBtn.primary {
+  background: white;
+  color: #5a3cff;
 }
 
-.navRight{
-  display:flex;
-  align-items:center;
-  gap:10px;
+/* SECONDARY (Dashboard) */
+.appNav .navBtn:not(.primary) {
+  color: white;
+  opacity: 0.85;
+}
+
+.appNav .navBtn:not(.primary):hover {
+  opacity: 1;
+}
+
+/* SPACING FIX TRA PILL E BOTTONI */
+.appNav .pill + .navBtn {
+  margin-left: 4px;
+}
+
+/* LOGO */
+.appNav .brandLogo img {
+  width: 36px;
+  height: 36px;
+}
+
+/* TEXT */
+.appNav .brandText {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.appNav .pill {
+  margin-right: 8px;
+}
+
+.appNav .navBtn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 /* ===== MARKETING NAV ===== */
@@ -346,7 +384,6 @@ h2{
   display:grid;
   gap:16px;
   margin-top:16px;
-  min-width:0;
 }
 
 .postCard{
@@ -354,8 +391,6 @@ h2{
   padding:16px;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.16);
-  overflow:hidden;
-  min-width:0;
 }
 
 .postTop{
@@ -376,16 +411,11 @@ h2{
   margin-top:10px;
   border-radius:12px;
   overflow:hidden;
-  width:100%;
-  max-width:100%;
-  min-width:0;
 }
 
 .mediaWrap img,
 .mediaWrap video{
   width:100%;
-  max-width:100%;
-  height:auto;
   display:block;
 }
 
