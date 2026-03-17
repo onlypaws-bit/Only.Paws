@@ -1,7 +1,7 @@
 <!--
   =========================================================
   OnlyPaws
-  File: /html/app/fans/subscribe.html
+  File: /html/app/fans/subscribtions.html
 
   Purpose:
   Fan subscription checkout page.
@@ -38,89 +38,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>OnlyPaws — Choose your plan</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Choose your plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="stylesheet" href="/css/styles.css" />
-<link rel="stylesheet" href="/css/app/fans/subscribe.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/fans/subscriptions.css" />
 </head>
 
-<body class="subscribePage">
+<body class="subscriptionsPage">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
 
-<div class="wrap">
+    <main class="page subscriptionsMain">
+      <div class="container">
+        <section class="panel subscriptionsPanel">
+          <h1 class="subscriptionsTitle">Choose your plan 🐾</h1>
+          <div class="sub subscriptionsSubline" id="subline">Loading…</div>
 
-<div id="header-placeholder"></div>
+          <div class="subscriptionsPlans">
+            <div class="subscriptionsPlanCard featured" id="vipPlan">
+              <img
+                class="subscriptionsPlanIcon"
+                src="/assets/images/paw-crown.png"
+                alt="VIPaws"
+              />
 
-<main class="subscribeMain">
+              <h2 class="subscriptionsPlanHeading" id="planName">VIPaws</h2>
 
-<section class="planPanel">
+              <div class="subscriptionsPlanTag" id="planTag">
+                best value 🐾
+              </div>
 
-<h1 class="planTitle">Choose your plan 🐾</h1>
-<div class="subline" id="subline">Loading…</div>
+              <p class="subscriptionsPlanDesc" id="planDesc">
+                Extra content, more interaction, real influence 🐶✨
+              </p>
 
-<div class="plans" id="plans">
+              <ul class="subscriptionsPlanFeatures">
+                <li>exclusive monthly content</li>
+                <li>bloopers & polls</li>
+                <li>monthly Q&A</li>
+              </ul>
 
-<div class="plan featured" id="vipPlan">
+              <div class="subscriptionsPlanPrice" id="planPrice">
+                €5 / month
+              </div>
 
-<img
-class="planIcon"
-src="/assets/images/paw-crown.png"
-alt="VIPaws"
-/>
+              <div class="subscriptionsPlanMicro" id="planMicro">
+                best value 🐾
+              </div>
 
-<h2 id="planName">VIPaws</h2>
+              <button
+                class="btn subscriptionsBtn"
+                id="subscribeBtn"
+                type="button"
+              >
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
 
-<div class="tag" id="planTag">
-best value 🐾
-</div>
+    <div id="footer-placeholder"></div>
+  </div>
 
-<p class="desc" id="planDesc">
-Extra content, more interaction, real influence 🐶✨
-</p>
+  <div class="toast subscriptionsToast" id="toast"></div>
 
-<ul class="planList">
-<li>exclusive monthly content</li>
-<li>bloopers & polls</li>
-<li>monthly Q&A</li>
-</ul>
-
-<div class="price" id="planPrice">
-€5 / month
-</div>
-
-<div class="micro" id="planMicro">
-best value 🐾
-</div>
-
-<button
-class="btn subscribeBtn"
-id="subscribeBtn"
-type="button"
->
-Subscribe
-</button>
-
-</div>
-</div>
-
-</section>
-
-</main>
-
-<div id="footer-placeholder"></div>
-
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/paths.js"></script>
-<script src="/js/onlypawsClient.js"></script>
-<script src="/js/nav.js"></script>
-<script src="/js/partials.js"></script>
-<script src="/js/auth-guard.js"></script>
-<script src="/js/app/fans/subscribe.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/app/fans/subscriptions.js"></script>
 </body>
 </html>
