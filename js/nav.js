@@ -1,7 +1,7 @@
 /* =========================================================
    OnlyPaws
    File: /js/nav.js
-   Purpose: hydrate shared app navigation and user pill
+   Purpose: hydrate shared marketing/app navigation and user pill
    Dependencies:
    - window.onlypawsClient
    - window.OP_PATHS
@@ -18,32 +18,51 @@
     el.hidden = !!hidden;
   }
 
-  function profilePath() {
+  function route(key, fallback) {
     if (ROUTES?.get) {
-      return ROUTES.get("app.profile") || "profile.html";
+      return ROUTES.get(key) || fallback;
     }
-    return PATHS?.app?.profile || "/html/app/profile.html";
-  }
-
-  function fanDashPath() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.fans.fanDash") || "fan-dash.html";
-    }
-    return PATHS?.app?.fans?.fanDash || "/html/app/fans/fan-dash.html";
-  }
-
-  function creatorDashPath() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.creators.creatorDash") || "creator-dash.html";
-    }
-    return PATHS?.app?.creators?.creatorDash || "/html/app/creators/creator-dash.html";
+    return fallback;
   }
 
   function homePath() {
-    if (ROUTES?.get) {
-      return ROUTES.get("home") || ROUTES.get("index") || "index.html";
-    }
-    return PATHS?.home || PATHS?.index || "/index.html";
+    return route("home", PATHS?.home || PATHS?.index || "/index.html");
+  }
+
+  function appFeedPath() {
+    return route("app.feed", PATHS?.app?.feed || "/html/app/feed.html");
+  }
+
+  function profilePath() {
+    return route("app.profile", PATHS?.app?.profile || "/html/app/profile.html");
+  }
+
+  function fanDashPath() {
+    return route(
+      "app.fans.fanDash",
+      PATHS?.app?.fans?.fanDash || "/html/app/fans/fan-dash.html"
+    );
+  }
+
+  function creatorDashPath() {
+    return route(
+      "app.creators.creatorDash",
+      PATHS?.app?.creators?.creatorDash || "/html/app/creators/creator-dash.html"
+    );
+  }
+
+  function creatorsPath() {
+    return route(
+      "marketing.creators",
+      PATHS?.marketing?.creators || "/html/marketing/creators.html"
+    );
+  }
+
+  function fansPath() {
+    return route(
+      "marketing.fans",
+      PATHS?.marketing?.fans || "/html/marketing/fans.html"
+    );
   }
 
   function currentMarketingPageKeys() {
@@ -84,9 +103,62 @@
     });
   }
 
+  function hydrateStaticLinks() {
+    const navHome = document.getElementById("navHome");
+    const brandLink = document.querySelector(".nav .brand");
+
+    const navProfile = document.getElementById("navProfile");
+    const navDashboard = document.getElementById("navDashboard");
+    const navFanDash = document.getElementById("navFanDash");
+    const navCreatorDash = document.getElementById("navCreatorDash");
+
+    const marketingCreators = document.querySelector('[data-page="creators"]');
+    const marketingFans = document.querySelector('[data-page="fans"]');
+    const marketingHome = document.querySelector('[data-page="index"], [data-page="home"]');
+
+    if (navHome) navHome.href = appFeedPath();
+
+    if (brandLink) {
+      const nav = brandLink.closest(".nav");
+      if (nav?.classList.contains("appNav")) {
+        brandLink.href = appFeedPath();
+      } else {
+        brandLink.href = homePath();
+      }
+    }
+
+    if (navProfile) {
+      navProfile.href = profilePath();
+    }
+
+    if (navDashboard) {
+      navDashboard.hidden = true;
+      navDashboard.removeAttribute("href");
+    }
+
+    if (navFanDash) {
+      navFanDash.href = fanDashPath();
+      navFanDash.hidden = true;
+    }
+
+    if (navCreatorDash) {
+      navCreatorDash.href = creatorDashPath();
+      navCreatorDash.hidden = true;
+    }
+
+    if (marketingHome) marketingHome.href = homePath();
+    if (marketingCreators) marketingCreators.href = creatorsPath();
+    if (marketingFans) marketingFans.href = fansPath();
+  }
+
   async function hydrateUserPill() {
     const pill = document.getElementById("userPill");
-    if (!pill || !client?.auth) return;
+    if (!pill) return;
+
+    if (!client?.auth) {
+      pill.textContent = "Guest";
+      return;
+    }
 
     try {
       const { data: sessData } = await client.auth.getSession();
@@ -115,54 +187,58 @@
       else pill.textContent = "User";
     } catch (err) {
       console.warn("hydrateUserPill failed:", err);
+      if (!pill.textContent) pill.textContent = "User";
     }
   }
 
-  async function hydrateNav() {
+  async function bindLogout() {
+    const logoutBtn = document.getElementById("navLogout");
+    if (!logoutBtn) return;
+
+    setHidden(logoutBtn, false);
+
+    if (logoutBtn.dataset.bound === "1") return;
+    logoutBtn.dataset.bound = "1";
+
+    logoutBtn.addEventListener("click", async (event) => {
+      event.preventDefault();
+      logoutBtn.disabled = true;
+      logoutBtn.textContent = "Logging out…";
+
+      try {
+        await client?.auth?.signOut();
+      } catch (err) {
+        console.warn("signOut failed:", err);
+      }
+
+      window.location.replace(homePath());
+    });
+  }
+
+  async function hydrateAppNav() {
     const profileBtn = document.getElementById("navProfile");
+    const dashboardBtn = document.getElementById("navDashboard");
     const fanDashBtn = document.getElementById("navFanDash");
     const creatorDashBtn = document.getElementById("navCreatorDash");
-    const logoutBtn = document.getElementById("navLogout");
 
     if (profileBtn) {
       profileBtn.href = profilePath();
       setHidden(profileBtn, false);
     }
 
-    if (fanDashBtn) {
-      fanDashBtn.href = fanDashPath();
-      setHidden(fanDashBtn, true);
-    }
-
-    if (creatorDashBtn) {
-      creatorDashBtn.href = creatorDashPath();
-      setHidden(creatorDashBtn, true);
-    }
-
-    if (logoutBtn) {
-      setHidden(logoutBtn, false);
-
-      if (logoutBtn.dataset.bound !== "1") {
-        logoutBtn.dataset.bound = "1";
-
-        logoutBtn.addEventListener("click", async (event) => {
-          event.preventDefault();
-          logoutBtn.disabled = true;
-          logoutBtn.textContent = "Logging out…";
-
-          try {
-            await client?.auth?.signOut();
-          } catch (_) {}
-
-          window.location.replace(homePath());
-        });
-      }
-    }
+    if (!client?.auth) return;
 
     try {
       const { data: u } = await client.auth.getUser();
       const userId = u?.user?.id;
-      if (!userId) return;
+
+      if (!userId) {
+        setHidden(profileBtn, true);
+        setHidden(dashboardBtn, true);
+        setHidden(fanDashBtn, true);
+        setHidden(creatorDashBtn, true);
+        return;
+      }
 
       const { data: p } = await client
         .from("profiles")
@@ -170,29 +246,51 @@
         .eq("user_id", userId)
         .maybeSingle();
 
-      if (p?.role === "creator") {
-        setHidden(creatorDashBtn, false);
-        setHidden(fanDashBtn, true);
-      } else {
-        setHidden(fanDashBtn, false);
-        setHidden(creatorDashBtn, true);
+      const isCreator = p?.role === "creator";
+
+      if (dashboardBtn) {
+        dashboardBtn.href = isCreator ? creatorDashPath() : fanDashPath();
+        dashboardBtn.textContent = "Dashboard";
+        setHidden(dashboardBtn, false);
+      }
+
+      if (fanDashBtn) {
+        fanDashBtn.href = fanDashPath();
+        setHidden(fanDashBtn, isCreator || !!dashboardBtn);
+      }
+
+      if (creatorDashBtn) {
+        creatorDashBtn.href = creatorDashPath();
+        setHidden(creatorDashBtn, !isCreator || !!dashboardBtn);
       }
     } catch (err) {
-      console.warn("hydrateNav failed:", err);
+      console.warn("hydrateAppNav failed:", err);
     }
   }
 
-  async function initNav() {
+  async function hydrateNav() {
+    hydrateStaticLinks();
     hideCurrentMarketingLink();
-    await hydrateNav();
+    await bindLogout();
+    await hydrateAppNav();
     await hydrateUserPill();
+  }
+
+  async function initNav() {
+    await hydrateNav();
   }
 
   window.OPNav = {
     setHidden,
+    homePath,
+    appFeedPath,
+    profilePath,
+    fanDashPath,
+    creatorDashPath,
     hideCurrentMarketingLink,
-    hydrateNav,
+    hydrateStaticLinks,
     hydrateUserPill,
+    hydrateNav,
     initNav,
   };
 })();
