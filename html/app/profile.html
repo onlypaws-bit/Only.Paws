@@ -1,14 +1,73 @@
-<div class="nav appNav">
-  <a id="navHome" class="brand" href="/index.html">
-    <div class="brandLogo">
-      <img src="/assets/images/logo.png" alt="OnlyPaws logo">
-    </div>
-    <span class="brandText">OnlyPaws</span>
-  </a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Fan Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <div class="navRight">
-    <div class="pill" id="userPill"></div>
-    <a class="navBtn" id="navProfile" hidden>Profile</a>
-    <a class="navBtn" id="navDashboard" hidden>Dashboard</a>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/fans/fan-dash.css" />
+</head>
+
+<body class="fanDashPage" data-page="fan-dash">
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="page fanDashMain">
+      <div class="container">
+        <section class="panel fanDashTopPanel fanDashPanelSpacer">
+          <h1>Fan Dashboard</h1>
+          <p class="sub">Manage your subscriptions, follows, and access.</p>
+          <div class="hint fanDashMsg" id="topMsg"></div>
+        </section>
+
+        <div class="fanDashGrid">
+          <section class="panel">
+            <div class="pill">My Subscriptions</div>
+            <p class="sub fanDashSectionSub">
+              Cancel anytime. Access remains active until the end of the billing period.
+            </p>
+            <div class="fanDashList" id="subsList"></div>
+            <div class="hint fanDashMsg" id="subsMsg"></div>
+          </section>
+
+          <section class="panel">
+            <div class="pill">Following</div>
+            <p class="sub fanDashSectionSub">Creators you follow.</p>
+            <div class="fanDashList" id="followsList"></div>
+            <div class="hint fanDashMsg" id="followsMsg"></div>
+          </section>
+
+          <section class="panel fanDashFullWidthPanel">
+            <div class="pill">My Access</div>
+            <p class="sub fanDashSectionSub">Shortcuts to what you can view.</p>
+
+            <div class="btnRow">
+              <button
+                class="ghost fanDashGhostDisabled"
+                id="purchasedPostsBtn"
+                type="button"
+                disabled
+                aria-disabled="true"
+                title="Coming soon: Purchased posts"
+              >
+                View purchased posts <span class="pill fanDashSoonPill">Soon</span>
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <div id="footer-placeholder"></div>
   </div>
-</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/app/fans/fan-dash.js"></script>
+</body>
+</html>
