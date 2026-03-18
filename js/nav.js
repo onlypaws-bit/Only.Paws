@@ -16,6 +16,11 @@
   function setHidden(el, hidden) {
     if (!el) return;
     el.hidden = !!hidden;
+    if (hidden) {
+      el.style.display = "none";
+    } else {
+      el.style.display = "";
+    }
   }
 
   function profilePath() {
@@ -46,54 +51,63 @@
     return PATHS?.home || PATHS?.index || "/index.html";
   }
 
+  function normalizePath(path) {
+    return String(path || "")
+      .toLowerCase()
+      .replace(/[?#].*$/, "")
+      .replace(/\/+$/, "");
+  }
+
   function currentPathname() {
-    return (window.location.pathname || "").toLowerCase();
+    return normalizePath(window.location.pathname || "");
   }
 
-  function isProfilePage() {
-    const pathname = currentPathname();
-    return (
-      pathname.endsWith("/html/app/profile.html") ||
-      pathname.endsWith("/profile.html")
-    );
+  function hrefPath(href) {
+    try {
+      return normalizePath(new URL(href, window.location.origin).pathname);
+    } catch (_) {
+      return "";
+    }
   }
 
-  function isFanDashPage() {
-    const pathname = currentPathname();
-    return (
-      pathname.endsWith("/html/app/fans/fan-dash.html") ||
-      pathname.endsWith("/fan-dash.html")
-    );
-  }
+  function samePage(targetHref) {
+    const current = currentPathname();
+    const target = hrefPath(targetHref);
 
-  function isCreatorDashPage() {
-    const pathname = currentPathname();
-    return (
-      pathname.endsWith("/html/app/creators/creator-dash.html") ||
-      pathname.endsWith("/creator-dash.html")
-    );
+    if (!current || !target) return false;
+    return current === target;
   }
 
   function currentMarketingPageKeys() {
     const pathname = currentPathname();
 
     if (
+      pathname === "" ||
       pathname === "/" ||
       pathname.endsWith("/index.html") ||
-      pathname.endsWith("/html/marketing/index.html")
+      pathname.endsWith("/html/marketing/index")
     ) {
       return ["index", "home"];
     }
 
-    if (pathname.endsWith("/html/marketing/creators.html")) {
+    if (
+      pathname.endsWith("/creators.html") ||
+      pathname.endsWith("/html/marketing/creators")
+    ) {
       return ["creators"];
     }
 
-    if (pathname.endsWith("/html/marketing/fans.html")) {
+    if (
+      pathname.endsWith("/fans.html") ||
+      pathname.endsWith("/html/marketing/fans")
+    ) {
       return ["fans"];
     }
 
-    if (pathname.endsWith("/html/marketing/the-pack.html")) {
+    if (
+      pathname.endsWith("/the-pack.html") ||
+      pathname.endsWith("/html/marketing/the-pack")
+    ) {
       return ["the-pack"];
     }
 
@@ -107,7 +121,7 @@
     document.querySelectorAll("[data-page]").forEach((link) => {
       const page = (link.dataset.page || "").trim().toLowerCase();
       if (currentKeys.includes(page)) {
-        link.hidden = true;
+        setHidden(link, true);
       }
     });
   }
@@ -198,18 +212,12 @@
         setHidden(dashboardBtn, false);
       }
 
-      if (profileBtn && isProfilePage()) {
+      if (profileBtn && samePage(profileBtn.href)) {
         setHidden(profileBtn, true);
       }
 
-      if (dashboardBtn) {
-        const hideDashboard =
-          (role === "fan" && isFanDashPage()) ||
-          (role === "creator" && isCreatorDashPage());
-
-        if (hideDashboard) {
-          setHidden(dashboardBtn, true);
-        }
+      if (dashboardBtn && samePage(dashboardBtn.href)) {
+        setHidden(dashboardBtn, true);
       }
     } catch (err) {
       console.warn("hydrateNav failed:", err);
