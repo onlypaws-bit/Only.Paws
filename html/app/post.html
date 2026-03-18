@@ -2,6 +2,8 @@
   OnlyPaws
   File: /html/app/post.html
 
+  Uses central paths from /js/paths.js
+
   CSS:
   - /css/styles.css
   - /css/app/post.css
@@ -26,42 +28,56 @@
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/app/post.css" />
 </head>
+
 <body class="postPage">
-  <div class="wrap">
-    <div id="header-placeholder"></div>
+  <div class="pageShell">
+    <div class="wrap">
+      <div id="header-placeholder"></div>
 
-    <main class="postMain">
-      <section class="panel">
-        <div class="pill">Post</div>
-        <h1 id="pageTitle">Post</h1>
+      <main class="postMain">
+        <section class="panel">
+          <div class="pill">Post</div>
 
-        <div class="meta postMeta">
-          <b id="author">@creator</b>
-          <span id="createdAt"></span>
-        </div>
+          <h1 id="pageTitle">Post</h1>
 
-        <div class="mediaWrap isHidden" id="mediaBox"></div>
+          <div class="meta postMeta">
+            <a id="author" class="postAuthorLink" href="/html/app/fans/creator-profile.html?u=creator">@creator</a>
+            <span id="createdAt"></span>
+          </div>
 
-        <div class="captionBox isHidden" id="caption"></div>
+          <div class="mediaWrap isHidden" id="mediaBox"></div>
 
-        <div class="btnRow">
-          <button class="ghost" id="likeBtn" data-liked="false" type="button" title="Like or unlike this post">
-            <span id="likeIcon">♡</span>
-            <span class="likeBtnLabel">Like</span>
-            <span id="likeCount" class="likeCount">0</span>
-          </button>
+          <div class="captionBox isHidden" id="caption"></div>
 
-          <button class="ghost" id="copyLinkBtn" type="button">Copy link</button>
+          <div class="btnRow">
+            <button
+              class="ghost"
+              id="likeBtn"
+              data-liked="false"
+              type="button"
+              title="Like or unlike this post"
+            >
+              <span id="likeIcon">♡</span>
+              <span class="likeBtnLabel">Like</span>
+              <span id="likeCount" class="likeCount">0</span>
+            </button>
 
-          <a class="ghost" id="backBtn" href="/html/app/feed.html">Back</a>
-        </div>
+            <button class="ghost" id="copyLinkBtn" type="button">
+              Copy link
+            </button>
 
-        <div class="hint" id="hintBox">Loading…</div>
-        <div class="err isHidden" id="errBox"></div>
-      </section>
-    </main>
+            <a class="ghost" id="backBtn" href="/html/app/feed.html">
+              Back
+            </a>
+          </div>
 
-    <div id="footer-placeholder"></div>
+          <div class="hint" id="hintBox">Loading…</div>
+          <div class="err isHidden" id="errBox"></div>
+        </section>
+      </main>
+
+      <div id="footer-placeholder"></div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
