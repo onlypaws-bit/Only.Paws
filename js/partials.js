@@ -18,6 +18,22 @@
     return null;
   }
 
+  function prepareMount(el, type) {
+    if (!el) return null;
+
+    el.classList.add("partialMount");
+
+    if (type === "header") {
+      el.classList.add("partialHeaderMount");
+    }
+
+    if (type === "footer") {
+      el.classList.add("partialFooterMount");
+    }
+
+    return el;
+  }
+
   async function loadPartial(targetOrId, url) {
     const target =
       typeof targetOrId === "string"
@@ -32,6 +48,7 @@
     }
 
     target.innerHTML = await res.text();
+    return target;
   }
 
   function highlightMarketingNav() {
@@ -51,8 +68,15 @@
   }
 
   async function loadLayout() {
-    const headerMount = getMount("header-placeholder", "header", "headerMount");
-    const footerMount = getMount("footer-placeholder", "footer", "footerMount");
+    const headerMount = prepareMount(
+      getMount("header-placeholder", "header", "headerMount"),
+      "header"
+    );
+
+    const footerMount = prepareMount(
+      getMount("footer-placeholder", "footer", "footerMount"),
+      "footer"
+    );
 
     await loadPartial(
       headerMount,
@@ -68,8 +92,15 @@
   }
 
   async function loadMarketingLayout() {
-    const headerMount = getMount("header-placeholder", "header", "headerMount");
-    const footerMount = getMount("footer-placeholder", "footer", "footerMount");
+    const headerMount = prepareMount(
+      getMount("header-placeholder", "header", "headerMount"),
+      "header"
+    );
+
+    const footerMount = prepareMount(
+      getMount("footer-placeholder", "footer", "footerMount"),
+      "footer"
+    );
 
     await loadPartial(
       headerMount,
@@ -86,8 +117,15 @@
   }
 
   async function loadStripeLayout() {
-    const headerMount = getMount("header-placeholder", "header", "headerMount");
-    const footerMount = getMount("footer-placeholder", "footer", "footerMount");
+    const headerMount = prepareMount(
+      getMount("header-placeholder", "header", "headerMount"),
+      "header"
+    );
+
+    const footerMount = prepareMount(
+      getMount("footer-placeholder", "footer", "footerMount"),
+      "footer"
+    );
 
     await loadPartial(
       headerMount,
