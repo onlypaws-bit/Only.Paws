@@ -77,17 +77,17 @@
         </div>
 
         <!-- POSTS -->
-        <section class="panel creatorPostsPanel">
-          <div class="postsHeader">
-            <h2>Latest posts</h2>
-            <div class="hint postsHeaderHint">
-              Visible posts (premium appears after purchase)
-            </div>
-          </div>
+<section class="panel creatorPostsPanel">
+  <div class="postsHeader">
+    <h2>Posts</h2>
+    <div class="hint postsHeaderHint">
+      Visible posts (premium appears after purchase)
+    </div>
+  </div>
 
-          <div class="feed" id="posts"></div>
-          <div class="hint" id="postsHint">Loading…</div>
-        </section>
+  <div class="posts" id="posts"></div>
+  <div class="hint" id="postsHint">Loading posts…</div>
+</section>
 
       </div>
     </main>
@@ -100,15 +100,20 @@
 
   <!-- MEDIA MODAL -->
   <div id="mediaModal" class="mediaModal" aria-hidden="true">
-    <div class="mediaModalInner">
-      <button id="mediaModalClose" class="mediaModalClose" type="button" aria-label="Close preview">
-        ✕
-      </button>
+  <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
+    <button
+      id="mediaModalClose"
+      class="mediaModalClose"
+      type="button"
+      aria-label="Close preview"
+    >
+      ✕
+    </button>
 
-      <img id="mediaModalImg" class="isHidden" alt="Preview" />
-      <video id="mediaModalVid" class="isHidden" controls playsinline></video>
-    </div>
+    <img id="mediaModalImg" class="isHidden" alt="Preview" />
+    <video id="mediaModalVid" class="isHidden" controls playsinline></video>
   </div>
+</div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
