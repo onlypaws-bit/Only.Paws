@@ -8,6 +8,10 @@
   min-height: 100vh;
 }
 
+.profileMain {
+  min-height: 100vh;
+}
+
 .profileWrap {
   max-width: 1180px;
   margin: 0 auto;
@@ -108,6 +112,11 @@
 .field input[readonly],
 .profileField input[readonly] {
   opacity: 0.75;
+}
+
+.field input[type="file"],
+.profileField input[type="file"] {
+  padding: 10px 12px;
 }
 
 .field textarea,
