@@ -76,6 +76,7 @@
     posts: [],
     isSelf: false,
     creatorUsername: "",
+    creatorAvatarUrl: "",
   };
 
   function esc(v) {
@@ -114,9 +115,42 @@
     if (!btn) return;
     btn.disabled = !!yes;
     btn.classList.toggle("isBusy", !!yes);
-    if (text != null) {
-      btn.textContent = text;
+    if (text != null) btn.textContent = text;
+  }
+
+  function isAbsoluteUrl(value) {
+    return /^(https?:)?\/\//i.test(String(value || ""));
+  }
+
+  function normalizeAssetUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+
+    if (
+      isAbsoluteUrl(raw) ||
+      raw.startsWith("/") ||
+      raw.startsWith("data:") ||
+      raw.startsWith("blob:")
+    ) {
+      return raw;
     }
+
+    return `/${raw.replace(/^\/+/, "")}`;
+  }
+
+  function resolveAvatarUrl(obj) {
+    const raw =
+      obj?.avatar_url ||
+      obj?.profile_image_url ||
+      obj?.profile_photo_url ||
+      obj?.photo_url ||
+      obj?.image_url ||
+      obj?.creator_avatar_url ||
+      obj?.creator_profile_image_url ||
+      obj?.creator_photo_url ||
+      "";
+
+    return normalizeAssetUrl(raw);
   }
 
   function normalizeSocialUrl(value, platform) {
@@ -138,9 +172,7 @@
     if (platform === "tiktok") {
       cleaned = cleaned.replace(/^tiktok\.com\//i, "");
       cleaned = cleaned.replace(/^www\.tiktok\.com\//i, "");
-      if (!cleaned.startsWith("@")) {
-        cleaned = `@${cleaned}`;
-      }
+      if (!cleaned.startsWith("@")) cleaned = `@${cleaned}`;
       return `https://tiktok.com/${cleaned}`;
     }
 
@@ -178,14 +210,14 @@
       ROUTES.replace("home");
       return;
     }
-    window.location.replace(PATHS?.home || PATHS?.index || "index.html");
+    window.location.replace(PATHS?.home || PATHS?.index || "/index.html");
   }
 
   function subscriptionsHref(creatorId) {
     if (ROUTES?.href) {
       return ROUTES.href("app.fans.subscriptions", { creator: creatorId });
     }
-    const base = PATHS?.app?.fans?.subscriptions || "subscriptions.html";
+    const base = PATHS?.app?.fans?.subscriptions || "/html/app/fans/subscriptions.html";
     return `${base}?creator=${encodeURIComponent(creatorId)}`;
   }
 
@@ -196,29 +228,29 @@
       return ROUTES.href("app.fans.creatorProfile", { u: usernameOrId });
     }
 
-    const base = PATHS?.app?.fans?.creatorProfile || "creator-profile.html";
+    const base = PATHS?.app?.fans?.creatorProfile || "/html/app/fans/creator-profile.html";
     return `${base}?u=${encodeURIComponent(usernameOrId)}`;
   }
 
   function profileHref() {
     if (ROUTES?.get) {
-      return ROUTES.get("app.profile") || "profile.html";
+      return ROUTES.get("app.profile") || "/html/app/profile.html";
     }
-    return PATHS?.app?.profile || "profile.html";
+    return PATHS?.app?.profile || "/html/app/profile.html";
   }
 
   function fanDashHref() {
     if (ROUTES?.get) {
-      return ROUTES.get("app.fans.fanDash") || "fan-dash.html";
+      return ROUTES.get("app.fans.fanDash") || "/html/app/fans/fan-dash.html";
     }
-    return PATHS?.app?.fans?.fanDash || "fan-dash.html";
+    return PATHS?.app?.fans?.fanDash || "/html/app/fans/fan-dash.html";
   }
 
   function creatorDashHref() {
     if (ROUTES?.get) {
-      return ROUTES.get("app.creators.creatorDash") || "creator-dash.html";
+      return ROUTES.get("app.creators.creatorDash") || "/html/app/creators/creator-dash.html";
     }
-    return PATHS?.app?.creators?.creatorDash || "creator-dash.html";
+    return PATHS?.app?.creators?.creatorDash || "/html/app/creators/creator-dash.html";
   }
 
   function creatorEligible(profile) {
@@ -259,22 +291,28 @@
     if (els.creatorInstagram) {
       if (instagramUrl) {
         els.creatorInstagram.href = instagramUrl;
+        els.creatorInstagram.target = "_blank";
+        els.creatorInstagram.rel = "noopener noreferrer";
         els.creatorInstagram.textContent = displaySocialLabel(instagramUrl, "Instagram");
         els.creatorInstagram.hidden = false;
         hasSocials = true;
       } else {
         els.creatorInstagram.hidden = true;
+        els.creatorInstagram.removeAttribute("href");
       }
     }
 
     if (els.creatorTikTok) {
       if (tiktokUrl) {
         els.creatorTikTok.href = tiktokUrl;
+        els.creatorTikTok.target = "_blank";
+        els.creatorTikTok.rel = "noopener noreferrer";
         els.creatorTikTok.textContent = displaySocialLabel(tiktokUrl, "TikTok");
         els.creatorTikTok.hidden = false;
         hasSocials = true;
       } else {
         els.creatorTikTok.hidden = true;
+        els.creatorTikTok.removeAttribute("href");
       }
     }
 
@@ -287,19 +325,29 @@
     const name = c.display_name || c.username || "Creator";
     const uname = c.username || "username";
     const bio = c.bio || "";
+    const avatarUrl = resolveAvatarUrl(c);
 
     if (els.creatorName) els.creatorName.textContent = name;
-    if (els.creatorHandle) els.creatorHandle.textContent = "@" + uname;
+    if (els.creatorHandle) els.creatorHandle.textContent = `@${uname}`;
     if (els.creatorBio) els.creatorBio.textContent = bio;
 
     state.creatorUsername = uname;
+    state.creatorAvatarUrl = avatarUrl;
 
     if (els.creatorAvatar) {
-      if (c.avatar_url) {
-        els.creatorAvatar.innerHTML =
-          `<img src="${esc(c.avatar_url)}" alt="Creator avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
+      if (avatarUrl) {
+        els.creatorAvatar.innerHTML = `
+          <img
+            src="${esc(avatarUrl)}"
+            alt="${esc(name)} avatar"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            onerror="this.remove()"
+          >
+        `;
       } else {
-        els.creatorAvatar.textContent = "🐾";
+        els.creatorAvatar.innerHTML = `<span aria-hidden="true">🐾</span>`;
       }
     }
 
@@ -317,9 +365,20 @@
     els.petsList.innerHTML = list.map((pet) => {
       const name = pet.name || "Pet";
       const line = [pet.species, pet.breed].filter(Boolean).join(" • ");
-      const av = (pet.avatar_url || "").trim()
-        ? `<img src="${esc(pet.avatar_url)}" alt="Pet avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-        : "🐾";
+      const avatarUrl = resolveAvatarUrl(pet);
+
+      const av = avatarUrl
+        ? `
+          <img
+            src="${esc(avatarUrl)}"
+            alt="${esc(name)} avatar"
+            loading="lazy"
+            decoding="async"
+            referrerpolicy="no-referrer"
+            onerror="this.remove()"
+          >
+        `
+        : `<span aria-hidden="true">🐾</span>`;
 
       return `
         <div class="petCard">
@@ -380,13 +439,24 @@
         return window.OnlyPawsPostCard.renderPostCard({
           id: post.id,
           creator_username: state.creatorUsername,
+          creator_avatar_url: state.creatorAvatarUrl,
           title: post.title || "Post",
           excerpt: canView
+            ? (post.content || post.preview || "")
+            : (post.preview || "Locked content."),
+          content: canView
             ? (post.content || post.preview || "")
             : (post.preview || "Locked content."),
           is_locked: !canView,
           media_url: post.media_url || null,
           media_type: post.media_type || null,
+          is_paid: post.is_paid === true,
+          is_public: post.is_public !== false,
+          created_at: post.created_at || null,
+          price_cents: post.price_cents || 0,
+          currency: post.currency || "eur",
+        }, {
+          showCreator: true,
         });
       }).join("");
 
@@ -433,8 +503,8 @@
           ${post.media_url ? `
             <div class="mediaWrap">
               ${String(post.media_type || "").startsWith("video")
-                ? `<video controls playsinline src="${esc(post.media_url)}"></video>`
-                : `<img src="${esc(post.media_url)}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer">`}
+                ? `<video controls playsinline src="${esc(normalizeAssetUrl(post.media_url))}"></video>`
+                : `<img src="${esc(normalizeAssetUrl(post.media_url))}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer">`}
             </div>
           ` : ""}
 
@@ -454,6 +524,9 @@
     if (!els.posts) return;
 
     els.posts.querySelectorAll('[data-action="premium"]').forEach((button) => {
+      if (button.dataset.bound === "1") return;
+      button.dataset.bound = "1";
+
       button.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -558,17 +631,22 @@
 
     if (navLogout) {
       navLogout.hidden = false;
-      navLogout.addEventListener("click", async (event) => {
-        event.preventDefault();
-        navLogout.disabled = true;
-        navLogout.textContent = "Logging out…";
 
-        try {
-          await client.auth.signOut();
-        } catch (_) {}
+      if (navLogout.dataset.bound !== "1") {
+        navLogout.dataset.bound = "1";
 
-        goHome();
-      });
+        navLogout.addEventListener("click", async (event) => {
+          event.preventDefault();
+          navLogout.disabled = true;
+          navLogout.textContent = "Logging out…";
+
+          try {
+            await client.auth.signOut();
+          } catch (_) {}
+
+          goHome();
+        });
+      }
     }
 
     try {
@@ -640,11 +718,7 @@
 
     if (navigator.share) {
       try {
-        await navigator.share({
-          title,
-          text,
-          url: absoluteUrl,
-        });
+        await navigator.share({ title, text, url: absoluteUrl });
         return;
       } catch (_) {}
     }
@@ -660,6 +734,9 @@
     }
 
     setFollowUi();
+
+    if (els.followBtn.dataset.bound === "1") return;
+    els.followBtn.dataset.bound = "1";
 
     els.followBtn.addEventListener("click", async () => {
       try {
@@ -698,6 +775,8 @@
 
   async function bindPremium(success = "", sessionId = "") {
     if (!els.premiumBtn || !state.creator || state.isSelf) return;
+    if (els.premiumBtn.dataset.bound === "1") return;
+    els.premiumBtn.dataset.bound = "1";
 
     function explainCreatorCantSubscribe() {
       setHint("⏳ Creator → creator subscriptions are coming later. For now, creators can’t subscribe.");
@@ -793,18 +872,36 @@
   }
 
   async function loadCreatorByParam(param) {
+    const selectFields = [
+      "user_id",
+      "username",
+      "display_name",
+      "bio",
+      "avatar_url",
+      "profile_image_url",
+      "profile_photo_url",
+      "image_url",
+      "photo_url",
+      "role",
+      "stripe_onboarding_status",
+      "charges_enabled",
+      "stripe_connect_account_id",
+      "instagram_url",
+      "tiktok_url",
+    ].join(",");
+
     let result;
 
     if (isUUID(param)) {
       result = await client
         .from("profiles")
-        .select("user_id, username, display_name, bio, avatar_url, role, stripe_onboarding_status, charges_enabled, stripe_connect_account_id, instagram_url, tiktok_url")
+        .select(selectFields)
         .eq("user_id", param)
         .maybeSingle();
     } else {
       result = await client
         .from("profiles")
-        .select("user_id, username, display_name, bio, avatar_url, role, stripe_onboarding_status, charges_enabled, stripe_connect_account_id, instagram_url, tiktok_url")
+        .select(selectFields)
         .eq("username", param)
         .maybeSingle();
     }
@@ -888,14 +985,14 @@
         getFollowRowId(state.viewerId, creator.user_id),
         client
           .from("posts")
-          .select("id, creator_id, title, content, preview, media_url, media_type, is_paid, is_public, is_pinned, created_at")
+          .select("id, creator_id, title, content, preview, media_url, media_type, is_paid, is_public, is_pinned, created_at, price_cents, currency")
           .eq("creator_id", creator.user_id)
           .order("is_pinned", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(24),
         client
           .from("pets")
-          .select("id, name, species, breed, avatar_url")
+          .select("id, name, species, breed, avatar_url, profile_image_url, profile_photo_url, image_url, photo_url")
           .eq("owner_id", creator.user_id)
           .order("created_at", { ascending: false }),
       ]);
@@ -921,7 +1018,8 @@
       await bindFollow();
       await bindPremium(success, session_id);
 
-      if (els.shareProfileBtn) {
+      if (els.shareProfileBtn && els.shareProfileBtn.dataset.bound !== "1") {
+        els.shareProfileBtn.dataset.bound = "1";
         els.shareProfileBtn.addEventListener("click", shareProfile);
       }
 
@@ -933,6 +1031,7 @@
         window.history.replaceState({}, "", clean.toString());
       }
     } catch (error) {
+      console.error("creator profile boot error", error);
       setHint("❌ " + (error?.message || String(error)));
       if (els.petsHint) els.petsHint.textContent = "";
       if (els.postsHint) els.postsHint.textContent = "";
