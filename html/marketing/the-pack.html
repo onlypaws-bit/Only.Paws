@@ -1,22 +1,3 @@
-<!--
-  OnlyPaws
-  File: /html/marketing/the-pack.html
-
-  Uses central paths from /js/paths.js
-
-  CSS:
-  /css/styles.css
-  /css/marketing/layout.css
-  /css/marketing/the-pack.css
-
-  JS:
-  /js/paths.js
-  /js/onlypawsClient.js
-  /js/partials.js
-  /js/nav.js
-  /js/marketing/the-pack.js
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,9 +5,8 @@
   <title>The Pack — OnlyPaws</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/marketing/layout.css" />
-  <link rel="stylesheet" href="/css/marketing/the-pack.css" />
+  <link rel="stylesheet" href="../../css/styles.css" />
+  <link rel="stylesheet" href="../../css/marketing/the-pack.css" />
 </head>
 
 <body>
@@ -34,8 +14,8 @@
     <div class="wrap">
       <div id="header-placeholder"></div>
 
-      <main class="hero">
-        <section class="panel">
+      <div class="hero">
+        <div class="panel">
           <div class="pill">meet the creators of onlypaws 🐾</div>
 
           <h1>The Pack</h1>
@@ -46,21 +26,19 @@
           </p>
 
           <div class="btnRow">
-            <a class="btn" id="joinAsFanLink" href="/html/marketing/fans.html">Support The Pack</a>
-            <a class="ghost" id="createPetPageTopLink" href="/html/marketing/creators.html">Create your pet page</a>
+            <a class="btn" href="../../html/marketing/fans.html">Join as a fan →</a>
+            <a class="ghost" href="../../html/marketing/creators.html">Create your pet page</a>
           </div>
 
-          <div class="marketingList">
-            <div class="marketingListItem">
-              The Pack is a public preview of OnlyPaws. Browse featured pets first, then sign up if you
-              want to follow creators, support them, or build a page for your own pet.
-            </div>
+          <div class="heroNote">
+            The Pack is a public preview of OnlyPaws. Browse featured pets first, then sign up if you
+            want to follow creators, support them, or build a page for your own pet.
           </div>
-        </section>
+        </div>
 
-        <section class="panel">
-          <div class="marketingGrid">
-            <div class="marketingListItem">
+        <div class="panel">
+          <div class="previewPanel">
+            <div class="previewCard">
               <h3>What you can do here</h3>
               <p>
                 Browse featured pets, discover their vibes, and see what OnlyPaws is all about
@@ -68,7 +46,7 @@
               </p>
             </div>
 
-            <div class="marketingListItem">
+            <div class="previewCard">
               <h3>What happens after signup</h3>
               <p>
                 Fans can follow creators and support their favorite animals.
@@ -76,7 +54,7 @@
               </p>
             </div>
 
-            <div class="marketingListItem">
+            <div class="previewCard">
               <h3>Why The Pack exists</h3>
               <p>
                 Because a pet platform should actually show pets first.
@@ -84,11 +62,11 @@
               </p>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </div>
 
-      <section class="section">
-        <section class="panel">
+      <div class="section">
+        <div class="panel">
           <h2 class="sectionTitle">Featured pets</h2>
           <p class="sectionSub">
             A few of the faces currently hanging around OnlyPaws.
@@ -96,30 +74,30 @@
 
           <div id="packStatus" class="packLoading">Loading The Pack...</div>
           <div id="packGrid" class="packGrid" hidden></div>
-        </section>
-      </section>
+        </div>
+      </div>
 
-      <section class="ctaPanel panel centerText">
+      <div class="ctaPanel">
         <h2>Want your pet in The Pack?</h2>
         <p>
           Create a page for your pet, share their photos and updates, and let people discover them on OnlyPaws.
         </p>
 
-        <div class="btnRow statusActions">
-          <a class="btn" id="createPetPageBottomLink" href="/html/marketing/creators.html">Join The Pack</a>
-          <a class="ghost" id="joinAsFanBottomLink" href="/html/marketing/fans.html">Join as a fan</a>
+        <div class="btnRow" style="justify-content:center;">
+          <a class="btn" href="../../html/marketing/creators.html">Create a pet page →</a>
+          <a class="ghost" href="../../html/marketing/fans.html">Join as a fan</a>
         </div>
-      </section>
+      </div>
 
-      <div id="footer-placeholder"></div>
+      <div class="footerWrap" id="footer-placeholder"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/paths.js"></script>
-  <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/partials.js"></script>
-  <script src="/js/nav.js"></script>
-  <script src="/js/marketing/the-pack.js"></script>
+  <script src="../../js/paths.js"></script>
+  <script src="../../js/supabase.js"></script>
+  <script src="../../js/nav.js"></script>
+  <script src="../../js/partials.js"></script>
+  <script src="../../js/marketing/the-pack.js"></script>
 </body>
 </html>
