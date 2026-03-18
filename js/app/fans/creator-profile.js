@@ -163,19 +163,6 @@
     return raw;
   }
 
-  function displaySocialLabel(url, fallback) {
-    const value = String(url || "").trim();
-    if (!value) return fallback;
-
-    try {
-      const parsed = new URL(value);
-      const path = parsed.pathname.replace(/^\/+/, "");
-      return path || fallback;
-    } catch (_) {
-      return fallback;
-    }
-  }
-
   function isUUID(v) {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v || "");
   }
@@ -201,7 +188,8 @@
     if (ROUTES?.href) {
       return ROUTES.href("app.fans.subscriptions", { creator: creatorId });
     }
-    const base = PATHS?.app?.fans?.subscriptions || "/html/app/fans/subscriptions.html";
+    const base =
+      PATHS?.app?.fans?.subscriptions || "/html/app/fans/subscriptions.html";
     return `${base}?creator=${encodeURIComponent(creatorId)}`;
   }
 
@@ -212,7 +200,8 @@
       return ROUTES.href("app.fans.creatorProfile", { u: usernameOrId });
     }
 
-    const base = PATHS?.app?.fans?.creatorProfile || "/html/app/fans/creator-profile.html";
+    const base =
+      PATHS?.app?.fans?.creatorProfile || "/html/app/fans/creator-profile.html";
     return `${base}?u=${encodeURIComponent(usernameOrId)}`;
   }
 
@@ -400,6 +389,7 @@
           <p>This creator hasn’t published anything yet.</p>
         </div>
       `;
+      if (els.postsHint) els.postsHint.textContent = "";
       return;
     }
 
@@ -438,8 +428,6 @@
             is_paid: post.is_paid === true,
             is_public: post.is_public !== false,
             created_at: post.created_at || null,
-            price_cents: post.price_cents || 0,
-            currency: post.currency || "eur",
           },
           {
             showCreator: true,
@@ -452,6 +440,7 @@
       }
 
       bindLockedSubscribeButtons();
+      if (els.postsHint) els.postsHint.textContent = "";
       return;
     }
 
@@ -505,6 +494,7 @@
     }).join("");
 
     bindLockedSubscribeButtons();
+    if (els.postsHint) els.postsHint.textContent = "";
   }
 
   function bindLockedSubscribeButtons() {
@@ -968,17 +958,20 @@
         getFollowRowId(state.viewerId, creator.user_id),
         client
           .from("posts")
-          .select("id, creator_id, title, content, preview, media_url, media_type, is_paid, is_public, is_pinned, created_at, price_cents, currency")
+          .select("id,creator_id,pet_id,title,content,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at")
           .eq("creator_id", creator.user_id)
           .order("is_pinned", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(24),
         client
           .from("pets")
-          .select("id, name, species, breed, avatar_url")
+          .select("id,name,species,breed,avatar_url")
           .eq("owner_id", creator.user_id)
           .order("created_at", { ascending: false }),
       ]);
+
+      if (postsRes.error) throw postsRes.error;
+      if (petsRes.error) throw petsRes.error;
 
       state.followRowId = followRowId;
       state.posts = postsRes.data || [];
@@ -989,8 +982,8 @@
       }
 
       renderPosts(state.posts);
-      if (els.postsHint) {
-        els.postsHint.textContent = state.posts.length ? "" : "No posts yet.";
+      if (els.postsHint && state.posts.length) {
+        els.postsHint.textContent = "";
       }
 
       if (!state.isSelf && state.viewerIsCreator) {
