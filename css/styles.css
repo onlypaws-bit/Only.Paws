@@ -66,8 +66,29 @@ img{
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  padding:22px 0 18px;
+  min-height:84px;
+  padding:18px 0 14px;
   margin:0;
+  position:relative;
+}
+
+.nav::after,
+.appNav::after,
+.marketingNav::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:1px;
+  background:linear-gradient(
+    90deg,
+    rgba(255,255,255,0),
+    rgba(255,255,255,.14) 18%,
+    rgba(255,255,255,.14) 82%,
+    rgba(255,255,255,0)
+  );
+  pointer-events:none;
 }
 
 .brand{
@@ -77,6 +98,7 @@ img{
   text-decoration:none;
   color:#fff;
   min-width:0;
+  flex:0 1 auto;
 }
 
 .brand:hover{
@@ -561,6 +583,7 @@ h2{
     flex-direction:column;
     align-items:flex-start;
     gap:14px;
+    min-height:0;
     padding:18px 0 14px;
   }
 
@@ -606,6 +629,7 @@ h2{
     align-items:center;
     justify-content:space-between;
     gap:12px;
+    min-height:0;
     padding:18px 0 14px;
   }
 
