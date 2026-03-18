@@ -13,8 +13,8 @@
   - /js/paths.js
   - /js/onlypawsClient.js
   - /js/auth-guard.js
-  - /js/nav.js
   - /js/partials.js
+  - /js/nav.js
   - /js/app/post.js
 -->
 
@@ -41,7 +41,11 @@
           <h1 id="pageTitle">Post</h1>
 
           <div class="meta postMeta">
-            <a id="author" class="postAuthorLink" href="/html/app/fans/creator-profile.html?u=creator">@creator</a>
+            <a
+              id="author"
+              class="postAuthorLink"
+              href="/html/app/fans/creator-profile.html?u=creator"
+            >@creator</a>
             <span id="createdAt"></span>
           </div>
 
@@ -76,7 +80,7 @@
         </section>
       </main>
 
-      <div id="footer-placeholder"></div>
+      <div class="footerWrap" id="footer-placeholder"></div>
     </div>
   </div>
 
@@ -84,8 +88,32 @@
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
   <script src="/js/auth-guard.js"></script>
-  <script src="/js/nav.js"></script>
   <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
   <script src="/js/app/post.js"></script>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        if (window.OPPartials?.loadAppLayout) {
+          await window.OPPartials.loadAppLayout();
+        } else if (window.loadAppLayout) {
+          await window.loadAppLayout();
+        }
+
+        if (window.OPNav?.initNav) {
+          await window.OPNav.initNav();
+        } else if (window.initNav) {
+          await window.initNav();
+        }
+
+        if (window.OnlyPawsPost?.initSinglePostPage) {
+          await window.OnlyPawsPost.initSinglePostPage();
+        }
+      } catch (err) {
+        console.error("Post page init failed:", err);
+      }
+    });
+  </script>
 </body>
 </html>
