@@ -1,61 +1,206 @@
+<!--
+  OnlyPaws
+  File: /html/app/profile.html
+
+  CSS:
+  - /css/styles.css
+  - /css/app/profile.css
+
+  JS:
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/partials.js
+  - /js/nav.js
+  - /js/app/profile.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OnlyPaws — Fan Dashboard</title>
+  <title>OnlyPaws — Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/app/fans/fan-dash.css" />
+  <link rel="stylesheet" href="/css/app/profile.css" />
 </head>
 
-<body class="fanDashPage" data-page="fan-dash">
+<body class="profilePage">
   <div class="wrap">
     <div id="header-placeholder"></div>
 
-    <main class="page fanDashMain">
-      <div class="container">
-        <section class="panel fanDashTopPanel fanDashPanelSpacer">
-          <h1>Fan Dashboard</h1>
-          <p class="sub">Manage your subscriptions, follows, and access.</p>
-          <div class="hint fanDashMsg" id="topMsg"></div>
-        </section>
+    <main class="profileMain">
+      <div class="profileWrap profileLayout">
+        <section class="panel profilePanel">
+          <div class="profileHero">
+            <div>
+              <div class="pill" id="emailPill">…</div>
+              <h1>Your profile</h1>
+              <p class="sub">Set your basics, socials, and avatar.</p>
+            </div>
 
-        <div class="fanDashGrid">
-          <section class="panel">
-            <div class="pill">My Subscriptions</div>
-            <p class="sub fanDashSectionSub">
-              Cancel anytime. Access remains active until the end of the billing period.
-            </p>
-            <div class="fanDashList" id="subsList"></div>
-            <div class="hint fanDashMsg" id="subsMsg"></div>
-          </section>
+            <div class="profileHeroActions">
+              <button class="navBtn" id="logoutBtn" type="button">Log out</button>
+            </div>
+          </div>
 
-          <section class="panel">
-            <div class="pill">Following</div>
-            <p class="sub fanDashSectionSub">Creators you follow.</p>
-            <div class="fanDashList" id="followsList"></div>
-            <div class="hint fanDashMsg" id="followsMsg"></div>
-          </section>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" readonly />
+          </div>
 
-          <section class="panel fanDashFullWidthPanel">
-            <div class="pill">My Access</div>
-            <p class="sub fanDashSectionSub">Shortcuts to what you can view.</p>
+          <section class="avatarBox">
+            <img id="avatarImg" class="avatarImg" alt="Avatar preview" />
 
-            <div class="btnRow">
-              <button
-                class="ghost fanDashGhostDisabled"
-                id="purchasedPostsBtn"
-                type="button"
-                disabled
-                aria-disabled="true"
-                title="Coming soon: Purchased posts"
-              >
-                View purchased posts <span class="pill fanDashSoonPill">Soon</span>
-              </button>
+            <div class="avatarControls">
+              <div class="field">
+                <label for="avatarFile">Avatar image</label>
+                <input id="avatarFile" type="file" accept="image/*" />
+              </div>
+
+              <div class="btnRow">
+                <button class="ghost" id="uploadAvatarBtn" type="button">Upload</button>
+                <button class="ghost" id="removeAvatarBtn" type="button">Remove</button>
+              </div>
+
+              <div class="uploadHint" id="avatarHint"></div>
             </div>
           </section>
-        </div>
+
+          <div class="field">
+            <label for="display_name">Display name</label>
+            <input id="display_name" autocomplete="name" />
+          </div>
+
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" autocomplete="off" />
+            <div class="hint" id="usernameHint"></div>
+          </div>
+
+          <div class="field">
+            <label for="bio">Bio</label>
+            <textarea id="bio"></textarea>
+          </div>
+
+          <section class="socialSection">
+            <h2 class="sectionTitle">Social links</h2>
+
+            <div class="field">
+              <label for="instagram_url">Instagram</label>
+              <input
+                id="instagram_url"
+                type="text"
+                inputmode="url"
+                placeholder="https://instagram.com/username or username"
+              />
+            </div>
+
+            <div class="field">
+              <label for="tiktok_url">TikTok</label>
+              <input
+                id="tiktok_url"
+                type="text"
+                inputmode="url"
+                placeholder="https://tiktok.com/@username or @username"
+              />
+            </div>
+          </section>
+
+          <div class="btnRow">
+            <button class="btn" id="saveBtn" type="button">Save profile</button>
+          </div>
+
+          <div class="msg" id="msg"></div>
+
+          <section class="dangerZone">
+            <b>Danger zone</b>
+
+            <div class="btnRow">
+              <button class="ghost dangerBtn" id="deleteBtn" type="button">
+                Delete account
+              </button>
+            </div>
+
+            <div class="msg" id="deleteMsg"></div>
+          </section>
+        </section>
+
+        <aside class="panel previewPanel">
+          <div class="previewHeader">
+            <div class="pill" id="userPill">…</div>
+            <h2>Public profile preview</h2>
+            <p class="sub">
+              Quick live preview of how your creator profile can look.
+            </p>
+          </div>
+
+          <div class="profilePreview" id="profilePreview">
+            <div class="profilePreviewCard">
+              <div class="profilePreviewTop">
+                <img
+                  id="previewAvatar"
+                  class="profilePreviewAvatar"
+                  src="/assets/images/logo.png"
+                  alt="Profile preview avatar"
+                />
+              </div>
+
+              <div class="profilePreviewBody">
+                <h3 id="previewName">Your name</h3>
+                <div class="profilePreviewHandle" id="previewHandle">@username</div>
+
+                <p class="profilePreviewBio" id="previewBio">
+                  Your bio preview will appear here.
+                </p>
+
+                <div class="profilePreviewSocials" id="previewSocials" hidden>
+                  <a
+                    id="previewInstagram"
+                    class="socialChip"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    hidden
+                  >
+                    Instagram
+                  </a>
+
+                  <a
+                    id="previewTikTok"
+                    class="socialChip"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    hidden
+                  >
+                    TikTok
+                  </a>
+                </div>
+
+                <div class="hint previewHint" id="previewHint"></div>
+
+                <div class="btnRow previewActions">
+                  <a
+                    id="previewOpenBtn"
+                    class="ghost"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    hidden
+                  >
+                    Open public preview
+                  </a>
+
+                  <button id="previewCopyBtn" class="ghost" type="button" hidden>
+                    Copy public link
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
       </div>
     </main>
 
@@ -65,9 +210,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/nav.js"></script>
   <script src="/js/partials.js"></script>
-  <script src="/js/auth-guard.js"></script>
-  <script src="/js/app/fans/fan-dash.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/app/profile.js"></script>
 </body>
 </html>
