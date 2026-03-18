@@ -1,6 +1,22 @@
 <!--
   OnlyPaws
   File: /html/app/fans/creator-profile.html
+
+  CSS:
+  - /css/styles.css
+  - /css/app/post.css
+  - /css/app/fans/creator-profile.css
+
+  JS:
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/auth-guard.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/app/likes.js
+  - /js/app/post.js
+  - /js/app/fans/creator-profile.js
 -->
 
 <!DOCTYPE html>
@@ -62,15 +78,14 @@
 
         <!-- POSTS -->
         <section class="panel creatorPostsPanel">
-          <div class="sectionHeader">
-            <h2>Posts</h2>
-            <div class="hint">
-              FREE visible • PREMIUM locked
+          <div class="postsHeader">
+            <h2>Latest posts</h2>
+            <div class="hint postsHeaderHint">
+              Visible posts (premium appears after purchase)
             </div>
           </div>
 
           <div class="feed" id="posts"></div>
-
           <div class="hint" id="postsHint">Loading…</div>
         </section>
 
@@ -83,17 +98,18 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- MEDIA MODAL (come feed) -->
+  <!-- MEDIA MODAL -->
   <div id="mediaModal" class="mediaModal" aria-hidden="true">
     <div class="mediaModalInner">
-      <button id="mediaModalClose" class="mediaModalClose">✕</button>
+      <button id="mediaModalClose" class="mediaModalClose" type="button" aria-label="Close preview">
+        ✕
+      </button>
 
-      <img id="mediaModalImg" class="isHidden" />
+      <img id="mediaModalImg" class="isHidden" alt="Preview" />
       <video id="mediaModalVid" class="isHidden" controls playsinline></video>
     </div>
   </div>
 
-  <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
