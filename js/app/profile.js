@@ -41,7 +41,6 @@
     avatarHint: document.getElementById("avatarHint"),
 
     logoutBtn: document.getElementById("logoutBtn"),
-    dashTopLink: document.getElementById("dashTopLink"),
 
     usernameHint: document.getElementById("usernameHint"),
 
@@ -219,20 +218,6 @@
       return ROUTES.get("home") || ROUTES.get("index") || "index.html";
     }
     return PATHS?.home || PATHS?.index || "index.html";
-  }
-
-  function getCreatorDashPath() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.creators.creatorDash") || "creator-dash.html";
-    }
-    return PATHS?.app?.creators?.creatorDash || "creator-dash.html";
-  }
-
-  function getFanDashPath() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.fans.fanDash") || "fan-dash.html";
-    }
-    return PATHS?.app?.fans?.fanDash || "fan-dash.html";
   }
 
   function getLogoPath() {
@@ -454,14 +439,6 @@
       state.role = profile?.role || "fan";
 
       hydrateUserPillFromProfile(profile, state.email);
-
-      if (els.dashTopLink) {
-        els.dashTopLink.hidden = false;
-        els.dashTopLink.href =
-          state.role === "creator"
-            ? getCreatorDashPath()
-            : getFanDashPath();
-      }
 
       if (els.displayName) els.displayName.value = profile?.display_name || "";
       if (els.username) els.username.value = profile?.username || "";
@@ -755,6 +732,11 @@
 
   async function initProfilePage() {
     bindEvents();
+
+    if (window.OPPartials?.loadLayout) {
+      await window.OPPartials.loadLayout();
+    }
+
     await loadProfile();
   }
 
