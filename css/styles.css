@@ -284,6 +284,43 @@ img{
   display:inline-block;
 }
 
+/* ===== PARTIAL MOUNTS ===== */
+
+.partialMount{
+  width:100%;
+}
+
+.partialHeaderMount{
+  position:sticky;
+  top:0;
+  z-index:40;
+  width:100%;
+  padding:0 18px;
+  backdrop-filter:blur(14px);
+  background:linear-gradient(
+    180deg,
+    rgba(107,78,255,.22),
+    rgba(107,78,255,.08)
+  );
+}
+
+.partialHeaderMount > *{
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+}
+
+.partialFooterMount{
+  width:100%;
+}
+
+.partialFooterMount > *{
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  padding:0 18px;
+}
+
 /* ===== PILLS ===== */
 
 .pill{
