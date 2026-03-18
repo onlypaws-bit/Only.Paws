@@ -335,7 +335,7 @@
 
     const { error: insertError } = await client
       .from("profiles")
-      .insert({ user_id: userId });
+      .insert({ user_id: userId, role: "fan" });
 
     if (insertError) throw insertError;
 
@@ -457,9 +457,10 @@
 
       if (els.dashTopLink) {
         els.dashTopLink.hidden = false;
-        els.dashTopLink.href = state.role === "creator"
-          ? getCreatorDashPath()
-          : getFanDashPath();
+        els.dashTopLink.href =
+          state.role === "creator"
+            ? getCreatorDashPath()
+            : getFanDashPath();
       }
 
       if (els.displayName) els.displayName.value = profile?.display_name || "";
@@ -766,4 +767,6 @@
     updatePreview,
     initProfilePage,
   };
+
+  initProfilePage();
 })();
