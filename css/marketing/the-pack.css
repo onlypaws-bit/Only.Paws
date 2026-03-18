@@ -4,15 +4,138 @@
    Purpose: styles specific to the marketing the-pack page
    ========================================================= */
 
+.pageShell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 18px 70px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 16px;
+  align-items: stretch;
+  margin-top: 6px;
+}
+
+.panel {
+  border-radius: 22px;
+  padding: 26px;
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+}
+
+.hero h1 {
+  margin: 12px 0 10px;
+  font-size: clamp(2.1rem, 4vw, 2.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.6px;
+}
+
+.sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  max-width: 60ch;
+}
+
 .packIntro {
-  margin-top: 14px;
+  margin-top: 0;
+}
+
+.btnRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  align-items: center;
+}
+
+.heroNote {
+  margin-top: 16px;
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.previewPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+}
+
+.previewCard {
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.previewCard h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.previewCard p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.84);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.section {
+  margin-top: 18px;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  font-size: 1.65rem;
+  letter-spacing: -0.4px;
+}
+
+.sectionSub {
+  margin: 0 0 16px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 15px;
 }
 
 .packGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  margin-top: 18px;
+}
+
+.packGrid[hidden] {
+  display: none !important;
 }
 
 .packCard {
@@ -26,13 +149,14 @@
   overflow: hidden;
   transition:
     transform 0.18s ease,
+    opacity 0.18s ease,
     background 0.18s ease,
     border-color 0.18s ease,
     box-shadow 0.18s ease;
 }
 
 .packCard:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px) scale(1.02);
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.22);
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
@@ -45,6 +169,7 @@
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,15 +185,15 @@
 
 .packCardTop {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-top: 12px;
+  margin-bottom: 8px;
 }
 
 .packCardTitle {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   line-height: 1.2;
   color: var(--text);
 }
@@ -88,15 +213,16 @@
 }
 
 .packCardMeta {
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.78);
   font-size: 13px;
   line-height: 1.5;
 }
 
 .packCardBio {
-  margin: 10px 0 0;
-  color: rgba(255, 255, 255, 0.88);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
   font-size: 14px;
   line-height: 1.6;
   min-height: 44px;
@@ -108,33 +234,97 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
-.packEmpty,
-.packLoading {
+.ctaPanel {
   margin-top: 18px;
-  padding: 18px;
+  border-radius: 22px;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.14);
   border: 1px solid var(--stroke);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.08);
   text-align: center;
-  color: rgba(255, 255, 255, 0.9);
 }
 
-.packHeroImage {
-  max-width: 400px;
+.ctaPanel h2 {
+  margin: 0 0 10px;
+  font-size: 1.45rem;
+}
+
+.ctaPanel p {
+  margin: 0 auto;
+  max-width: 700px;
+  color: rgba(255, 255, 255, 0.86);
+  line-height: 1.65;
+  font-size: 14px;
+}
+
+.ctaPanel .btnRow {
+  justify-content: center;
+}
+
+.footerWrap {
+  margin-top: 28px;
+}
+
+.packLoading,
+.packEmpty,
+.packError {
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.packLoading,
+.packEmpty {
+  text-align: center;
+}
+
+.packError {
+  text-align: left;
 }
 
 @media (max-width: 920px) {
-  .packGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .hero {
+    grid-template-columns: 1fr;
   }
 
-  .packHeroImage {
-    max-width: 340px;
+  .packGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 620px) {
+  .wrap {
+    padding: 0 14px 56px;
+  }
+
+  .panel,
+  .ctaPanel {
+    padding: 20px;
+  }
+
+  .pill {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .btnRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btnRow > a,
+  .btnRow > button {
+    width: 100%;
+  }
+
   .packGrid {
     grid-template-columns: 1fr;
+  }
+
+  .packCardTop {
+    align-items: flex-start;
   }
 }
