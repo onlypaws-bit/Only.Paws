@@ -1,13 +1,46 @@
 /* =========================================================
    OnlyPaws
-   File: css/app/post.css
+   File: /css/app/post.css
    Purpose: shared post UI + post page styles
    ========================================================= */
 
 
 /* =========================================================
+   POSTS HEADER
+   ========================================================= */
+
+.postsHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.postsHeader h2{
+  margin:0;
+  font-size:18px;
+  line-height:1.2;
+  font-weight:900;
+}
+
+.postsHeaderHint{
+  margin:0;
+  font-size:13px;
+  line-height:1.35;
+  color:rgba(255,255,255,.78);
+  text-align:right;
+}
+
+
+/* =========================================================
    SHARED POST CARD UI
    ========================================================= */
+
+.posts{
+  display:grid;
+  gap:16px;
+}
 
 .op-postCard{
   width:100%;
@@ -22,6 +55,7 @@
   display:grid;
   gap:12px;
   padding:14px;
+  cursor:pointer;
 }
 
 .op-postHeader{
@@ -50,6 +84,8 @@
   justify-content:center;
   flex:0 0 auto;
   font-size:16px;
+  color:inherit;
+  text-decoration:none;
 }
 
 .op-postCreatorAvatar img{
@@ -61,6 +97,7 @@
 
 .op-postCreatorMeta{
   min-width:0;
+  display:grid;
 }
 
 .op-postCreatorName{
@@ -69,8 +106,12 @@
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
- color: inherit;
-  text-decoration: none;
+  color:inherit;
+  text-decoration:none;
+}
+
+.op-postCreatorName:hover{
+  text-decoration:none;
 }
 
 .op-postDate{
@@ -243,59 +284,6 @@
 
 
 /* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (min-width:760px){
-  .op-mediaWrap{
-    aspect-ratio:16 / 9;
-    max-height:340px;
-  }
-}
-
-@media (max-width:640px){
-  .op-postMain{
-    padding:12px;
-  }
-
-  .op-postHeader{
-    align-items:flex-start;
-    gap:10px;
-  }
-
-  .op-title{
-    font-size:14px;
-  }
-
-  .op-excerpt{
-    font-size:13px;
-    -webkit-line-clamp:2;
-  }
-
-  .op-mediaWrap{
-    aspect-ratio:4 / 5;
-    max-height:300px;
-  }
-
-  .op-lockBox{
-    max-width:220px;
-    padding:14px;
-  }
-
-  .op-postBottom{
-    padding:10px 12px;
-  }
-}
-
-.op-postCreatorName{
-  text-decoration: none;
-}
-
-.op-postCreatorName:hover{
-  text-decoration: none;
-}
-
-/* =========================================================
    SINGLE POST PAGE
    ========================================================= */
 
@@ -329,4 +317,64 @@
 .postError{
   margin-top:12px;
   color:#ffdede;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width:760px){
+  .op-mediaWrap{
+    aspect-ratio:16 / 9;
+    max-height:340px;
+  }
+}
+
+@media (max-width:640px){
+  .postsHeader{
+    gap:8px;
+  }
+
+  .postsHeader h2{
+    font-size:16px;
+  }
+
+  .postsHeaderHint{
+    width:100%;
+    text-align:left;
+    font-size:12px;
+  }
+
+  .op-postMain{
+    padding:12px;
+  }
+
+  .op-postHeader{
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .op-title{
+    font-size:14px;
+  }
+
+  .op-excerpt{
+    font-size:13px;
+    -webkit-line-clamp:2;
+  }
+
+  .op-mediaWrap{
+    aspect-ratio:4 / 5;
+    max-height:300px;
+  }
+
+  .op-lockBox{
+    max-width:220px;
+    padding:14px;
+  }
+
+  .op-postBottom{
+    padding:10px 12px;
+  }
 }
