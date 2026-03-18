@@ -89,11 +89,6 @@
       .replaceAll("'", "&#039;");
   }
 
-  function setHidden(el, hidden) {
-    if (!el) return;
-    el.hidden = !!hidden;
-  }
-
   function toast(message) {
     if (!els.toast) return;
 
@@ -139,18 +134,7 @@
   }
 
   function resolveAvatarUrl(obj) {
-    const raw =
-      obj?.avatar_url ||
-      obj?.profile_image_url ||
-      obj?.profile_photo_url ||
-      obj?.photo_url ||
-      obj?.image_url ||
-      obj?.creator_avatar_url ||
-      obj?.creator_profile_image_url ||
-      obj?.creator_photo_url ||
-      "";
-
-    return normalizeAssetUrl(raw);
+    return normalizeAssetUrl(obj?.avatar_url || "");
   }
 
   function normalizeSocialUrl(value, platform) {
@@ -293,7 +277,7 @@
         els.creatorInstagram.href = instagramUrl;
         els.creatorInstagram.target = "_blank";
         els.creatorInstagram.rel = "noopener noreferrer";
-        els.creatorInstagram.textContent = displaySocialLabel(instagramUrl, "Instagram");
+        els.creatorInstagram.textContent = "Instagram";
         els.creatorInstagram.hidden = false;
         hasSocials = true;
       } else {
@@ -307,7 +291,7 @@
         els.creatorTikTok.href = tiktokUrl;
         els.creatorTikTok.target = "_blank";
         els.creatorTikTok.rel = "noopener noreferrer";
-        els.creatorTikTok.textContent = displaySocialLabel(tiktokUrl, "TikTok");
+        els.creatorTikTok.textContent = "TikTok";
         els.creatorTikTok.hidden = false;
         hasSocials = true;
       } else {
@@ -343,7 +327,7 @@
             loading="lazy"
             decoding="async"
             referrerpolicy="no-referrer"
-            onerror="this.remove()"
+            onerror="this.parentElement.innerHTML='<span aria-hidden=&quot;true&quot;>🐾</span>'"
           >
         `;
       } else {
@@ -375,7 +359,7 @@
             loading="lazy"
             decoding="async"
             referrerpolicy="no-referrer"
-            onerror="this.remove()"
+            onerror="this.parentElement.innerHTML='<span aria-hidden=&quot;true&quot;>🐾</span>'"
           >
         `
         : `<span aria-hidden="true">🐾</span>`;
@@ -436,28 +420,31 @@
           canView = state.isSelf || access.hasAccess;
         }
 
-        return window.OnlyPawsPostCard.renderPostCard({
-          id: post.id,
-          creator_username: state.creatorUsername,
-          creator_avatar_url: state.creatorAvatarUrl,
-          title: post.title || "Post",
-          excerpt: canView
-            ? (post.content || post.preview || "")
-            : (post.preview || "Locked content."),
-          content: canView
-            ? (post.content || post.preview || "")
-            : (post.preview || "Locked content."),
-          is_locked: !canView,
-          media_url: post.media_url || null,
-          media_type: post.media_type || null,
-          is_paid: post.is_paid === true,
-          is_public: post.is_public !== false,
-          created_at: post.created_at || null,
-          price_cents: post.price_cents || 0,
-          currency: post.currency || "eur",
-        }, {
-          showCreator: true,
-        });
+        return window.OnlyPawsPostCard.renderPostCard(
+          {
+            id: post.id,
+            creator_username: state.creatorUsername,
+            creator_avatar_url: state.creatorAvatarUrl,
+            title: post.title || "Post",
+            excerpt: canView
+              ? (post.content || post.preview || "")
+              : (post.preview || "Locked content."),
+            content: canView
+              ? (post.content || post.preview || "")
+              : (post.preview || "Locked content."),
+            is_locked: !canView,
+            media_url: post.media_url || null,
+            media_type: post.media_type || null,
+            is_paid: post.is_paid === true,
+            is_public: post.is_public !== false,
+            created_at: post.created_at || null,
+            price_cents: post.price_cents || 0,
+            currency: post.currency || "eur",
+          },
+          {
+            showCreator: true,
+          }
+        );
       }).join("");
 
       if (window.OnlyPawsPostCard?.initPostCards) {
@@ -878,10 +865,6 @@
       "display_name",
       "bio",
       "avatar_url",
-      "profile_image_url",
-      "profile_photo_url",
-      "image_url",
-      "photo_url",
       "role",
       "stripe_onboarding_status",
       "charges_enabled",
@@ -992,7 +975,7 @@
           .limit(24),
         client
           .from("pets")
-          .select("id, name, species, breed, avatar_url, profile_image_url, profile_photo_url, image_url, photo_url")
+          .select("id, name, species, breed, avatar_url")
           .eq("owner_id", creator.user_id)
           .order("created_at", { ascending: false }),
       ]);
