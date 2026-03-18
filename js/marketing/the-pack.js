@@ -11,7 +11,6 @@
    ========================================================= */
 
 (function () {
-
   const client = window.onlypawsClient;
   const PATHS = window.OP_PATHS || {};
 
@@ -81,7 +80,7 @@
     const fansPath =
       PATHS?.marketing?.fans || "/html/marketing/fans.html";
 
-    if (creator.slug) {
+    if (creator?.slug) {
       return `${fansPath}?creator=${encodeURIComponent(creator.slug)}`;
     }
 
@@ -98,22 +97,20 @@
       : `<span aria-hidden="true">${speciesEmoji(creator.tag)}</span>`;
 
     return `
-      <a class="petCard" href="${cardHref(creator)}">
-
-        <div class="petThumb">
+      <a class="packCard" href="${cardHref(creator)}">
+        <div class="packCardMedia">
           ${thumbMarkup}
         </div>
 
-        <div class="petTop">
-          <h3 class="petName">${escapeHtml(creator.name)}</h3>
-          <span class="petTag">${escapeHtml(creator.tag)}</span>
+        <div class="packCardTop">
+          <h3 class="packCardTitle">${escapeHtml(creator.name)}</h3>
+          <span class="packCardBadge">${escapeHtml(creator.tag)}</span>
         </div>
 
-        <div class="petMeta">${escapeHtml(creator.meta)}</div>
-        <p class="petBio">${escapeHtml(creator.bio)}</p>
+        <div class="packCardMeta">${escapeHtml(creator.meta)}</div>
+        <p class="packCardBio">${escapeHtml(creator.bio)}</p>
 
-        <div class="petFooter">view profile after signup →</div>
-
+        <div class="packCardFooter">view profile after signup →</div>
       </a>
     `;
   }
@@ -205,17 +202,17 @@
     const creators = fallbackCreators();
 
     gridEl.innerHTML = creators.map(createPetCard).join("");
-    gridEl.style.display = "grid";
+    gridEl.hidden = false;
 
     if (!statusEl) return;
 
     if (showErrorMessage) {
-      statusEl.className = "errorState";
+      statusEl.className = "packEmpty";
       statusEl.textContent =
         "Could not load live creators right now, so here is a preview of The Pack instead.";
-      statusEl.style.display = "";
+      statusEl.hidden = false;
     } else {
-      statusEl.style.display = "none";
+      statusEl.hidden = true;
     }
   }
 
@@ -234,9 +231,7 @@
     try {
       const profiles = await fetchProfiles();
       const petIds = profiles.map((p) => p.pet).filter(Boolean);
-
       const pets = await fetchPetsByIds(petIds);
-
       const creators = mergeProfilesAndPets(profiles, pets);
 
       if (!creators.length) {
@@ -245,10 +240,10 @@
       }
 
       gridEl.innerHTML = creators.map(createPetCard).join("");
-      gridEl.style.display = "grid";
+      gridEl.hidden = false;
 
       if (statusEl) {
-        statusEl.style.display = "none";
+        statusEl.hidden = true;
       }
     } catch (error) {
       console.error("failed to load the pack:", error);
@@ -257,7 +252,6 @@
   }
 
   async function initMarketingThePack() {
-
     if (window.OPPartials?.loadMarketingLayout) {
       await window.OPPartials.loadMarketingLayout();
     }
@@ -274,5 +268,4 @@
   }
 
   window.addEventListener("DOMContentLoaded", initMarketingThePack);
-
 })();
