@@ -1,7 +1,7 @@
 /* =========================================================
    OnlyPaws
    File: /js/nav.js
-   Purpose: hydrate shared marketing/app navigation and user pill
+   Purpose: hydrate shared app navigation and user pill
    Dependencies:
    - window.onlypawsClient
    - window.OP_PATHS
@@ -18,62 +18,64 @@
     el.hidden = !!hidden;
   }
 
-  function route(pathKey, fallback) {
-    if (ROUTES?.get) {
-      return ROUTES.get(pathKey) || fallback;
-    }
-    return fallback;
-  }
-
-  function homePath() {
-    return route("home", PATHS?.home || PATHS?.index || "/index.html");
-  }
-
-  function marketingHomePath() {
-    return route(
-      "marketing.home",
-      PATHS?.marketing?.home || "/html/marketing/index.html"
-    );
-  }
-
-  function appFeedPath() {
-    return route("app.feed", PATHS?.app?.feed || "/html/app/feed.html");
-  }
-
   function profilePath() {
-    return route("app.profile", PATHS?.app?.profile || "/html/app/profile.html");
+    if (ROUTES?.get) {
+      return ROUTES.get("app.profile") || "profile.html";
+    }
+    return PATHS?.app?.profile || "/html/app/profile.html";
   }
 
   function fanDashPath() {
-    return route(
-      "app.fans.fanDash",
-      PATHS?.app?.fans?.fanDash || "/html/app/fans/fan-dash.html"
-    );
+    if (ROUTES?.get) {
+      return ROUTES.get("app.fans.fanDash") || "fan-dash.html";
+    }
+    return PATHS?.app?.fans?.fanDash || "/html/app/fans/fan-dash.html";
   }
 
   function creatorDashPath() {
-    return route(
-      "app.creators.creatorDash",
-      PATHS?.app?.creators?.creatorDash || "/html/app/creators/creator-dash.html"
+    if (ROUTES?.get) {
+      return ROUTES.get("app.creators.creatorDash") || "creator-dash.html";
+    }
+    return PATHS?.app?.creators?.creatorDash || "/html/app/creators/creator-dash.html";
+  }
+
+  function homePath() {
+    if (ROUTES?.get) {
+      return ROUTES.get("home") || ROUTES.get("index") || "index.html";
+    }
+    return PATHS?.home || PATHS?.index || "/index.html";
+  }
+
+  function currentPathname() {
+    return (window.location.pathname || "").toLowerCase();
+  }
+
+  function isProfilePage() {
+    const pathname = currentPathname();
+    return (
+      pathname.endsWith("/html/app/profile.html") ||
+      pathname.endsWith("/profile.html")
     );
   }
 
-  function creatorsPath() {
-    return route(
-      "marketing.creators",
-      PATHS?.marketing?.creators || "/html/marketing/creators.html"
+  function isFanDashPage() {
+    const pathname = currentPathname();
+    return (
+      pathname.endsWith("/html/app/fans/fan-dash.html") ||
+      pathname.endsWith("/fan-dash.html")
     );
   }
 
-  function fansPath() {
-    return route(
-      "marketing.fans",
-      PATHS?.marketing?.fans || "/html/marketing/fans.html"
+  function isCreatorDashPage() {
+    const pathname = currentPathname();
+    return (
+      pathname.endsWith("/html/app/creators/creator-dash.html") ||
+      pathname.endsWith("/creator-dash.html")
     );
   }
 
   function currentMarketingPageKeys() {
-    const pathname = (window.location.pathname || "").toLowerCase();
+    const pathname = currentPathname();
 
     if (
       pathname === "/" ||
@@ -110,70 +112,9 @@
     });
   }
 
-  function hydrateStaticLinks() {
-    const navHome = document.getElementById("navHome");
-    const navProfile = document.getElementById("navProfile");
-    const navDashboard = document.getElementById("navDashboard");
-    const navFanDash = document.getElementById("navFanDash");
-    const navCreatorDash = document.getElementById("navCreatorDash");
-
-    const navs = document.querySelectorAll(".nav");
-
-    navs.forEach((nav) => {
-      const brand = nav.querySelector(".brand");
-      if (!brand) return;
-
-      if (nav.classList.contains("appNav")) {
-        brand.href = appFeedPath();
-      } else {
-        brand.href = homePath();
-      }
-    });
-
-    if (navHome) {
-      navHome.href = appFeedPath();
-    }
-
-    if (navProfile) {
-      navProfile.href = profilePath();
-    }
-
-    if (navDashboard) {
-      setHidden(navDashboard, true);
-      navDashboard.removeAttribute("href");
-    }
-
-    if (navFanDash) {
-      navFanDash.href = fanDashPath();
-      setHidden(navFanDash, true);
-    }
-
-    if (navCreatorDash) {
-      navCreatorDash.href = creatorDashPath();
-      setHidden(navCreatorDash, true);
-    }
-
-    document.querySelectorAll('[data-page="index"], [data-page="home"]').forEach((link) => {
-      link.href = homePath();
-    });
-
-    document.querySelectorAll('[data-page="creators"]').forEach((link) => {
-      link.href = creatorsPath();
-    });
-
-    document.querySelectorAll('[data-page="fans"]').forEach((link) => {
-      link.href = fansPath();
-    });
-  }
-
   async function hydrateUserPill() {
     const pill = document.getElementById("userPill");
-    if (!pill) return;
-
-    if (!client?.auth) {
-      pill.textContent = "Guest";
-      return;
-    }
+    if (!pill || !client?.auth) return;
 
     try {
       const { data: sessData } = await client.auth.getSession();
@@ -202,129 +143,90 @@
       else pill.textContent = "User";
     } catch (err) {
       console.warn("hydrateUserPill failed:", err);
-      if (!pill.textContent) pill.textContent = "User";
     }
   }
 
-  async function bindLogout() {
-    const logoutBtn = document.getElementById("navLogout");
-    if (!logoutBtn) return;
-
-    setHidden(logoutBtn, false);
-
-    if (logoutBtn.dataset.bound === "1") return;
-    logoutBtn.dataset.bound = "1";
-
-    logoutBtn.addEventListener("click", async (event) => {
-      event.preventDefault();
-      logoutBtn.disabled = true;
-      logoutBtn.textContent = "Logging out…";
-
-      try {
-        await client?.auth?.signOut();
-      } catch (err) {
-        console.warn("signOut failed:", err);
-      }
-
-      window.location.replace(homePath());
-    });
-  }
-
-  async function hydrateAppNav() {
+  async function hydrateNav() {
     const profileBtn = document.getElementById("navProfile");
     const dashboardBtn = document.getElementById("navDashboard");
-    const fanDashBtn = document.getElementById("navFanDash");
-    const creatorDashBtn = document.getElementById("navCreatorDash");
-    const pill = document.getElementById("userPill");
+    const logoutBtn = document.getElementById("navLogout");
 
     if (profileBtn) {
       profileBtn.href = profilePath();
-      setHidden(profileBtn, true);
+      setHidden(profileBtn, false);
     }
 
     if (dashboardBtn) {
       setHidden(dashboardBtn, true);
-      dashboardBtn.removeAttribute("href");
     }
 
-    if (fanDashBtn) {
-      fanDashBtn.href = fanDashPath();
-      setHidden(fanDashBtn, true);
-    }
+    if (logoutBtn) {
+      setHidden(logoutBtn, false);
 
-    if (creatorDashBtn) {
-      creatorDashBtn.href = creatorDashPath();
-      setHidden(creatorDashBtn, true);
-    }
+      if (logoutBtn.dataset.bound !== "1") {
+        logoutBtn.dataset.bound = "1";
 
-    if (!client?.auth) {
-      if (pill && !pill.textContent) pill.textContent = "Guest";
-      return;
+        logoutBtn.addEventListener("click", async (event) => {
+          event.preventDefault();
+          logoutBtn.disabled = true;
+          logoutBtn.textContent = "Logging out…";
+
+          try {
+            await client?.auth?.signOut();
+          } catch (_) {}
+
+          window.location.replace(homePath());
+        });
+      }
     }
 
     try {
-      const { data: sessData } = await client.auth.getSession();
-      const session = sessData?.session;
-      const userId = session?.user?.id;
+      const { data: u } = await client.auth.getUser();
+      const userId = u?.user?.id;
+      if (!userId) return;
 
-      if (!userId) {
-        if (pill && !pill.textContent) pill.textContent = "Guest";
-        return;
-      }
-
-      if (profileBtn) {
-        setHidden(profileBtn, false);
-      }
-
-      const { data: profile } = await client
+      const { data: p } = await client
         .from("profiles")
         .select("role")
         .eq("user_id", userId)
         .maybeSingle();
 
-      const isCreator = profile?.role === "creator";
+      const role = p?.role === "creator" ? "creator" : "fan";
 
       if (dashboardBtn) {
-        dashboardBtn.href = isCreator ? creatorDashPath() : fanDashPath();
-        dashboardBtn.textContent = "Dashboard";
+        dashboardBtn.href = role === "creator" ? creatorDashPath() : fanDashPath();
         setHidden(dashboardBtn, false);
-      } else {
-        if (fanDashBtn) {
-          setHidden(fanDashBtn, isCreator);
-        }
-        if (creatorDashBtn) {
-          setHidden(creatorDashBtn, !isCreator);
+      }
+
+      if (profileBtn && isProfilePage()) {
+        setHidden(profileBtn, true);
+      }
+
+      if (dashboardBtn) {
+        const hideDashboard =
+          (role === "fan" && isFanDashPage()) ||
+          (role === "creator" && isCreatorDashPage());
+
+        if (hideDashboard) {
+          setHidden(dashboardBtn, true);
         }
       }
     } catch (err) {
-      console.warn("hydrateAppNav failed:", err);
+      console.warn("hydrateNav failed:", err);
     }
   }
 
-  async function hydrateNav() {
-    hydrateStaticLinks();
-    hideCurrentMarketingLink();
-    await bindLogout();
-    await hydrateAppNav();
-    await hydrateUserPill();
-  }
-
   async function initNav() {
+    hideCurrentMarketingLink();
     await hydrateNav();
+    await hydrateUserPill();
   }
 
   window.OPNav = {
     setHidden,
-    homePath,
-    marketingHomePath,
-    appFeedPath,
-    profilePath,
-    fanDashPath,
-    creatorDashPath,
     hideCurrentMarketingLink,
-    hydrateStaticLinks,
-    hydrateUserPill,
     hydrateNav,
+    hydrateUserPill,
     initNav,
   };
 })();
