@@ -274,6 +274,11 @@
     );
   }
 
+  function getPostLocked(post) {
+    if (typeof post?.is_locked === "boolean") return post.is_locked;
+    return false;
+  }
+
   function mediaHtml(post, locked) {
     const rawUrl = post?.media_url || "";
     const url = normalizeAssetUrl(rawUrl);
@@ -309,12 +314,13 @@
 
   function renderBadge(post, locked) {
     const price =
-      post.price_cents != null && Number(post.price_cents) > 0
+      post?.price_cents != null && Number(post.price_cents) > 0
         ? fmtMoney(post.price_cents, post.currency || "eur")
         : "";
 
     if (locked) return `<span class="op-badge op-badge--locked">Locked</span>`;
     if (price) return `<span class="op-badge op-badge--price">${esc(price)}</span>`;
+    if (post?.is_paid) return `<span class="op-badge op-badge--price">Paid</span>`;
 
     return `<span class="op-badge op-badge--free">Free</span>`;
   }
@@ -322,14 +328,14 @@
   function renderPost(post, opts = {}) {
     const postUrl = (opts.postUrl || defaultPostUrl)(post);
     const title = esc(post.title || "");
-    const excerpt = esc(post.excerpt || post.content || "");
+    const excerpt = esc(post.preview || post.content || "");
 
     const creatorRaw = post.creator_username || "creator";
     const creator = esc(creatorRaw);
 
     const creatorAvatar = esc(resolveCreatorAvatar(post));
     const createdAt = formatPostDate(post.created_at);
-    const locked = Boolean(post.is_locked);
+    const locked = getPostLocked(post);
 
     const media = mediaHtml(post, locked);
     const badge = renderBadge(post, locked);
@@ -619,9 +625,10 @@
     if (navCreatorDash) navCreatorDash.setAttribute("href", creatorDashUrl());
 
     show(navProfile, true);
-    show(navLogout, true);
     show(navFanDash, false);
     show(navCreatorDash, false);
+
+    if (navLogout) show(navLogout, false);
 
     try {
       const { data: u } = await c.auth.getUser();
@@ -666,17 +673,19 @@
         [
           "id",
           "creator_id",
+          "pet_id",
           "title",
           "content",
           "preview",
-          "excerpt",
-          "price_cents",
-          "currency",
-          "is_locked",
+          "slug",
           "media_url",
           "media_type",
+          "is_public",
+          "is_paid",
+          "is_pinned",
           "likes_count",
           "created_at",
+          "updated_at",
         ].join(", ")
       )
       .eq("id", postId)
@@ -821,7 +830,7 @@
       const bodyText =
         (post.content && String(post.content).trim().length
           ? post.content
-          : post.preview || post.excerpt || "") || "";
+          : post.preview || "") || "";
 
       if (caption) {
         if (bodyText && String(bodyText).trim().length) {
@@ -856,8 +865,6 @@
           likeBtn.dataset.bound = "1";
 
           likeBtn.addEventListener("click", async () => {
-            if (!likeBtn) return;
-
             if (errBox) errBox.style.display = "none";
 
             const liked = likeBtn.getAttribute("data-liked") === "true";
