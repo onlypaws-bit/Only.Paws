@@ -1,7 +1,9 @@
 /* =========================================================
    OnlyPaws
    File: /css/app/post.css
-   Purpose: shared post UI + post page styles
+   Purpose:
+   - shared post cards UI
+   - single post page styles
    ========================================================= */
 
 
@@ -56,6 +58,14 @@
   gap:12px;
   padding:14px;
   cursor:pointer;
+  color:inherit;
+  text-decoration:none;
+  outline:none;
+}
+
+.op-postMain:focus-visible{
+  outline:2px solid rgba(255,255,255,.45);
+  outline-offset:-2px;
 }
 
 .op-postHeader{
@@ -111,13 +121,26 @@
 }
 
 .op-postCreatorName:hover{
-  text-decoration:none;
+  text-decoration:underline;
+}
+
+.op-postCreatorPlaceholder{
+  display:block;
+  width:1px;
+  height:13px;
 }
 
 .op-postDate{
   margin-top:2px;
   font-size:12px;
   color:rgba(255,255,255,.72);
+}
+
+.op-postHeaderRight{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
 }
 
 .op-badge{
@@ -175,6 +198,7 @@
   overflow:hidden;
   border-radius:14px;
   background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.14);
 }
 
 .op-mediaWrap img,
@@ -183,6 +207,7 @@
   height:100%;
   object-fit:cover;
   display:block;
+  background:#000;
 }
 
 .op-mediaWrap.op-isLocked img,
@@ -287,21 +312,93 @@
    SINGLE POST PAGE
    ========================================================= */
 
+.postPage .wrap{
+  max-width:1040px;
+  margin:0 auto;
+  padding:28px 18px 70px;
+}
+
+.postMain{
+  margin-top:18px;
+}
+
+.postMain .panel{
+  border-radius:22px;
+  padding:22px;
+}
+
+.postMain h1{
+  margin:10px 0 6px;
+  font-size:clamp(2rem, 4vw, 2.6rem);
+  line-height:1.05;
+  letter-spacing:-0.6px;
+}
+
+.postMeta,
 .postMetaRow{
   display:flex;
   flex-wrap:wrap;
+  align-items:center;
   gap:8px;
   margin-top:10px;
 }
 
-.postMediaBox{
-  margin-top:14px;
+.postAuthorLink{
+  display:inline-flex;
+  align-items:center;
+  font-size:1.05rem;
+  font-weight:900;
+  color:inherit;
+  text-decoration:none;
+}
+
+.postAuthorLink:hover{
+  text-decoration:underline;
+}
+
+.postMeta span,
+#createdAt{
+  display:block;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  white-space:pre-wrap;
+}
+
+.postMediaBox,
+.mediaWrap{
+  margin-top:12px;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(0,0,0,.18);
+}
+
+.mediaWrap img,
+.mediaWrap video{
+  width:100%;
+  display:block;
+  max-height:620px;
+  object-fit:contain;
+  background:#000;
 }
 
 .captionBox{
   margin-top:14px;
+  border-radius:18px;
+  padding:14px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  white-space:pre-wrap;
   line-height:1.6;
   color:rgba(255,255,255,.92);
+}
+
+.postMain .btnRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:14px;
+  align-items:center;
 }
 
 .likeBtnLabel{
@@ -309,14 +406,59 @@
 }
 
 .likeCount{
-  margin-top:10px;
-  font-size:13px;
-  color:rgba(255,255,255,.78);
+  margin-left:10px;
+  opacity:.9;
+  font-size:inherit;
+  color:inherit;
 }
 
+.hint{
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  line-height:1.4;
+  margin-top:10px;
+  white-space:pre-wrap;
+}
+
+.err,
 .postError{
   margin-top:12px;
-  color:#ffdede;
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(0,0,0,.18);
+  color:rgba(255,255,255,.92);
+}
+
+.isHidden{
+  display:none !important;
+}
+
+
+/* =========================================================
+   SINGLE POST LOCKED MEDIA
+   ========================================================= */
+
+#mediaBox .op-mediaWrap{
+  margin-top:0;
+  border-radius:18px;
+}
+
+#mediaBox .op-mediaWrap img,
+#mediaBox .op-mediaWrap video{
+  width:100%;
+  display:block;
+  max-height:620px;
+  object-fit:contain;
+  background:#000;
+}
+
+#mediaBox .op-lockOverlay{
+  padding:24px;
+}
+
+#mediaBox .op-lockBox{
+  max-width:300px;
 }
 
 
@@ -376,5 +518,39 @@
 
   .op-postBottom{
     padding:10px 12px;
+  }
+
+  .postPage .wrap{
+    padding:20px 14px 56px;
+  }
+
+  .postMain .panel{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .postMain h1{
+    font-size:clamp(1.8rem, 8vw, 2.3rem);
+  }
+
+  .postMeta{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  .postMain .btnRow{
+    gap:8px;
+  }
+
+  .mediaWrap img,
+  .mediaWrap video,
+  #mediaBox .op-mediaWrap img,
+  #mediaBox .op-mediaWrap video{
+    max-height:420px;
+  }
+
+  #mediaBox .op-lockOverlay{
+    padding:16px;
   }
 }
