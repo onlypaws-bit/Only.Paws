@@ -51,6 +51,41 @@
     );
   }
 
+  function isAbsoluteUrl(value) {
+    return /^(https?:)?\/\//i.test(String(value || ""));
+  }
+
+  function normalizeAssetUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+
+    if (
+      isAbsoluteUrl(raw) ||
+      raw.startsWith("/") ||
+      raw.startsWith("data:") ||
+      raw.startsWith("blob:")
+    ) {
+      return raw;
+    }
+
+    return `/${raw.replace(/^\/+/, "")}`;
+  }
+
+  function resolveCreatorAvatar(post) {
+    const raw =
+      post?.creator_avatar_url ||
+      post?.avatar_url ||
+      post?.creator_profile_image_url ||
+      post?.creator_image_url ||
+      post?.profile_image_url ||
+      post?.profile_photo_url ||
+      post?.creator_profile_photo_url ||
+      post?.creator_photo_url ||
+      "";
+
+    return normalizeAssetUrl(raw);
+  }
+
   function defaultPostUrl(post) {
     if (ROUTES?.href) {
       return ROUTES.href("app.post", { id: post.id });
@@ -75,7 +110,8 @@
   }
 
   function mediaHtml(post, locked) {
-    const url = post?.media_url;
+    const rawUrl = post?.media_url || "";
+    const url = normalizeAssetUrl(rawUrl);
     if (!url) return "";
 
     const isVideo = isVideoMedia(post.media_type, url);
@@ -150,7 +186,7 @@
     const creatorRaw = post.creator_username || "creator";
     const creator = esc(creatorRaw);
 
-    const creatorAvatar = esc(post.creator_avatar_url || "");
+    const creatorAvatar = esc(resolveCreatorAvatar(post));
     const createdAt = formatPostDate(post.created_at);
     const locked = Boolean(post.is_locked);
 
@@ -158,7 +194,7 @@
     const badge = renderBadge(post, locked);
 
     const avatarHtml = creatorAvatar
-      ? `<img src="${creatorAvatar}" alt="${creator} avatar" loading="lazy" decoding="async">`
+      ? `<img src="${creatorAvatar}" alt="${creator} avatar" loading="lazy" decoding="async" onerror="this.remove()">`
       : `<span aria-hidden="true">🐾</span>`;
 
     const likeBlock = FEATURE_LIKES
@@ -195,8 +231,8 @@
               <div class="op-postCreatorMeta">
                 ${
                   opts.showCreator !== false
-                    ? `<a class="op-postCreatorName" href="${esc(creatorProfileUrl(creatorRaw))}" data-op-stop-nav="1" style="text-decoration:none;">@${creator}</a>`
-                    : `<span class="op-postCreatorName"></span>`
+                    ? `<a class="op-postCreatorName" href="${esc(creatorProfileUrl(creatorRaw))}" data-op-stop-nav="1">@${creator}</a>`
+                    : ``
                 }
                 ${createdAt ? `<span class="op-postDate">${esc(createdAt)}</span>` : ``}
               </div>
@@ -245,12 +281,6 @@
       main.addEventListener("click", (e) => {
         if (e.target.closest("[data-op-stop-nav='1']")) return;
         if (e.target.closest("a, button, input, textarea, select, label")) return;
-
-        if (e.target.closest(".op-mediaWrap")) {
-          go();
-          return;
-        }
-
         go();
       });
 
@@ -267,18 +297,34 @@
     bindPostNavigation(root);
 
     const buttons = $$(".op-likeBtn", root);
+    if (!buttons.length) return;
+
     const logged = await isLoggedIn();
 
     buttons.forEach((btn) => {
+      if (btn.dataset.likeBound === "1") return;
+      btn.dataset.likeBound = "1";
+
       btn.addEventListener("click", async (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        if (!logged) return alert("Login required");
+        if (!logged) {
+          alert("Login required");
+          return;
+        }
 
-        const res = await window.onlypawsLikes.togglePostLike(btn.dataset.postId);
-        btn.querySelector(".op-likeIcon").textContent = res.liked ? "♥" : "♡";
-        btn.querySelector("[data-like-count]").textContent = res.like_count;
+        if (!window.onlypawsLikes?.togglePostLike) return;
+
+        try {
+          const res = await window.onlypawsLikes.togglePostLike(btn.dataset.postId);
+          btn.querySelector(".op-likeIcon").textContent = res.liked ? "♥" : "♡";
+          btn.querySelector("[data-like-count]").textContent = res.like_count;
+          btn.dataset.liked = res.liked ? "1" : "0";
+          btn.classList.toggle("op-liked", Boolean(res.liked));
+        } catch (err) {
+          console.error("toggle like failed", err);
+        }
       });
     });
   }
