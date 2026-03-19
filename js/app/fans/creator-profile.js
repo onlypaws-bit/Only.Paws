@@ -1,30 +1,6 @@
 /* =========================================================
    OnlyPaws
    File: /js/app/fans/creator-profile.js
-   Purpose:
-   Fan-side creator profile page logic.
-
-   Handles:
-   - loading creator profile
-   - pets list
-   - posts rendering
-   - follow / unfollow
-   - subscription state UI
-   - premium post access checks
-   - creator social links
-   - share profile button
-
-   Premium access is granted only when:
-   - creator is eligible (Stripe onboarding completed)
-   - AND fan subscription is still valid.
-
-   Dependencies:
-   - window.onlypawsClient
-   - window.OP_PATHS
-   - window.OPRoutes
-   - window.OPPartials
-   - window.OPNav
-   - window.OnlyPawsPostCard (optional)
    ========================================================= */
 
 (function () {
@@ -41,7 +17,7 @@
     creatorName: document.getElementById("creatorName"),
     creatorHandle: document.getElementById("creatorHandle"),
     creatorBio: document.getElementById("creatorBio"),
-    creatorAvatar: document.getElementById("creatorAvatar"),
+    creatorAvatarImg: document.getElementById("creatorAvatarImg"),
 
     creatorSocials: document.getElementById("creatorSocials"),
     creatorInstagram: document.getElementById("creatorInstagram"),
@@ -66,13 +42,10 @@
     viewerId: null,
     viewerRole: "",
     viewerIsCreator: false,
-
     creator: null,
     creatorEligible: false,
-
     followRowId: null,
     subRow: null,
-
     posts: [],
     isSelf: false,
     creatorUsername: "",
@@ -91,10 +64,8 @@
 
   function toast(message) {
     if (!els.toast) return;
-
     els.toast.textContent = message || "";
     els.toast.classList.add("show");
-
     clearTimeout(els.toast._t);
     els.toast._t = setTimeout(() => {
       els.toast.classList.remove("show");
@@ -193,7 +164,7 @@
     return `${base}?creator=${encodeURIComponent(creatorId)}`;
   }
 
-  function publicCreatorProfileHref(usernameOrId) {
+  function creatorProfileHref(usernameOrId) {
     if (!usernameOrId) return "";
 
     if (ROUTES?.href) {
@@ -205,25 +176,9 @@
     return `${base}?u=${encodeURIComponent(usernameOrId)}`;
   }
 
-  function profileHref() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.profile") || "/html/app/profile.html";
-    }
-    return PATHS?.app?.profile || "/html/app/profile.html";
-  }
-
-  function fanDashHref() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.fans.fanDash") || "/html/app/fans/fan-dash.html";
-    }
-    return PATHS?.app?.fans?.fanDash || "/html/app/fans/fan-dash.html";
-  }
-
-  function creatorDashHref() {
-    if (ROUTES?.get) {
-      return ROUTES.get("app.creators.creatorDash") || "/html/app/creators/creator-dash.html";
-    }
-    return PATHS?.app?.creators?.creatorDash || "/html/app/creators/creator-dash.html";
+  function computePostHref(postId) {
+    const base = PATHS?.app?.post || "/html/app/post.html";
+    return `${base}?id=${encodeURIComponent(postId)}`;
   }
 
   function creatorEligible(profile) {
@@ -266,7 +221,6 @@
         els.creatorInstagram.href = instagramUrl;
         els.creatorInstagram.target = "_blank";
         els.creatorInstagram.rel = "noopener noreferrer";
-        els.creatorInstagram.textContent = "Instagram";
         els.creatorInstagram.hidden = false;
         hasSocials = true;
       } else {
@@ -280,7 +234,6 @@
         els.creatorTikTok.href = tiktokUrl;
         els.creatorTikTok.target = "_blank";
         els.creatorTikTok.rel = "noopener noreferrer";
-        els.creatorTikTok.textContent = "TikTok";
         els.creatorTikTok.hidden = false;
         hasSocials = true;
       } else {
@@ -307,21 +260,9 @@
     state.creatorUsername = uname;
     state.creatorAvatarUrl = avatarUrl;
 
-    if (els.creatorAvatar) {
-      if (avatarUrl) {
-        els.creatorAvatar.innerHTML = `
-          <img
-            src="${esc(avatarUrl)}"
-            alt="${esc(name)} avatar"
-            loading="lazy"
-            decoding="async"
-            referrerpolicy="no-referrer"
-            onerror="this.parentElement.innerHTML='<span aria-hidden=&quot;true&quot;>🐾</span>'"
-          >
-        `;
-      } else {
-        els.creatorAvatar.innerHTML = `<span aria-hidden="true">🐾</span>`;
-      }
+    if (els.creatorAvatarImg) {
+      els.creatorAvatarImg.src = avatarUrl || "/assets/images/logo.png";
+      els.creatorAvatarImg.alt = `${name} avatar`;
     }
 
     renderCreatorSocials(c);
@@ -341,16 +282,7 @@
       const avatarUrl = resolveAvatarUrl(pet);
 
       const av = avatarUrl
-        ? `
-          <img
-            src="${esc(avatarUrl)}"
-            alt="${esc(name)} avatar"
-            loading="lazy"
-            decoding="async"
-            referrerpolicy="no-referrer"
-            onerror="this.parentElement.innerHTML='<span aria-hidden=&quot;true&quot;>🐾</span>'"
-          >
-        `
+        ? `<img src="${esc(avatarUrl)}" alt="${esc(name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
         : `<span aria-hidden="true">🐾</span>`;
 
       return `
@@ -365,18 +297,37 @@
     }).join("");
   }
 
-  function lockedOverlayHtml() {
-    return `
-      <div class="lockedOverlay">
-        <div class="lockedBox">
-          <b>🔒 Premium post</b>
-          <div class="small">Subscribe to unlock all premium posts from this creator.</div>
-          <div class="ctaRow">
-            <button class="ghost" type="button" data-action="premium">Subscribe</button>
-          </div>
-        </div>
-      </div>
-    `;
+  function enrichPostsForRenderer(posts) {
+    const access = computeAccess(state.subRow, state.creatorEligible);
+
+    return posts.map((post) => {
+      const isPremium = post.is_paid === true;
+      const isPrivate = post.is_public === false;
+
+      let canView = false;
+
+      if (isPrivate) {
+        canView = state.isSelf;
+      } else if (!isPremium) {
+        canView = true;
+      } else {
+        canView = state.isSelf || access.hasAccess;
+      }
+
+      return {
+        ...post,
+        href: computePostHref(post.id),
+        creator_username: state.creatorUsername,
+        creator_name: state.creator?.display_name || state.creatorUsername,
+        creator_avatar_url: state.creatorAvatarUrl,
+        excerpt: canView
+          ? (post.content || post.preview || "")
+          : (post.preview || "Locked content."),
+        is_locked: !canView,
+        can_view: canView,
+        liked: false,
+      };
+    });
   }
 
   function renderPosts(posts) {
@@ -393,125 +344,35 @@
       return;
     }
 
-    const access = computeAccess(state.subRow, state.creatorEligible);
+    const postApi = window.OnlyPawsPost || null;
 
-    if (window.OnlyPawsPostCard?.renderPostCard) {
-      els.posts.innerHTML = posts.map((post) => {
-        const isPremium = post.is_paid === true;
-        const isPrivate = post.is_public === false;
-
-        let canView = false;
-
-        if (isPrivate) {
-          canView = state.isSelf;
-        } else if (!isPremium) {
-          canView = true;
-        } else {
-          canView = state.isSelf || access.hasAccess;
-        }
-
-        return window.OnlyPawsPostCard.renderPostCard(
-          {
-            id: post.id,
-            creator_username: state.creatorUsername,
-            creator_avatar_url: state.creatorAvatarUrl,
-            title: post.title || "Post",
-            excerpt: canView
-              ? (post.content || post.preview || "")
-              : (post.preview || "Locked content."),
-            content: canView
-              ? (post.content || post.preview || "")
-              : (post.preview || "Locked content."),
-            is_locked: !canView,
-            media_url: post.media_url || null,
-            media_type: post.media_type || null,
-            is_paid: post.is_paid === true,
-            is_public: post.is_public !== false,
-            created_at: post.created_at || null,
-          },
-          {
-            showCreator: true,
-          }
-        );
-      }).join("");
-
-      if (window.OnlyPawsPostCard?.initPostCards) {
-        window.OnlyPawsPostCard.initPostCards(els.posts);
+    if (!postApi?.buildPostCard) {
+      els.posts.innerHTML = "";
+      if (els.postsHint) {
+        els.postsHint.textContent = "Post renderer not available.";
       }
-
-      bindLockedSubscribeButtons();
-      if (els.postsHint) els.postsHint.textContent = "";
       return;
     }
 
-    els.posts.innerHTML = posts.map((post) => {
-      const who = state.creatorUsername ? `@${state.creatorUsername}` : "@creator";
-      const title = post.title || "Post";
-      const fullText = post.content || post.preview || "";
-      const preview = post.preview || "Subscribe to unlock this post.";
+    const enriched = enrichPostsForRenderer(posts);
+    els.posts.innerHTML = enriched.map((post) =>
+      postApi.buildPostCard(post, {
+        creatorUsername: post.creator_username,
+        creatorDisplayName: post.creator_name,
+        creatorAvatarUrl: post.creator_avatar_url,
+        canViewFull: post.can_view === true,
+        liked: post.liked === true,
+      })
+    ).join("");
 
-      const isPremium = post.is_paid === true;
-      const isPrivate = post.is_public === false;
-
-      let canView = false;
-
-      if (isPrivate) {
-        canView = state.isSelf;
-      } else if (!isPremium) {
-        canView = true;
-      } else {
-        canView = state.isSelf || access.hasAccess;
-      }
-
-      const badgeLabel = isPremium
-        ? "🔒 PREMIUM"
-        : (isPrivate ? "🙈 PRIVATE" : "🆓 FREE");
-
-      return `
-        <div class="postCard ${canView ? "" : "isLocked"}" data-postid="${esc(post.id)}">
-          <div class="postTop">
-            <div class="badge">${esc(who)}</div>
-            <div class="badge">${badgeLabel}</div>
-          </div>
-
-          <h3>${esc(title)}</h3>
-
-          ${post.media_url ? `
-            <div class="mediaWrap">
-              ${String(post.media_type || "").startsWith("video")
-                ? `<video controls playsinline src="${esc(normalizeAssetUrl(post.media_url))}"></video>`
-                : `<img src="${esc(normalizeAssetUrl(post.media_url))}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer">`}
-            </div>
-          ` : ""}
-
-          <div class="postText">
-            <p>${esc(canView ? fullText : preview)}</p>
-          </div>
-
-          ${canView ? "" : lockedOverlayHtml()}
-        </div>
-      `;
-    }).join("");
-
-    bindLockedSubscribeButtons();
     if (els.postsHint) els.postsHint.textContent = "";
-  }
 
-  function bindLockedSubscribeButtons() {
-    if (!els.posts) return;
-
-    els.posts.querySelectorAll('[data-action="premium"]').forEach((button) => {
-      if (button.dataset.bound === "1") return;
-      button.dataset.bound = "1";
-
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        if (!state.creator?.user_id) return;
-        window.location.href = subscriptionsHref(state.creator.user_id);
-      });
-    });
+    const likesApi = window.onlypawsLikes || null;
+    if (likesApi?.initLikes) {
+      likesApi.initLikes(els.posts).catch(() => {});
+    } else if (likesApi?.bindLikeButtons) {
+      likesApi.bindLikeButtons(els.posts).catch(() => {});
+    }
   }
 
   async function getFollowRowId(fanId, creatorId) {
@@ -538,21 +399,19 @@
     return data || null;
   }
 
-  function setPremiumUI(success = "", sessionId = "") {
+  function setPremiumUI() {
     const btn = els.premiumBtn;
     if (!btn) return;
 
     if (state.viewerIsCreator) {
       btn.textContent = "Coming soon";
       btn.disabled = true;
-      btn.title = "Creators can’t subscribe yet.";
       return;
     }
 
     if (!state.creatorEligible) {
       btn.textContent = "Creator not ready";
       btn.disabled = true;
-      btn.title = "Creator not ready yet (Stripe setup incomplete).";
       return;
     }
 
@@ -561,113 +420,23 @@
     if (access.hardCanceled) {
       btn.textContent = "Subscribe again";
       btn.disabled = false;
-      btn.title = "";
-      if (!(success === "1" || sessionId)) {
-        setHint("⚠️ This subscription was canceled and can’t be resumed. Subscribe again to renew.");
-      }
       return;
     }
 
     if (!access.rawActive) {
       btn.textContent = "Subscribe";
       btn.disabled = false;
-      btn.title = "";
       return;
     }
 
     if (access.canceling) {
       btn.textContent = "Resume (keep access)";
       btn.disabled = false;
-      btn.title = "";
-
-      if (!(success === "1" || sessionId)) {
-        const d = state.subRow?.current_period_end
-          ? new Date(state.subRow.current_period_end).toLocaleDateString()
-          : "";
-        setHint(d ? `Cancels on ${d} — resume anytime.` : "Cancels at period end — resume anytime.");
-      }
       return;
     }
 
     btn.textContent = "Subscribed ✓ (Cancel)";
     btn.disabled = false;
-    btn.title = "";
-  }
-
-  async function hydrateHeaderActions() {
-    const navProfile = document.getElementById("navProfile");
-    const navFanDash = document.getElementById("navFanDash");
-    const navCreatorDash = document.getElementById("navCreatorDash");
-    const navLogout = document.getElementById("navLogout");
-    const userPill = document.getElementById("userPill");
-
-    if (navProfile) {
-      navProfile.hidden = false;
-      navProfile.href = profileHref();
-    }
-
-    if (navLogout) {
-      navLogout.hidden = false;
-
-      if (navLogout.dataset.bound !== "1") {
-        navLogout.dataset.bound = "1";
-
-        navLogout.addEventListener("click", async (event) => {
-          event.preventDefault();
-          navLogout.disabled = true;
-          navLogout.textContent = "Logging out…";
-
-          try {
-            await client.auth.signOut();
-          } catch (_) {}
-
-          goHome();
-        });
-      }
-    }
-
-    try {
-      const { data: sessData } = await client.auth.getSession();
-      const session = sessData?.session;
-
-      if (!session) {
-        if (userPill) userPill.textContent = "Guest";
-        return;
-      }
-
-      const uid = session.user.id;
-      const email = session.user.email || "";
-
-      const { data: prof } = await client
-        .from("profiles")
-        .select("username, display_name, role")
-        .eq("user_id", uid)
-        .maybeSingle();
-
-      const uname = (prof?.username || "").trim();
-      const dname = (prof?.display_name || "").trim();
-
-      if (userPill) {
-        if (uname) userPill.textContent = "@" + uname;
-        else if (dname) userPill.textContent = dname;
-        else if (email) userPill.textContent = email.split("@")[0];
-        else userPill.textContent = "User";
-      }
-
-      if (prof?.role === "creator") {
-        if (navCreatorDash) {
-          navCreatorDash.hidden = false;
-          navCreatorDash.href = creatorDashHref();
-        }
-        if (navFanDash) navFanDash.hidden = true;
-      } else {
-        if (navFanDash) {
-          navFanDash.hidden = false;
-          navFanDash.href = fanDashHref();
-        }
-        if (navCreatorDash) navCreatorDash.hidden = true;
-      }
-    } catch (_) {}
   }
 
   async function copyProfileLink() {
@@ -675,7 +444,7 @@
     if (!shareKey) return;
 
     try {
-      const href = publicCreatorProfileHref(shareKey);
+      const href = creatorProfileHref(shareKey);
       const absoluteUrl = new URL(href, window.location.origin).toString();
       await navigator.clipboard.writeText(absoluteUrl);
       toast("Profile link copied ✅");
@@ -688,7 +457,7 @@
     const shareKey = state.creatorUsername || state.creator?.user_id;
     if (!shareKey || !state.creator) return;
 
-    const href = publicCreatorProfileHref(shareKey);
+    const href = creatorProfileHref(shareKey);
     const absoluteUrl = new URL(href, window.location.origin).toString();
     const title = state.creator.display_name || state.creator.username || "OnlyPaws creator";
     const text = `Check out ${title} on OnlyPaws 🐾`;
@@ -750,97 +519,19 @@
     });
   }
 
-  async function bindPremium(success = "", sessionId = "") {
+  async function bindPremium() {
     if (!els.premiumBtn || !state.creator || state.isSelf) return;
     if (els.premiumBtn.dataset.bound === "1") return;
     els.premiumBtn.dataset.bound = "1";
 
-    function explainCreatorCantSubscribe() {
-      setHint("⏳ Creator → creator subscriptions are coming later. For now, creators can’t subscribe.");
-    }
-
-    function explainCreatorNotReady() {
-      setHint("⚠️ This creator isn’t ready for subscriptions yet (Stripe setup incomplete).");
-    }
-
     els.premiumBtn.addEventListener("click", async () => {
       if (state.viewerIsCreator) {
-        explainCreatorCantSubscribe();
+        setHint("⏳ Creator → creator subscriptions are coming later.");
         return;
       }
 
       if (!state.creatorEligible) {
-        explainCreatorNotReady();
-        return;
-      }
-
-      const access = computeAccess(state.subRow, state.creatorEligible);
-
-      if (state.subRow && access.canceling) {
-        try {
-          setBtnBusy(els.premiumBtn, true, "Resuming…");
-
-          const { data: s } = await client.auth.getSession();
-          const token = s?.session?.access_token;
-          if (!token) throw new Error("No session");
-
-          const { error } = await client.functions.invoke("resume-fan-subscription", {
-            body: { creator_id: state.creator.user_id },
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (error) throw error;
-
-          state.subRow = await getSubscription(state.creator.user_id, state.viewerId);
-
-          setPremiumUI(success, sessionId);
-          toast("✅ Subscription resumed.");
-          setHint("");
-
-          renderPosts(state.posts);
-        } catch (error) {
-          alert(error?.message || String(error));
-        } finally {
-          setBtnBusy(els.premiumBtn, false, null);
-          setPremiumUI(success, sessionId);
-        }
-        return;
-      }
-
-      if (state.subRow && access.rawActive && !state.subRow.cancel_at_period_end) {
-        try {
-          setBtnBusy(els.premiumBtn, true, "Canceling…");
-
-          const { data: s } = await client.auth.getSession();
-          const token = s?.session?.access_token;
-          if (!token) throw new Error("No session");
-
-          const { error } = await client.functions.invoke("cancel-fan-subscription", {
-            body: { creator_id: state.creator.user_id },
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (error) throw error;
-
-          state.subRow = await getSubscription(state.creator.user_id, state.viewerId);
-
-          setPremiumUI(success, sessionId);
-
-          const d = state.subRow?.current_period_end
-            ? new Date(state.subRow.current_period_end).toLocaleDateString()
-            : "";
-
-          setHint(
-            d
-              ? `✅ Will cancel on ${d}. You can resume anytime before then.`
-              : "✅ Will cancel at period end. You can resume anytime before then."
-          );
-        } catch (error) {
-          alert(error?.message || String(error));
-        } finally {
-          setBtnBusy(els.premiumBtn, false, null);
-          setPremiumUI(success, sessionId);
-        }
+        setHint("⚠️ This creator isn’t ready for subscriptions yet.");
         return;
       }
 
@@ -895,8 +586,6 @@
       return;
     }
 
-    await hydrateHeaderActions();
-
     state.viewerId = session.user.id;
 
     const { data: vp } = await client
@@ -908,7 +597,7 @@
     state.viewerRole = vp?.role || "";
     state.viewerIsCreator = state.viewerRole === "creator";
 
-    const { u, success, session_id } = getParams();
+    const { u } = getParams();
     if (!u) {
       goHome();
       return;
@@ -927,32 +616,7 @@
         els.actionRow.hidden = !!state.isSelf;
       }
 
-      if (success === "1" || session_id) {
-        toast("✅ Payment received — syncing subscription…");
-        setHint("");
-      } else {
-        setHint("");
-      }
-
       state.subRow = await getSubscription(creator.user_id, state.viewerId);
-
-      let access = computeAccess(state.subRow, state.creatorEligible);
-      let hasAccess = access.hasAccess;
-
-      if ((success === "1" || session_id) && !hasAccess) {
-        const waits = [1500, 3000, 5000];
-
-        for (const wait of waits) {
-          await new Promise((resolve) => setTimeout(resolve, wait));
-
-          try {
-            state.subRow = await getSubscription(creator.user_id, state.viewerId);
-            access = computeAccess(state.subRow, state.creatorEligible);
-            hasAccess = access.hasAccess;
-            if (hasAccess) break;
-          } catch (_) {}
-        }
-      }
 
       const [followRowId, postsRes, petsRes] = await Promise.all([
         getFollowRowId(state.viewerId, creator.user_id),
@@ -982,29 +646,13 @@
       }
 
       renderPosts(state.posts);
-      if (els.postsHint && state.posts.length) {
-        els.postsHint.textContent = "";
-      }
-
-      if (!state.isSelf && state.viewerIsCreator) {
-        setHint("⏳ Creator → creator subscriptions are coming later. For now, creators can’t subscribe.");
-      }
-
-      setPremiumUI(success, session_id);
+      setPremiumUI();
       await bindFollow();
-      await bindPremium(success, session_id);
+      await bindPremium();
 
       if (els.shareProfileBtn && els.shareProfileBtn.dataset.bound !== "1") {
         els.shareProfileBtn.dataset.bound = "1";
         els.shareProfileBtn.addEventListener("click", shareProfile);
-      }
-
-      if (hasAccess && (success === "1" || session_id)) {
-        setHint("✅ Subscribed! Premium posts are now unlocked.");
-        const clean = new URL(window.location.href);
-        clean.searchParams.delete("success");
-        clean.searchParams.delete("session_id");
-        window.history.replaceState({}, "", clean.toString());
       }
     } catch (error) {
       console.error("creator profile boot error", error);
