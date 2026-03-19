@@ -334,8 +334,7 @@
   letter-spacing:-0.6px;
 }
 
-.postMeta,
-.postMetaRow{
+.postMeta{
   display:flex;
   flex-wrap:wrap;
   align-items:center;
@@ -364,7 +363,6 @@
   white-space:pre-wrap;
 }
 
-.postMediaBox,
 .mediaWrap{
   margin-top:12px;
   border-radius:18px;
@@ -420,8 +418,7 @@
   white-space:pre-wrap;
 }
 
-.err,
-.postError{
+.err{
   margin-top:12px;
   padding:12px 14px;
   border-radius:16px;
