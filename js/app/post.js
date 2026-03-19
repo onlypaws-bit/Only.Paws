@@ -9,6 +9,7 @@
    Used by:
    - /html/app/feed.html
    - /html/app/post.html
+   - /html/app/fans/creator-profile.html
 
    Dependencies:
    - window.OP_PATHS
@@ -103,9 +104,7 @@
     if (t === "video") return true;
 
     const cleanUrl = String(url || "").toLowerCase();
-    return [".mp4", ".webm", ".ogg", ".mov", ".m4v"].some((ext) =>
-      cleanUrl.includes(ext)
-    );
+    return [".mp4", ".webm", ".ogg", ".mov", ".m4v"].some((ext) => cleanUrl.includes(ext));
   }
 
   function getPostIdFromUrl() {
@@ -115,25 +114,9 @@
 
   function canViewFullPost(post, viewerId) {
     if (!post) return false;
-
-    const isMine =
-      !!viewerId && String(post.creator_id || "") === String(viewerId || "");
-
-    if (post.is_public === false) {
-      return isMine;
-    }
-
-    if (!post.is_paid) {
-      return true;
-    }
-
-    if (!viewerId) {
-      return false;
-    }
-
-    if (isMine) {
-      return true;
-    }
+    if (!post.is_paid) return true;
+    if (!viewerId) return false;
+    if (post.creator_id === viewerId) return true;
 
     return !!post.has_access;
   }
@@ -153,8 +136,7 @@
         media_type,
         likes_count,
         created_at,
-        is_paid,
-        is_public
+        is_paid
       `)
       .eq("id", postId)
       .maybeSingle();
@@ -177,70 +159,22 @@
   }
 
   async function checkPostAccess(post, viewerId) {
-    if (!post) return false;
-
-    const isMine =
-      !!viewerId && String(post.creator_id || "") === String(viewerId || "");
-
-    if (post.is_public === false) {
-      return isMine;
-    }
-
-    if (!post.is_paid) {
-      return true;
-    }
-
-    if (!viewerId) {
-      return false;
-    }
-
-    if (isMine) {
-      return true;
-    }
+    if (!post?.is_paid) return true;
+    if (!viewerId) return false;
+    if (post.creator_id === viewerId) return true;
 
     const db = getClient();
 
-    try {
-      const { data, error } = await db
-        .from("fan_subscriptions")
-        .select("creator_id, status, current_period_end, cancel_at_period_end")
-        .eq("fan_id", viewerId)
-        .eq("creator_id", post.creator_id);
+    const { data, error } = await db
+      .from("subscriptions")
+      .select("id, status")
+      .eq("fan_id", viewerId)
+      .eq("creator_id", post.creator_id)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
-      if (error) throw error;
-
-      const rows = data || [];
-      const now = Date.now();
-
-      for (const row of rows) {
-        const raw = row?.current_period_end;
-        let endMs = 0;
-
-        if (raw) {
-          if (typeof raw === "number" || /^\d+$/.test(String(raw))) {
-            const n = Number(raw);
-            endMs = n < 1e12 ? n * 1000 : n;
-          } else {
-            endMs = new Date(raw).getTime();
-          }
-        }
-
-        let hasAccess = !!endMs && endMs > now;
-
-        if (!hasAccess && !raw) {
-          const status = String(row?.status || "").toLowerCase();
-          if (status === "active" || status === "trialing") {
-            hasAccess = true;
-          }
-        }
-
-        if (hasAccess) return true;
-      }
-
-      return false;
-    } catch (err) {
-      return false;
-    }
+    if (error) return false;
+    return !!data?.id;
   }
 
   async function getLikedByMe(postId, userId) {
@@ -258,13 +192,7 @@
     return !!data?.id;
   }
 
-  async function refreshSinglePostLikes(
-    postId,
-    likeBtn,
-    likeIcon,
-    likeCount,
-    userId
-  ) {
+  async function refreshSinglePostLikes(postId, likeBtn, likeIcon, likeCount, userId) {
     const post = await fetchPostById(postId);
     if (likeCount) likeCount.textContent = String(post?.likes_count ?? 0);
 
@@ -274,16 +202,13 @@
       likeBtn.setAttribute("data-liked", liked ? "true" : "false");
       likeBtn.classList.toggle("op-liked", liked);
     }
-
     if (likeIcon) likeIcon.textContent = liked ? "♥" : "♡";
 
     return { post, liked };
   }
 
   async function togglePostLike(postId, userId) {
-    if (!postId || !userId) {
-      throw new Error("Missing post or user.");
-    }
+    if (!postId || !userId) throw new Error("Missing post or user.");
 
     const db = getClient();
     const liked = await getLikedByMe(postId, userId);
@@ -320,9 +245,7 @@
             <div class="op-badge op-badge--locked">Locked</div>
             <p class="op-lockTitle">Premium post</p>
             <p class="op-lockText">Subscribe to unlock this content</p>
-            <a class="op-openCreatorBtn" href="${esc(
-              creatorProfileUrl(creatorUsername)
-            )}">Open creator</a>
+            <a class="op-openCreatorBtn" href="${esc(creatorProfileUrl(creatorUsername))}">Open creator</a>
           </div>
         </div>
       </div>
@@ -336,85 +259,65 @@
       creatorAvatarUrl = "",
       canViewFull = false,
       liked = false,
-      postHref: customPostHref = null,
     } = options;
 
     const id = post?.id || "";
     const title = String(post?.title || "").trim() || "Post";
     const previewText = canViewFull
-      ? (String(post?.content || "").trim() || post?.preview || "")
+      ? ((post?.content && String(post.content).trim()) || post?.preview || "")
       : (post?.preview || "");
 
     const url = normalizeAssetUrl(post?.media_url || "");
     const type = (post?.media_type || "none").toLowerCase();
     const isVideo = isVideoMedia(type, url);
     const hasMedia = !!url && type !== "none";
-    const href =
-      typeof customPostHref === "function"
-        ? customPostHref(post)
-        : postUrl(id);
 
-    const isLocked =
-      post?.is_locked === true ||
-      (post?.is_paid === true && !canViewFull) ||
-      (post?.is_public === false && !canViewFull);
+    const creatorHref = creatorProfileUrl(creatorUsername);
+    const postHref = postUrl(id);
 
-    let badgeHtml = `<div class="op-badge op-badge--free">Free</div>`;
-
-    if (post?.is_public === false) {
-      badgeHtml = canViewFull
-        ? `<div class="op-badge op-badge--price">Private</div>`
-        : `<div class="op-badge op-badge--locked">Private</div>`;
-    } else if (post?.is_paid) {
-      badgeHtml = canViewFull
-        ? `<div class="op-badge op-badge--price">Premium</div>`
-        : `<div class="op-badge op-badge--locked">Locked</div>`;
-    }
+    const badgeHtml = post?.is_paid
+      ? (canViewFull
+          ? `<div class="op-badge op-badge--price">Premium</div>`
+          : `<div class="op-badge op-badge--locked">Locked</div>`)
+      : `<div class="op-badge op-badge--free">Free</div>`;
 
     const avatarHtml = creatorAvatarUrl
-      ? `<img src="${esc(normalizeAssetUrl(creatorAvatarUrl))}" alt="${esc(
-          creatorUsername
-        )} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+      ? `<img src="${esc(normalizeAssetUrl(creatorAvatarUrl))}" alt="${esc(creatorUsername)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
       : `🐾`;
 
     let mediaHtml = "";
     if (hasMedia) {
-      if (isLocked) {
+      if (!canViewFull && post?.is_paid) {
         mediaHtml = buildLockedMediaHtml(url, isVideo, creatorUsername);
       } else {
         mediaHtml = `
-          <div class="op-mediaWrap">
-            ${
-              isVideo
-                ? `<video playsinline preload="metadata" src="${esc(url)}"></video>`
-                : `<img src="${esc(
-                    url
-                  )}" alt="${esc(title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-            }
-          </div>
+          <a class="op-postMediaLink" href="${esc(postHref)}" aria-label="Open post">
+            <div class="op-mediaWrap">
+              ${
+                isVideo
+                  ? `<video playsinline preload="metadata" src="${esc(url)}"></video>`
+                  : `<img src="${esc(url)}" alt="${esc(title)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+              }
+            </div>
+          </a>
         `;
       }
     }
 
     return `
       <article class="op-postCard" data-post-id="${esc(id)}">
-        <a class="op-postMain" href="${esc(href)}">
+        <div class="op-postMain">
           <div class="op-postHeader">
             <div class="op-postCreator">
-              <a
-                class="op-postCreatorAvatar"
-                href="${esc(creatorProfileUrl(creatorUsername))}"
-                aria-label="Open creator profile"
-              >
+              <a class="op-postCreatorAvatar" href="${esc(creatorHref)}" aria-label="Open creator profile">
                 ${avatarHtml}
               </a>
 
               <div class="op-postCreatorMeta">
-                <a class="op-postCreatorName" href="${esc(
-                  creatorProfileUrl(creatorUsername)
-                )}">
+                <a class="op-postCreatorName" href="${esc(creatorHref)}">
                   ${esc(creatorDisplayName || `@${creatorUsername}`)}
                 </a>
+                <span class="op-postUsername">@${esc(creatorUsername)}</span>
                 <div class="op-postDate">${esc(fmtDate(post?.created_at))}</div>
               </div>
             </div>
@@ -425,11 +328,13 @@
           </div>
 
           <div class="op-postBody">
-            <h3 class="op-title">${esc(title)}</h3>
-            ${previewText ? `<p class="op-excerpt">${esc(previewText)}</p>` : ""}
+            <a class="op-postContentLink" href="${esc(postHref)}" aria-label="Open post">
+              <h3 class="op-title">${esc(title)}</h3>
+              ${previewText ? `<p class="op-excerpt">${esc(previewText)}</p>` : ""}
+            </a>
             ${mediaHtml}
           </div>
-        </a>
+        </div>
 
         <div class="op-postBottom">
           <button
@@ -437,7 +342,6 @@
             type="button"
             data-post-id="${esc(id)}"
             data-liked="${liked ? "true" : "false"}"
-            aria-label="Toggle like"
           >
             <span class="op-likeIcon">${liked ? "♥" : "♡"}</span>
             <span class="op-likeCount">${Number(post?.likes_count || 0)}</span>
@@ -447,41 +351,21 @@
     `;
   }
 
-  function renderPost(post, options = {}) {
-    return buildPostCard(post, {
-      creatorUsername:
-        options.creatorUsername ||
-        post?.creator_username ||
-        "creator",
-      creatorDisplayName:
-        options.creatorDisplayName ||
-        post?.creator_name ||
-        "",
-      creatorAvatarUrl:
-        options.creatorAvatarUrl ||
-        post?.creator_avatar_url ||
-        "",
-      canViewFull:
-        typeof options.canViewFull === "boolean"
-          ? options.canViewFull
-          : post?.can_view === true,
-      liked:
-        typeof options.liked === "boolean"
-          ? options.liked
-          : post?.liked === true,
-      postHref: options.postUrl || null,
-    });
-  }
-
   async function renderSinglePost(post, userId) {
     const pageTitle = $("pageTitle");
-    const author = $("author");
     const createdAt = $("createdAt");
     const mediaBox = $("mediaBox");
     const caption = $("caption");
 
+    const author = $("author");
+    const authorName = $("authorName");
+    const authorUsername = $("authorUsername");
+    const authorAvatarImg = $("authorAvatarImg");
+
     const profile = await fetchCreatorProfile(post.creator_id);
     const creatorUsername = String(profile?.username || "").trim() || "creator";
+    const creatorDisplayName = String(profile?.display_name || "").trim() || creatorUsername;
+    const creatorAvatarUrl = normalizeAssetUrl(profile?.avatar_url || "");
     const canAccess = await checkPostAccess(post, userId);
 
     post.has_access = canAccess;
@@ -491,8 +375,24 @@
     }
 
     if (author) {
-      author.textContent = `@${creatorUsername}`;
       author.href = creatorProfileUrl(creatorUsername);
+    }
+
+    if (authorName) {
+      authorName.textContent = creatorDisplayName;
+    }
+
+    if (authorUsername) {
+      authorUsername.textContent = `@${creatorUsername}`;
+    }
+
+    if (authorAvatarImg) {
+      if (creatorAvatarUrl) {
+        authorAvatarImg.src = creatorAvatarUrl;
+      } else {
+        authorAvatarImg.src = "/assets/images/logo.png";
+      }
+      authorAvatarImg.alt = `${creatorDisplayName} avatar`;
     }
 
     if (createdAt) {
@@ -530,20 +430,12 @@
 
         const isVideo = isVideoMedia(type, url);
 
-        if (!canViewFull && (post.is_paid || post.is_public === false)) {
-          mediaBox.innerHTML = buildLockedMediaHtml(
-            url,
-            isVideo,
-            creatorUsername
-          );
+        if (!canViewFull && post.is_paid) {
+          mediaBox.innerHTML = buildLockedMediaHtml(url, isVideo, creatorUsername);
         } else if (isVideo) {
-          mediaBox.innerHTML = `<video controls playsinline preload="metadata" src="${esc(
-            url
-          )}"></video>`;
+          mediaBox.innerHTML = `<video controls playsinline preload="metadata" src="${esc(url)}"></video>`;
         } else {
-          mediaBox.innerHTML = `<img src="${esc(
-            url
-          )}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
+          mediaBox.innerHTML = `<img src="${esc(url)}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer">`;
         }
       }
     }
@@ -618,13 +510,7 @@
 
           try {
             await togglePostLike(postId, userId);
-            const fresh = await refreshSinglePostLikes(
-              postId,
-              likeBtn,
-              likeIcon,
-              likeCount,
-              userId
-            );
+            const fresh = await refreshSinglePostLikes(postId, likeBtn, likeIcon, likeCount, userId);
             post = fresh.post || post;
           } catch (err) {
             if (errBox) {
@@ -637,13 +523,7 @@
         });
       }
 
-      await refreshSinglePostLikes(
-        postId,
-        likeBtn,
-        likeIcon,
-        likeCount,
-        userId
-      );
+      await refreshSinglePostLikes(postId, likeBtn, likeIcon, likeCount, userId);
 
       if (hintBox) hintBox.textContent = "";
       if (errBox) {
@@ -668,12 +548,7 @@
     creatorProfileUrl,
     postUrl,
     canViewFullPost,
-    buildLockedMediaHtml,
     buildPostCard,
-    renderPost,
-    fetchPostById,
-    fetchCreatorProfile,
-    checkPostAccess,
     togglePostLike,
     getLikedByMe,
     initSinglePostPage,
