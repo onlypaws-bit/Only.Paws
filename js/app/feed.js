@@ -127,6 +127,79 @@
   }
 
   /* =========================================================
+     Post renderer / likes helpers
+     ========================================================= */
+
+  function getPostRenderer() {
+    const api = window.OnlyPawsPost || null;
+    if (!api) return null;
+
+    if (typeof api.buildPostCard === "function") {
+      return {
+        mode: "buildPostCard",
+        render(post) {
+          return api.buildPostCard(post, {
+            creatorUsername: post.creator_username,
+            creatorDisplayName: post.creator_name,
+            creatorAvatarUrl: post.creator_avatar_url,
+            canViewFull: post.can_view === true,
+            liked: post.liked === true,
+          });
+        },
+      };
+    }
+
+    if (typeof api.renderPost === "function") {
+      return {
+        mode: "renderPost",
+        render(post) {
+          return api.renderPost(post, {
+            showCreator: true,
+            postUrl: (p) => postHref(p.id),
+          });
+        },
+      };
+    }
+
+    return null;
+  }
+
+  async function initLikesForContainer(container) {
+    if (!container) return;
+
+    const likesApi = window.onlypawsLikes || null;
+    if (!likesApi) return;
+
+    try {
+      if (typeof likesApi.initLikes === "function") {
+        await likesApi.initLikes(container);
+        return;
+      }
+
+      if (typeof likesApi.initPostLikes === "function") {
+        await likesApi.initPostLikes(container);
+        return;
+      }
+
+      if (typeof likesApi.initFeedLikes === "function") {
+        await likesApi.initFeedLikes(container);
+        return;
+      }
+
+      if (typeof likesApi.bindLikeButtons === "function") {
+        await likesApi.bindLikeButtons(container);
+        return;
+      }
+
+      if (typeof likesApi.init === "function") {
+        await likesApi.init(container);
+      }
+    } catch (error) {
+      console.warn("[feed] likes init failed", error);
+    }
+  }
+
+  /* =========================================================
      Featured creators
      Aligned to real profiles schema:
      - user_id
@@ -342,8 +415,10 @@
     const postsHint = document.getElementById("postsHint");
     if (!postsEl) return;
 
-    if (!window.OnlyPawsPost?.renderPost) {
-      console.warn("[feed] OnlyPawsPost not found. Load /js/app/post.js first.");
+    const postRenderer = getPostRenderer();
+
+    if (!postRenderer) {
+      console.warn("[feed] OnlyPawsPost renderer not available.");
       setText(postsHint, "Post renderer not available.");
       show(postsHint);
       return;
@@ -370,6 +445,7 @@
           media_type,
           is_paid,
           is_public,
+          likes_count,
           created_at,
           profiles:creator_id (
             user_id,
@@ -395,6 +471,7 @@
 
           return {
             ...post,
+            href: postHref(post.id),
             creator_username: profile?.username || "creator",
             creator_name: profile?.display_name || profile?.username || "creator",
             creator_avatar_url: profile?.avatar_url || "",
@@ -403,6 +480,7 @@
               : (post.preview || post.content || ""),
             is_locked: locked,
             can_view: !locked,
+            liked: false,
           };
         });
 
@@ -414,20 +492,11 @@
         }
 
         postsEl.innerHTML = enrichedLoggedOut
-          .map((post) =>
-            window.OnlyPawsPost.renderPost(post, {
-              showCreator: true,
-              postUrl: (p) => postHref(p.id),
-            })
-          )
+          .map((post) => postRenderer.render(post))
           .join("");
 
         hide(postsHint);
-
-        if (window.OnlyPawsPost?.initPosts) {
-          await window.OnlyPawsPost.initPosts(postsEl);
-        }
-
+        await initLikesForContainer(postsEl);
         return;
       }
 
@@ -462,7 +531,6 @@
 
           for (const row of subs || []) {
             const raw = row.current_period_end;
-
             let endMs = 0;
 
             if (raw) {
@@ -509,6 +577,7 @@
 
         return {
           ...post,
+          href: postHref(post.id),
           creator_username: profile?.username || "creator",
           creator_name: profile?.display_name || profile?.username || "creator",
           creator_avatar_url: profile?.avatar_url || "",
@@ -517,6 +586,7 @@
             : (post.preview || post.content || ""),
           is_locked: locked,
           can_view: !locked,
+          liked: false,
         };
       });
 
@@ -528,19 +598,11 @@
       }
 
       postsEl.innerHTML = enriched
-        .map((post) =>
-          window.OnlyPawsPost.renderPost(post, {
-            showCreator: true,
-            postUrl: (p) => postHref(p.id),
-          })
-        )
+        .map((post) => postRenderer.render(post))
         .join("");
 
       hide(postsHint);
-
-      if (window.OnlyPawsPost?.initPosts) {
-        await window.OnlyPawsPost.initPosts(postsEl);
-      }
+      await initLikesForContainer(postsEl);
     } catch (error) {
       console.error("[feed] failed to load latest posts", error);
       setText(postsHint, "Could not load posts.");
