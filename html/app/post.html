@@ -29,47 +29,53 @@
   <link rel="stylesheet" href="/css/app/post.css" />
 </head>
 
-<body class="postPage">
+<body class="postPage singlePostPage">
   <div class="pageShell">
     <div class="wrap">
       <div id="header-placeholder"></div>
 
       <main class="postMain">
         <section class="panel">
-          <div class="pill">Post</div>
+          <div class="singlePostTop">
+            <div class="singlePostLabelRow">
+              <div class="pill">Post</div>
+            </div>
 
-          <h1 id="pageTitle">Post</h1>
+            <h1 id="pageTitle" class="singlePostTitle">Post</h1>
 
-          <div class="postMeta">
-            <a
-              id="author"
-              class="postAuthorLink"
-              href="/html/app/fans/creator-profile.html?u=creator"
-            >
-              <span class="postAuthorAvatar" id="authorAvatar">
-                <img
-                  id="authorAvatarImg"
-                  src="/assets/images/logo.png"
-                  alt="Creator avatar"
-                />
-              </span>
+            <div class="singlePostHeader">
+              <a
+                id="author"
+                class="singlePostAuthor"
+                href="/html/app/fans/creator-profile.html?u=creator"
+              >
+                <span class="singlePostAuthorAvatar" id="authorAvatar">
+                  <img
+                    id="authorAvatarImg"
+                    src="/assets/images/logo.png"
+                    alt="Creator avatar"
+                  />
+                </span>
 
-              <span class="postAuthorMeta">
-                <span class="postAuthorName" id="authorName">Creator</span>
-                <span class="postAuthorUsername" id="authorUsername">@creator</span>
-              </span>
-            </a>
+                <span class="singlePostAuthorMeta">
+                  <span class="singlePostAuthorName" id="authorName">Creator</span>
+                  <span class="singlePostAuthorUsername" id="authorUsername">@creator</span>
+                </span>
+              </a>
 
-            <span id="createdAt"></span>
+              <div class="singlePostHeaderRight">
+                <span id="createdAt" class="singlePostDate"></span>
+              </div>
+            </div>
           </div>
 
-          <div class="mediaWrap isHidden" id="mediaBox"></div>
+          <div class="singlePostMediaWrap is-hidden" id="mediaBox"></div>
 
-          <div class="captionBox isHidden" id="caption"></div>
+          <div class="singlePostCaption is-hidden" id="caption"></div>
 
-          <div class="btnRow">
+          <div class="singlePostActions">
             <button
-              class="ghost"
+              class="singlePostLikeBtn"
               id="likeBtn"
               data-liked="false"
               type="button"
@@ -77,7 +83,7 @@
             >
               <span id="likeIcon">♡</span>
               <span class="likeBtnLabel">Like</span>
-              <span id="likeCount" class="likeCount">0</span>
+              <span id="likeCount" class="singlePostLikeCount">0</span>
             </button>
 
             <button class="ghost" id="copyLinkBtn" type="button">
@@ -89,8 +95,8 @@
             </a>
           </div>
 
-          <div class="hint" id="hintBox">Loading…</div>
-          <div class="err isHidden" id="errBox"></div>
+          <div class="singlePostHint" id="hintBox">Loading…</div>
+          <div class="singlePostError is-hidden" id="errBox"></div>
         </section>
       </main>
 
