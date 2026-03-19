@@ -125,10 +125,9 @@
     window.addEventListener("DOMContentLoaded", async () => {
       try {
         // header + footer
-        if (window.OPPartials?.loadAppLayout) {
-          await window.OPPartials.loadAppLayout();
-        } else if (window.loadAppLayout) {
-          await window.loadAppLayout();
+        if (window.OPPartials?.loadLayout) {
+  await window.OPPartials.loadLayout();
+}
         }
 
         // nav
