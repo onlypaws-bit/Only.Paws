@@ -60,23 +60,25 @@
           <button id="supportBtn" class="navBtn" type="button">Support OnlyPaws</button>
         </div>
 
-        <div id="debug" class="debug" hidden></div>
+        <div id="debug" class="debugBox" hidden></div>
       </section>
 
       <section class="panel panelSpaced">
         <div class="pill">Featured creators</div>
         <div class="creatorList" id="creatorList"></div>
-        <div class="hint" id="creatorHint">Loading creators…</div>
+        <div class="creatorHint" id="creatorHint">Loading creators…</div>
       </section>
 
       <section class="panel panelSpaced feedPostsSection">
         <div class="postsHeader">
           <h2>Latest posts</h2>
-          <div class="hint postsHeaderHint">Visible posts (premium appears after purchase)</div>
+          <div class="postsHeaderHint">
+            Visible posts (premium appears after purchase)
+          </div>
         </div>
 
         <div class="posts feedPosts" id="posts"></div>
-        <div class="hint" id="postsHint">Loading posts…</div>
+        <div class="postsHint" id="postsHint">Loading posts…</div>
       </section>
     </main>
 
@@ -94,8 +96,8 @@
         ✕
       </button>
 
-      <img id="mediaModalImg" class="isHidden" alt="Preview" />
-      <video id="mediaModalVid" class="isHidden" controls playsinline></video>
+      <img id="mediaModalImg" class="is-hidden" alt="Preview" />
+      <video id="mediaModalVid" class="is-hidden" controls playsinline></video>
     </div>
   </div>
 
@@ -109,5 +111,29 @@
   <script src="/js/app/likes.js"></script>
   <script src="/js/app/post.js"></script>
   <script src="/js/app/feed.js"></script>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        if (window.OPPartials?.loadAppLayout) {
+          await window.OPPartials.loadAppLayout();
+        } else if (window.loadAppLayout) {
+          await window.loadAppLayout();
+        }
+
+        if (window.OPNav?.initNav) {
+          await window.OPNav.initNav();
+        } else if (window.initNav) {
+          await window.initNav();
+        }
+
+        if (window.OnlyPawsFeed?.initFeedPage) {
+          await window.OnlyPawsFeed.initFeedPage();
+        }
+      } catch (err) {
+        console.error("Feed page init failed:", err);
+      }
+    });
+  </script>
 </body>
 </html>
