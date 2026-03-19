@@ -70,13 +70,13 @@
             <button class="ghost" id="shareProfileBtn" type="button">Share</button>
           </div>
 
-          <div class="hint" id="creatorHint"></div>
+          <div class="sectionHint" id="creatorHint"></div>
         </div>
 
         <section class="panel creatorPetsPanel">
           <div class="pill">Pets</div>
           <div class="petsList" id="petsList"></div>
-          <div class="hint" id="petsHint">Loading…</div>
+          <div class="petsHint" id="petsHint">Loading…</div>
         </section>
       </section>
 
@@ -84,13 +84,13 @@
         <div class="panel">
           <div class="postsHeader">
             <h2>Posts</h2>
-            <div class="hint postsHeaderHint">
+            <div class="postsHeaderHint">
               Visible posts (premium appears after purchase)
             </div>
           </div>
 
           <div class="posts creatorPosts" id="posts"></div>
-          <div class="hint" id="postsHint">Loading posts…</div>
+          <div class="postsHint" id="postsHint">Loading posts…</div>
         </div>
       </section>
     </main>
@@ -111,8 +111,8 @@
         ✕
       </button>
 
-      <img id="mediaModalImg" class="isHidden" alt="Preview" />
-      <video id="mediaModalVid" class="isHidden" controls playsinline></video>
+      <img id="mediaModalImg" class="is-hidden" alt="Preview" />
+      <video id="mediaModalVid" class="is-hidden" controls playsinline></video>
     </div>
   </div>
 
@@ -125,5 +125,29 @@
   <script src="/js/app/likes.js"></script>
   <script src="/js/app/post.js"></script>
   <script src="/js/app/fans/creator-profile.js"></script>
+
+  <script>
+    window.addEventListener("DOMContentLoaded", async () => {
+      try {
+        if (window.OPPartials?.loadAppLayout) {
+          await window.OPPartials.loadAppLayout();
+        } else if (window.loadAppLayout) {
+          await window.loadAppLayout();
+        }
+
+        if (window.OPNav?.initNav) {
+          await window.OPNav.initNav();
+        } else if (window.initNav) {
+          await window.initNav();
+        }
+
+        if (window.OnlyPawsCreatorProfile?.initCreatorProfilePage) {
+          await window.OnlyPawsCreatorProfile.initCreatorProfilePage();
+        }
+      } catch (err) {
+        console.error("Creator profile init failed:", err);
+      }
+    });
+  </script>
 </body>
 </html>
