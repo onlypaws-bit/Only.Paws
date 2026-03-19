@@ -38,8 +38,12 @@
 
     <main class="feedMain">
       <section class="panel">
-        <h1>Feed</h1>
-        <p class="sub">Browse creators, discover cute content, and support what you love.</p>
+        <div class="feedHeader">
+          <div>
+            <h1>Feed</h1>
+            <p>Browse creators, discover cute content, and support what you love.</p>
+          </div>
+        </div>
 
         <div class="searchRow">
           <input
@@ -65,13 +69,13 @@
         <div class="hint" id="creatorHint">Loading creators…</div>
       </section>
 
-      <section class="panel panelSpaced">
+      <section class="panel panelSpaced feedPostsSection">
         <div class="postsHeader">
           <h2>Latest posts</h2>
           <div class="hint postsHeaderHint">Visible posts (premium appears after purchase)</div>
         </div>
 
-        <div class="posts" id="posts"></div>
+        <div class="posts feedPosts" id="posts"></div>
         <div class="hint" id="postsHint">Loading posts…</div>
       </section>
     </main>
