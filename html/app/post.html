@@ -40,12 +40,26 @@
 
           <h1 id="pageTitle">Post</h1>
 
-          <div class="meta postMeta">
+          <div class="postMeta">
             <a
               id="author"
               class="postAuthorLink"
               href="/html/app/fans/creator-profile.html?u=creator"
-            >@creator</a>
+            >
+              <span class="postAuthorAvatar" id="authorAvatar">
+                <img
+                  id="authorAvatarImg"
+                  src="/assets/images/logo.png"
+                  alt="Creator avatar"
+                />
+              </span>
+
+              <span class="postAuthorMeta">
+                <span class="postAuthorName" id="authorName">Creator</span>
+                <span class="postAuthorUsername" id="authorUsername">@creator</span>
+              </span>
+            </a>
+
             <span id="createdAt"></span>
           </div>
 
