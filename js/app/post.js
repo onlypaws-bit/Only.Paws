@@ -6,11 +6,6 @@
    - shared post card rendering
    - single post page rendering
 
-   Used by:
-   - /html/app/feed.html
-   - /html/app/post.html
-   - /html/app/fans/creator-profile.html
-
    Dependencies:
    - window.OP_PATHS
    - window.onlypawsClient
@@ -18,7 +13,6 @@
 
 (function () {
   const PATHS = window.OP_PATHS || {};
-  const client = window.onlypawsClient || null;
 
   function $(id) {
     return document.getElementById(id);
@@ -40,9 +34,7 @@
   }
 
   function normalizeAssetUrl(url = "") {
-    const value = String(url || "").trim();
-    if (!value) return "";
-    return value;
+    return String(url || "").trim();
   }
 
   function fmtDate(iso) {
@@ -63,7 +55,6 @@
   }
 
   function getClient() {
-    if (client) return client;
     if (window.onlypawsClient) return window.onlypawsClient;
     throw new Error("Missing onlypawsClient.");
   }
@@ -166,15 +157,35 @@
     const db = getClient();
 
     const { data, error } = await db
-      .from("subscriptions")
-      .select("id, status")
+      .from("fan_subscriptions")
+      .select("id, status, current_period_end, cancel_at_period_end")
       .eq("fan_id", viewerId)
       .eq("creator_id", post.creator_id)
-      .in("status", ["active", "trialing"])
       .maybeSingle();
 
-    if (error) return false;
-    return !!data?.id;
+    if (error || !data) return false;
+
+    const raw = data.current_period_end;
+    let endMs = 0;
+
+    if (raw) {
+      if (typeof raw === "number" || /^\d+$/.test(String(raw))) {
+        const n = Number(raw);
+        endMs = n < 1e12 ? n * 1000 : n;
+      } else {
+        endMs = new Date(raw).getTime();
+      }
+    }
+
+    const now = Date.now();
+    let hasAccess = !!endMs && endMs > now;
+
+    if (!hasAccess && !raw) {
+      const st = String(data.status || "").toLowerCase();
+      if (st === "active" || st === "trialing") hasAccess = true;
+    }
+
+    return hasAccess;
   }
 
   function buildLockedMediaHtml(url, isVideo, creatorUsername) {
@@ -208,7 +219,6 @@
 
     const id = post?.id || "";
     const rawTitle = String(post?.title || "").trim();
-    const title = rawTitle;
     const previewText = canViewFull
       ? ((post?.content && String(post.content).trim()) || post?.preview || "")
       : (post?.preview || "");
@@ -277,7 +287,7 @@
 
           <div class="op-postBody">
             <a class="op-postContentLink" href="${esc(postHref)}" aria-label="Open post">
-              ${title ? `<h3 class="op-title">${esc(title)}</h3>` : ""}
+              ${rawTitle ? `<h3 class="op-title">${esc(rawTitle)}</h3>` : ""}
               ${previewText ? `<p class="op-excerpt">${esc(previewText)}</p>` : ""}
             </a>
             ${mediaHtml}
