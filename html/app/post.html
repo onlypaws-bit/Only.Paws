@@ -1,5 +1,3 @@
-
-
 <!--
   OnlyPaws
   File: /html/app/post.html
@@ -31,22 +29,17 @@
 
 <body class="postPage singlePostPage">
   <div class="wrap">
-    <!-- HEADER -->
     <div id="header-placeholder"></div>
 
     <main class="postMain">
       <section class="panel">
-
-        <!-- TOP -->
         <div class="singlePostTop">
           <div class="singlePostLabelRow">
             <div class="pill">Post</div>
           </div>
 
-          <!-- TITLE -->
           <h1 id="pageTitle" class="singlePostTitle">Post</h1>
 
-          <!-- AUTHOR -->
           <div class="singlePostHeader">
             <a
               id="author"
@@ -61,7 +54,6 @@
                 />
               </span>
 
-              <!-- SOLO USERNAME -->
               <span class="singlePostAuthorMeta">
                 <span class="singlePostAuthorUsername" id="authorUsername">@creator</span>
               </span>
@@ -73,13 +65,10 @@
           </div>
         </div>
 
-        <!-- MEDIA -->
         <div class="singlePostMediaWrap is-hidden" id="mediaBox"></div>
 
-        <!-- CAPTION -->
         <div class="singlePostCaption is-hidden" id="caption"></div>
 
-        <!-- ACTIONS -->
         <div class="singlePostActions">
           <button
             class="singlePostLikeBtn"
@@ -101,18 +90,14 @@
           </a>
         </div>
 
-        <!-- STATE -->
         <div class="singlePostHint" id="hintBox">Loading…</div>
         <div class="singlePostError is-hidden" id="errBox"></div>
-
       </section>
     </main>
 
-    <!-- FOOTER -->
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
@@ -124,20 +109,16 @@
   <script>
     window.addEventListener("DOMContentLoaded", async () => {
       try {
-        // header + footer
         if (window.OPPartials?.loadLayout) {
-  await window.OPPartials.loadLayout();
-}
+          await window.OPPartials.loadLayout();
         }
 
-        // nav
         if (window.OPNav?.initNav) {
           await window.OPNav.initNav();
         } else if (window.initNav) {
           await window.initNav();
         }
 
-        // page logic
         if (window.OnlyPawsPost?.initSinglePostPage) {
           await window.OnlyPawsPost.initSinglePostPage();
         }
