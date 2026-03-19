@@ -31,89 +31,90 @@
   <link rel="stylesheet" href="/css/app/fans/creator-profile.css" />
 </head>
 
-<body>
+<body class="creatorProfilePage">
   <div class="wrap">
     <div id="header-placeholder"></div>
 
-    <main class="page creatorProfilePage">
-      <div class="creatorProfileWrap">
+    <main>
+      <section class="creatorProfileHero">
+        <div class="panel creatorProfileCard">
+          <div class="pill">Creator</div>
 
-        <div class="creatorProfileGrid">
-          <!-- HERO -->
-          <section class="panel creatorHeroPanel">
-            <div class="pill">Creator</div>
+          <div class="creatorProfileTop">
+            <div class="creatorIdentity">
+              <div class="creatorAvatar">
+                <img
+                  id="creatorAvatarImg"
+                  src="/assets/images/logo.png"
+                  alt="Creator avatar"
+                />
+              </div>
 
-            <h1 id="creatorName">Creator</h1>
-
-            <div class="heroRow">
-              <div class="avatar" id="creatorAvatar">🐾</div>
-
-              <div class="meta">
-                <b id="creatorHandle">@username</b>
-                <span id="creatorBio"></span>
+              <div class="creatorMeta">
+                <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
+                <p class="creatorUsername" id="creatorHandle">@username</p>
               </div>
             </div>
+          </div>
 
-            <div class="creatorSocials" id="creatorSocials" hidden>
-              <a id="creatorInstagram" class="socialChip" hidden>Instagram</a>
-              <a id="creatorTikTok" class="socialChip" hidden>TikTok</a>
-            </div>
+          <p class="creatorBio" id="creatorBio"></p>
 
-            <div class="btnRow" id="actionRow">
-              <button class="ghost" id="followBtn">Follow</button>
-              <button class="btn" id="premiumBtn">Subscribe</button>
-              <button class="ghost" id="shareProfileBtn">Share</button>
-            </div>
+          <div class="creatorSocials" id="creatorSocials" hidden>
+            <a id="creatorInstagram" class="socialChip" hidden>Instagram</a>
+            <a id="creatorTikTok" class="socialChip" hidden>TikTok</a>
+          </div>
 
-            <div class="hint" id="creatorHint"></div>
-          </section>
+          <div class="btnRow" id="actionRow">
+            <button class="ghost" id="followBtn" type="button">Follow</button>
+            <button class="btn" id="premiumBtn" type="button">Subscribe</button>
+            <button class="ghost" id="shareProfileBtn" type="button">Share</button>
+          </div>
 
-          <!-- PETS -->
-          <section class="panel creatorPetsPanel">
-            <div class="pill">Pets</div>
-            <div class="petsList" id="petsList"></div>
-            <div class="hint" id="petsHint">Loading…</div>
-          </section>
+          <div class="hint" id="creatorHint"></div>
         </div>
 
-        <!-- POSTS -->
-<section class="panel creatorPostsPanel">
-  <div class="postsHeader">
-    <h2>Posts</h2>
-    <div class="hint postsHeaderHint">
-      Visible posts (premium appears after purchase)
-    </div>
-  </div>
+        <section class="panel creatorPetsPanel">
+          <div class="pill">Pets</div>
+          <div class="petsList" id="petsList"></div>
+          <div class="hint" id="petsHint">Loading…</div>
+        </section>
+      </section>
 
-  <div class="posts" id="posts"></div>
-  <div class="hint" id="postsHint">Loading posts…</div>
-</section>
+      <section class="creatorPostsSection">
+        <div class="panel">
+          <div class="postsHeader">
+            <h2>Posts</h2>
+            <div class="hint postsHeaderHint">
+              Visible posts (premium appears after purchase)
+            </div>
+          </div>
 
-      </div>
+          <div class="posts creatorPosts" id="posts"></div>
+          <div class="hint" id="postsHint">Loading posts…</div>
+        </div>
+      </section>
     </main>
 
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
-  <!-- MEDIA MODAL -->
   <div id="mediaModal" class="mediaModal" aria-hidden="true">
-  <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
-    <button
-      id="mediaModalClose"
-      class="mediaModalClose"
-      type="button"
-      aria-label="Close preview"
-    >
-      ✕
-    </button>
+    <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
+      <button
+        id="mediaModalClose"
+        class="mediaModalClose"
+        type="button"
+        aria-label="Close preview"
+      >
+        ✕
+      </button>
 
-    <img id="mediaModalImg" class="isHidden" alt="Preview" />
-    <video id="mediaModalVid" class="isHidden" controls playsinline></video>
+      <img id="mediaModalImg" class="isHidden" alt="Preview" />
+      <video id="mediaModalVid" class="isHidden" controls playsinline></video>
+    </div>
   </div>
-</div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
