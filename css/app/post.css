@@ -55,8 +55,8 @@
 
 .op-postMain{
   display:grid;
-  gap:12px;
-  padding:14px;
+  gap:14px;
+  padding:16px;
   cursor:pointer;
   color:inherit;
   text-decoration:none;
@@ -69,9 +69,9 @@
 }
 
 .op-postHeader{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:start;
   gap:12px;
 }
 
@@ -108,9 +108,11 @@
 .op-postCreatorMeta{
   min-width:0;
   display:grid;
+  gap:2px;
 }
 
 .op-postCreatorName{
+  display:block;
   font-size:14px;
   font-weight:900;
   white-space:nowrap;
@@ -131,14 +133,14 @@
 }
 
 .op-postDate{
-  margin-top:2px;
   font-size:12px;
   color:rgba(255,255,255,.72);
 }
 
 .op-postHeaderRight{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
+  justify-content:flex-end;
   gap:8px;
   flex:0 0 auto;
 }
@@ -172,7 +174,8 @@
 
 .op-postBody{
   display:grid;
-  gap:10px;
+  gap:12px;
+  min-width:0;
 }
 
 .op-title{
@@ -184,17 +187,16 @@
 
 .op-excerpt{
   margin:0;
-  color:rgba(255,255,255,.86);
+  color:rgba(255,255,255,.90);
   font-size:14px;
-  line-height:1.5;
-  display:-webkit-box;
-  -webkit-line-clamp:3;
-  -webkit-box-orient:vertical;
-  overflow:hidden;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
 }
 
 .op-mediaWrap{
   position:relative;
+  width:100%;
   overflow:hidden;
   border-radius:14px;
   background:rgba(0,0,0,.18);
@@ -204,9 +206,9 @@
 .op-mediaWrap img,
 .op-mediaWrap video{
   width:100%;
-  height:100%;
-  object-fit:cover;
   display:block;
+  max-height:520px;
+  object-fit:cover;
   background:#000;
 }
 
@@ -268,8 +270,7 @@
 .op-postBottom{
   display:flex;
   justify-content:flex-start;
-  padding:10px 14px;
-  border-top:1px solid rgba(255,255,255,.10);
+  padding:0 16px 16px;
 }
 
 .op-likeBtn{
@@ -487,11 +488,16 @@
 
   .op-postMain{
     padding:12px;
+    gap:12px;
   }
 
   .op-postHeader{
-    align-items:flex-start;
+    grid-template-columns:1fr;
     gap:10px;
+  }
+
+  .op-postHeaderRight{
+    justify-content:flex-start;
   }
 
   .op-title{
@@ -500,12 +506,11 @@
 
   .op-excerpt{
     font-size:13px;
-    -webkit-line-clamp:2;
   }
 
-  .op-mediaWrap{
-    aspect-ratio:4 / 5;
-    max-height:300px;
+  .op-mediaWrap img,
+  .op-mediaWrap video{
+    max-height:320px;
   }
 
   .op-lockBox{
@@ -514,7 +519,7 @@
   }
 
   .op-postBottom{
-    padding:10px 12px;
+    padding:0 12px 12px;
   }
 
   .postPage .wrap{
