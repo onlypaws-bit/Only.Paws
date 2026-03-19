@@ -32,28 +32,26 @@
 </head>
 
 <body class="creatorProfilePage">
-  <div class="wrap">
+  <div class="wrap creatorProfileWrap">
     <div id="header-placeholder"></div>
 
     <main>
-      <section class="creatorProfileHero">
-        <div class="panel creatorProfileCard">
+      <section class="creatorProfileGrid">
+        <div class="panel creatorHeroPanel">
           <div class="pill">Creator</div>
 
-          <div class="creatorProfileTop">
-            <div class="creatorIdentity">
-              <div class="creatorAvatar">
-                <img
-                  id="creatorAvatarImg"
-                  src="/assets/images/logo.png"
-                  alt="Creator avatar"
-                />
-              </div>
+          <div class="heroRow">
+            <div class="avatar" id="creatorAvatar">
+              <img
+                id="creatorAvatarImg"
+                src="/assets/images/logo.png"
+                alt="Creator avatar"
+              />
+            </div>
 
-              <div class="creatorMeta">
-                <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
-                <p class="creatorUsername" id="creatorHandle">@username</p>
-              </div>
+            <div class="meta">
+              <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
+              <span id="creatorHandle">@username</span>
             </div>
           </div>
 
@@ -70,28 +68,24 @@
             <button class="ghost" id="shareProfileBtn" type="button">Share</button>
           </div>
 
-          <div class="sectionHint" id="creatorHint"></div>
+          <div class="hint" id="creatorHint"></div>
         </div>
 
         <section class="panel creatorPetsPanel">
           <div class="pill">Pets</div>
           <div class="petsList" id="petsList"></div>
-          <div class="petsHint" id="petsHint">Loading…</div>
+          <div id="petsHint">Loading…</div>
         </section>
       </section>
 
-      <section class="creatorPostsSection">
-        <div class="panel">
-          <div class="postsHeader">
-            <h2>Posts</h2>
-            <div class="postsHeaderHint">
-              Visible posts (premium appears after purchase)
-            </div>
-          </div>
-
-          <div class="posts creatorPosts" id="posts"></div>
-          <div class="postsHint" id="postsHint">Loading posts…</div>
+      <section class="panel creatorPostsPanel">
+        <div class="postsHeader">
+          <h2>Posts</h2>
+          <div class="hint postsLegend">FREE is visible • PREMIUM is locked (unless subscribed)</div>
         </div>
+
+        <div class="posts creatorPosts" id="posts"></div>
+        <div class="hint" id="postsHint">Loading posts…</div>
       </section>
     </main>
 
@@ -111,8 +105,8 @@
         ✕
       </button>
 
-      <img id="mediaModalImg" class="is-hidden" alt="Preview" />
-      <video id="mediaModalVid" class="is-hidden" controls playsinline></video>
+      <img id="mediaModalImg" class="isHidden" alt="Preview" />
+      <video id="mediaModalVid" class="isHidden" controls playsinline></video>
     </div>
   </div>
 
