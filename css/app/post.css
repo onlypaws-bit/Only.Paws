@@ -8,7 +8,294 @@
 
 
 /* =========================================================
-   POSTS HEADER
+           FEED PAGE LAYOUT
+   ========================================================= */
+
+.feedPage .wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:28px 18px 70px;
+}
+
+.feedPage .panel{
+  border-radius:22px;
+  padding:22px;
+}
+
+
+/* =========================================================
+   FEED HEADER
+   ========================================================= */
+
+.feedHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.feedHeader h1,
+.feedHeader h2{
+  margin:0;
+  font-size:clamp(1.6rem, 3vw, 2rem);
+  line-height:1.1;
+  font-weight:900;
+}
+
+.feedHeader p{
+  margin:6px 0 0;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  line-height:1.45;
+}
+
+
+/* =========================================================
+   FEED POSTS AREA
+   ========================================================= */
+
+.feedPostsSection{
+  margin-top:18px;
+}
+
+.feedPostsSection .postsHeader{
+  margin-bottom:14px;
+}
+
+.feedPosts{
+  display:grid;
+  gap:18px;
+}
+
+.feedPosts .op-postCard{
+  width:100%;
+}
+
+
+/* =========================================================
+   EMPTY / STATE
+   ========================================================= */
+
+.feedEmpty,
+.feedError{
+  margin-top:16px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.9);
+  line-height:1.5;
+}
+
+.feedError{
+  background:rgba(0,0,0,.18);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width:640px){
+  .feedPage .wrap{
+    padding:20px 14px 56px;
+  }
+
+  .feedPage .panel{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .feedHeader{
+    gap:10px;
+  }
+
+  .feedHeader h1,
+  .feedHeader h2{
+    font-size:1.45rem;
+  }
+
+  .feedPosts{
+    gap:14px;
+  }
+}
+
+
+
+/* =========================================================
+         CREATOR PROFILE PAGE LAYOUT
+   ========================================================= */
+
+.creatorProfilePage .wrap{
+  max-width:1180px;
+  margin:0 auto;
+  padding:28px 18px 70px;
+}
+
+
+/* =========================================================
+   CREATOR HERO / PROFILE TOP
+   ========================================================= */
+
+.creatorProfileHero{
+  display:grid;
+  gap:18px;
+}
+
+.creatorProfileCard{
+  border-radius:24px;
+  padding:22px;
+}
+
+.creatorProfileTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  flex-wrap:wrap;
+}
+
+.creatorIdentity{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.creatorAvatar{
+  width:72px;
+  height:72px;
+  border-radius:999px;
+  overflow:hidden;
+  flex:0 0 auto;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.12);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.creatorAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.creatorMeta{
+  min-width:0;
+  display:grid;
+  gap:4px;
+}
+
+.creatorDisplayName{
+  margin:0;
+  font-size:clamp(1.6rem, 3vw, 2rem);
+  line-height:1.05;
+  font-weight:900;
+  word-break:break-word;
+}
+
+.creatorUsername{
+  margin:0;
+  font-size:14px;
+  font-weight:900;
+  color:rgba(255,255,255,.82);
+}
+
+.creatorBio{
+  margin:10px 0 0;
+  max-width:760px;
+  color:rgba(255,255,255,.9);
+  line-height:1.6;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+
+/* =========================================================
+   POSTS SECTION
+   ========================================================= */
+
+.creatorPostsSection{
+  margin-top:22px;
+}
+
+.creatorPostsSection .panel{
+  border-radius:22px;
+  padding:22px;
+}
+
+.creatorPostsSection .postsHeader{
+  margin-bottom:14px;
+}
+
+.creatorPosts{
+  display:grid;
+  gap:18px;
+}
+
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
+.creatorPostsEmpty,
+.creatorPostsError{
+  margin-top:16px;
+  padding:14px 16px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.9);
+  line-height:1.5;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width:640px){
+  .creatorProfilePage .wrap{
+    padding:20px 14px 56px;
+  }
+
+  .creatorProfileCard,
+  .creatorPostsSection .panel{
+    padding:18px;
+    border-radius:18px;
+  }
+
+  .creatorProfileTop{
+    gap:14px;
+  }
+
+  .creatorIdentity{
+    gap:12px;
+    align-items:center;
+  }
+
+  .creatorAvatar{
+    width:60px;
+    height:60px;
+  }
+
+  .creatorDisplayName{
+    font-size:1.4rem;
+  }
+
+  .creatorPosts{
+    gap:14px;
+  }
+}
+
+
+
+
+/* =========================================================
+             POST SECTION HEADER
    ========================================================= */
 
 .postsHeader{
@@ -36,7 +323,7 @@
 
 
 /* =========================================================
-   SHARED POST CARD UI
+   POSTS GRID
    ========================================================= */
 
 .posts{
@@ -44,9 +331,14 @@
   gap:16px;
 }
 
+
+/* =========================================================
+   SHARED POST CARD
+   ========================================================= */
+
 .op-postCard{
   width:100%;
-  border-radius:18px;
+  border-radius:20px;
   overflow:hidden;
   background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.16);
@@ -68,10 +360,16 @@
   outline-offset:-2px;
 }
 
+
+/* =========================================================
+   POST HEADER
+   sempre avatar + foto + username
+   ========================================================= */
+
 .op-postHeader{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:start;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
   gap:12px;
 }
 
@@ -80,11 +378,12 @@
   display:flex;
   align-items:center;
   gap:10px;
+  flex:1 1 auto;
 }
 
 .op-postCreatorAvatar{
-  width:42px;
-  height:42px;
+  width:44px;
+  height:44px;
   border-radius:999px;
   overflow:hidden;
   background:rgba(255,255,255,.14);
@@ -115,6 +414,7 @@
   display:block;
   font-size:14px;
   font-weight:900;
+  line-height:1.2;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
@@ -126,10 +426,14 @@
   text-decoration:underline;
 }
 
-.op-postCreatorPlaceholder{
+.op-postUsername{
   display:block;
-  width:1px;
-  height:13px;
+  font-size:12px;
+  font-weight:800;
+  color:rgba(255,255,255,.72);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .op-postDate{
@@ -145,10 +449,16 @@
   flex:0 0 auto;
 }
 
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
 .op-badge{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  gap:6px;
   padding:6px 10px;
   border-radius:999px;
   font-size:12px;
@@ -172,6 +482,11 @@
   color:#fff;
 }
 
+
+/* =========================================================
+   POST BODY
+   ========================================================= */
+
 .op-postBody{
   display:grid;
   gap:12px;
@@ -194,11 +509,16 @@
   word-break:break-word;
 }
 
+
+/* =========================================================
+   MEDIA
+   ========================================================= */
+
 .op-mediaWrap{
   position:relative;
   width:100%;
   overflow:hidden;
-  border-radius:14px;
+  border-radius:16px;
   background:rgba(0,0,0,.18);
   border:1px solid rgba(255,255,255,.14);
 }
@@ -211,6 +531,11 @@
   object-fit:cover;
   background:#000;
 }
+
+
+/* =========================================================
+   LOCKED MEDIA
+   ========================================================= */
 
 .op-mediaWrap.op-isLocked img,
 .op-mediaWrap.op-isLocked video{
@@ -266,6 +591,11 @@
   background:rgba(255,255,255,.92);
   color:rgba(107,78,255,1);
 }
+
+
+/* =========================================================
+   POST ACTIONS
+   ========================================================= */
 
 .op-postBottom{
   display:flex;
@@ -346,14 +676,57 @@
 .postAuthorLink{
   display:inline-flex;
   align-items:center;
+  gap:10px;
   font-size:1.05rem;
   font-weight:900;
   color:inherit;
   text-decoration:none;
+  min-width:0;
 }
 
 .postAuthorLink:hover{
   text-decoration:underline;
+}
+
+.postAuthorAvatar{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.12);
+  flex:0 0 auto;
+}
+
+.postAuthorAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.postAuthorMeta{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+
+.postAuthorName{
+  font-size:14px;
+  font-weight:900;
+  line-height:1.2;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.postAuthorUsername{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(255,255,255,.72);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 
 .postMeta span,
@@ -492,12 +865,18 @@
   }
 
   .op-postHeader{
-    grid-template-columns:1fr;
+    flex-direction:column;
+    align-items:stretch;
     gap:10px;
   }
 
   .op-postHeaderRight{
     justify-content:flex-start;
+  }
+
+  .op-postCreatorAvatar{
+    width:40px;
+    height:40px;
   }
 
   .op-title{
@@ -538,7 +917,7 @@
   .postMeta{
     align-items:flex-start;
     flex-direction:column;
-    gap:4px;
+    gap:6px;
   }
 
   .postMain .btnRow{
