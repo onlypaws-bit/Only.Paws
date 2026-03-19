@@ -1,8 +1,8 @@
+
+
 <!--
   OnlyPaws
   File: /html/app/post.html
-
-  Uses central paths from /js/paths.js
 
   CSS:
   - /css/styles.css
@@ -30,80 +30,89 @@
 </head>
 
 <body class="postPage singlePostPage">
-  <div class="pageShell">
-    <div class="wrap">
-      <div id="header-placeholder"></div>
+  <div class="wrap">
+    <!-- HEADER -->
+    <div id="header-placeholder"></div>
 
-      <main class="postMain">
-        <section class="panel">
-          <div class="singlePostTop">
-            <div class="singlePostLabelRow">
-              <div class="pill">Post</div>
-            </div>
+    <main class="postMain">
+      <section class="panel">
 
-            <h1 id="pageTitle" class="singlePostTitle">Post</h1>
-
-            <div class="singlePostHeader">
-              <a
-                id="author"
-                class="singlePostAuthor"
-                href="/html/app/fans/creator-profile.html?u=creator"
-              >
-                <span class="singlePostAuthorAvatar" id="authorAvatar">
-                  <img
-                    id="authorAvatarImg"
-                    src="/assets/images/logo.png"
-                    alt="Creator avatar"
-                  />
-                </span>
-
-                <span class="singlePostAuthorMeta">
-                  <span class="singlePostAuthorName" id="authorName">Creator</span>
-                  <span class="singlePostAuthorUsername" id="authorUsername">@creator</span>
-                </span>
-              </a>
-
-              <div class="singlePostHeaderRight">
-                <span id="createdAt" class="singlePostDate"></span>
-              </div>
-            </div>
+        <!-- TOP -->
+        <div class="singlePostTop">
+          <div class="singlePostLabelRow">
+            <div class="pill">Post</div>
           </div>
 
-          <div class="singlePostMediaWrap is-hidden" id="mediaBox"></div>
+          <!-- TITLE -->
+          <h1 id="pageTitle" class="singlePostTitle">Post</h1>
 
-          <div class="singlePostCaption is-hidden" id="caption"></div>
-
-          <div class="singlePostActions">
-            <button
-              class="singlePostLikeBtn"
-              id="likeBtn"
-              data-liked="false"
-              type="button"
-              title="Like or unlike this post"
+          <!-- AUTHOR -->
+          <div class="singlePostHeader">
+            <a
+              id="author"
+              class="singlePostAuthor"
+              href="/html/app/fans/creator-profile.html?u=creator"
             >
-              <span id="likeIcon">♡</span>
-              <span class="likeBtnLabel">Like</span>
-              <span id="likeCount" class="singlePostLikeCount">0</span>
-            </button>
+              <span class="singlePostAuthorAvatar">
+                <img
+                  id="authorAvatarImg"
+                  src="/assets/images/logo.png"
+                  alt="Creator avatar"
+                />
+              </span>
 
-            <button class="ghost" id="copyLinkBtn" type="button">
-              Copy link
-            </button>
-
-            <a class="ghost" id="backBtn" href="/html/app/feed.html">
-              Back
+              <!-- SOLO USERNAME -->
+              <span class="singlePostAuthorMeta">
+                <span class="singlePostAuthorUsername" id="authorUsername">@creator</span>
+              </span>
             </a>
+
+            <div class="singlePostHeaderRight">
+              <span id="createdAt" class="singlePostDate"></span>
+            </div>
           </div>
+        </div>
 
-          <div class="singlePostHint" id="hintBox">Loading…</div>
-          <div class="singlePostError is-hidden" id="errBox"></div>
-        </section>
-      </main>
+        <!-- MEDIA -->
+        <div class="singlePostMediaWrap is-hidden" id="mediaBox"></div>
 
-      <div class="footerWrap" id="footer-placeholder"></div>
-    </div>
+        <!-- CAPTION -->
+        <div class="singlePostCaption is-hidden" id="caption"></div>
+
+        <!-- ACTIONS -->
+        <div class="singlePostActions">
+          <button
+            class="singlePostLikeBtn"
+            id="likeBtn"
+            data-liked="false"
+            type="button"
+          >
+            <span id="likeIcon">♡</span>
+            <span class="likeBtnLabel">Like</span>
+            <span id="likeCount" class="singlePostLikeCount">0</span>
+          </button>
+
+          <button class="ghost" id="copyLinkBtn" type="button">
+            Copy link
+          </button>
+
+          <a class="ghost" id="backBtn" href="/html/app/feed.html">
+            Back
+          </a>
+        </div>
+
+        <!-- STATE -->
+        <div class="singlePostHint" id="hintBox">Loading…</div>
+        <div class="singlePostError is-hidden" id="errBox"></div>
+
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <div id="footer-placeholder"></div>
   </div>
 
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
@@ -115,18 +124,21 @@
   <script>
     window.addEventListener("DOMContentLoaded", async () => {
       try {
+        // header + footer
         if (window.OPPartials?.loadAppLayout) {
           await window.OPPartials.loadAppLayout();
         } else if (window.loadAppLayout) {
           await window.loadAppLayout();
         }
 
+        // nav
         if (window.OPNav?.initNav) {
           await window.OPNav.initNav();
         } else if (window.initNav) {
           await window.initNav();
         }
 
+        // page logic
         if (window.OnlyPawsPost?.initSinglePostPage) {
           await window.OnlyPawsPost.initSinglePostPage();
         }
