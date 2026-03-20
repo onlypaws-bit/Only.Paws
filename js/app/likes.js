@@ -7,41 +7,42 @@
    ========================================================= */
 
 (function () {
-  const client = window.onlypawsClient;
-
-  const state = {
-    byPostId: new Map(),
-    loadingByPostId: new Map(),
-  };
-
   function getClient() {
+    const client = window.onlypawsClient;
     if (!client) {
       throw new Error("onlypawsClient not found. Load /js/onlypawsClient.js first.");
     }
     return client;
   }
 
+  const state = {
+    byPostId: new Map(),
+    loadingByPostId: new Map(),
+  };
+
   function normalizePostId(postId) {
     return String(postId || "").trim();
-  }
-
-  function getButtonsForPost(postId, root = document) {
-    const safePostId = CSS.escape(normalizePostId(postId));
-    return Array.from(
-      root.querySelectorAll(`[data-like-button][data-post-id="${safePostId}"]`)
-    );
-  }
-
-  function getCountElsForPost(postId, root = document) {
-    const safePostId = CSS.escape(normalizePostId(postId));
-    return Array.from(
-      root.querySelectorAll(`[data-like-count][data-post-id="${safePostId}"]`)
-    );
   }
 
   function formatLikeCount(count) {
     const n = Number(count) || 0;
     return String(n);
+  }
+
+  function getButtonsForPost(postId, root = document) {
+    const safePostId = normalizePostId(postId);
+    if (!safePostId) return [];
+    return Array.from(
+      root.querySelectorAll('[data-like-button][data-post-id]')
+    ).filter((el) => normalizePostId(el.dataset.postId) === safePostId);
+  }
+
+  function getCountElsForPost(postId, root = document) {
+    const safePostId = normalizePostId(postId);
+    if (!safePostId) return [];
+    return Array.from(
+      root.querySelectorAll('[data-like-count][data-post-id]')
+    ).filter((el) => normalizePostId(el.dataset.postId) === safePostId);
   }
 
   async function getPostLikeCount(postId) {
@@ -139,13 +140,14 @@
       btn.setAttribute("aria-pressed", liked ? "true" : "false");
       btn.classList.toggle("is-liked", liked);
 
-      if (btn.hasAttribute("data-like-label")) {
-        btn.textContent = liked ? "Liked" : "Like";
-      }
-
       const iconEl = btn.querySelector("[data-like-icon]");
       if (iconEl) {
         iconEl.textContent = liked ? "❤️" : "🤍";
+      }
+
+      const labelEl = btn.querySelector("[data-like-label]");
+      if (labelEl) {
+        labelEl.textContent = liked ? "Liked" : "Like";
       }
 
       const inlineCountEl = btn.querySelector("[data-like-count-inline]");
@@ -201,12 +203,17 @@
   }
 
   async function initLikeButtons(root = document) {
-    const buttons = Array.from(root.querySelectorAll("[data-like-button][data-post-id]"));
-    const uniquePostIds = [...new Set(
-      buttons
-        .map((btn) => normalizePostId(btn.dataset.postId))
-        .filter(Boolean)
-    )];
+    const buttons = Array.from(
+      root.querySelectorAll("[data-like-button][data-post-id]")
+    );
+
+    const uniquePostIds = [
+      ...new Set(
+        buttons
+          .map((btn) => normalizePostId(btn.dataset.postId))
+          .filter(Boolean)
+      ),
+    ];
 
     buttons.forEach((btn) => {
       if (btn.dataset.likeBound === "true") return;
@@ -245,5 +252,6 @@
     refreshPostLikeUi,
     initLikeButtons,
     applyLikeStateToDom,
+    handleLikeClick,
   };
 })();
