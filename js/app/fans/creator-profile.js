@@ -368,10 +368,8 @@
     if (els.postsHint) els.postsHint.textContent = "";
 
     const likesApi = window.onlypawsLikes || null;
-    if (likesApi?.initLikes) {
-      likesApi.initLikes(els.posts).catch(() => {});
-    } else if (likesApi?.bindLikeButtons) {
-      likesApi.bindLikeButtons(els.posts).catch(() => {});
+    if (likesApi?.initLikeButtons) {
+      likesApi.initLikeButtons(els.posts).catch(() => {});
     }
   }
 
