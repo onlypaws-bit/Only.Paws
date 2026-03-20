@@ -9,6 +9,7 @@
    - window.OPPartials
    - window.OPNav
    - window.OnlyPawsPost
+   - window.OnlyPawsPostCard
    ========================================================= */
 
 (function () {
@@ -53,25 +54,65 @@
     earningsTable: document.getElementById("earningsTable"),
   };
 
-  function homeHref() {
-    if (ROUTES?.get) {
-      return ROUTES.get("home") || ROUTES.get("index") || "index.html";
-    }
-    return PATHS?.home || PATHS?.index || "/index.html";
+  function routeGet(pathValue, fallback) {
+    return pathValue || fallback;
   }
 
-  function creatorCreatePostUrl(editId = "") {
+  function homeHref() {
+    if (ROUTES?.get) {
+      return ROUTES.get("home") || ROUTES.get("index") || "/";
+    }
+    return routeGet(PATHS?.home, routeGet(PATHS?.index, "/"));
+  }
+
+  function creatorsLandingUrl() {
+    if (ROUTES?.get) {
+      return ROUTES.get("marketing.creators") || "/html/marketing/creators.html";
+    }
+    return (
+      PATHS?.marketing?.creators ||
+      PATHS?.creators ||
+      "/html/marketing/creators.html"
+    );
+  }
+
+  function profileUrl(username) {
+    if (ROUTES?.href && username) {
+      return ROUTES.href("app.shared.profile", { u: username });
+    }
+    if (ROUTES?.get) {
+      return ROUTES.get("app.shared.profile") || "/html/app/profile.html";
+    }
+    const base =
+      PATHS?.app?.profile ||
+      PATHS?.profile ||
+      "/html/app/profile.html";
+    return username ? `${base}?u=${encodeURIComponent(username)}` : base;
+  }
+
+  function creatorCreatePostUrl(editId = "", username = "") {
     if (ROUTES?.href) {
-      return ROUTES.href("app.creators.createPost", editId ? { edit: editId } : {});
+      const params = {};
+      if (editId) params.edit = editId;
+      if (username) params.u = username;
+      return ROUTES.href("app.creators.createPost", params);
     }
 
-    const base = PATHS?.app?.creators?.createPost || "/html/app/creators/create-post.html";
-    return editId ? `${base}?edit=${encodeURIComponent(editId)}` : base;
+    const base =
+      PATHS?.app?.creators?.createPost ||
+      "/html/app/creators/create-post.html";
+
+    const qs = new URLSearchParams();
+    if (editId) qs.set("edit", editId);
+    if (username) qs.set("u", username);
+
+    const suffix = qs.toString();
+    return suffix ? `${base}?${suffix}` : base;
   }
 
   function creatorPetsUrl() {
     if (ROUTES?.get) {
-      return ROUTES.get("app.creators.pets") || "pets.html";
+      return ROUTES.get("app.creators.pets") || "/html/app/creators/pets.html";
     }
     return PATHS?.app?.creators?.pets || "/html/app/creators/pets.html";
   }
@@ -81,11 +122,18 @@
       return ROUTES.href("app.creators.fanProfile", { u: username || "" });
     }
 
-    const base = PATHS?.app?.creators?.fanProfile || "/html/app/creators/fan-profile.html";
+    const base =
+      PATHS?.app?.creators?.fanProfile ||
+      "/html/app/creators/fan-profile.html";
+
     return `${base}?u=${encodeURIComponent(username || "")}`;
   }
 
-  function creatorPayoutSetupUrl(doneState) {
+  function creatorPayoutSetupPath(doneState) {
+    const base =
+      PATHS?.app?.creators?.payoutsSetup ||
+      "/html/app/creators/payouts-setup.html";
+
     if (ROUTES?.href) {
       return ROUTES.href(
         "app.creators.payoutsSetup",
@@ -93,7 +141,6 @@
       );
     }
 
-    const base = PATHS?.app?.creators?.payoutsSetup || "/html/app/creators/payouts-setup.html";
     return doneState ? `${base}?done=1` : `${base}?retry=1`;
   }
 
@@ -102,7 +149,8 @@
   }
 
   function esc(value) {
-    return (value ?? "").toString()
+    return (value ?? "")
+      .toString()
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -150,7 +198,7 @@
     els.stateBox.innerHTML = `
       <b>${esc(title)}</b>
       <div class="hint">${esc(text || "").replaceAll("\n", "<br/>")}</div>
-      ${extrasHtml}
+      ${extrasHtml || ""}
     `;
   }
 
@@ -160,23 +208,13 @@
     els.walletMsg.hidden = false;
 
     const titleEl = els.walletMsg.querySelector("b");
-    if (titleEl) {
-      titleEl.textContent = title;
-    }
-
-    if (els.walletMsgText) {
-      els.walletMsgText.textContent = text || "";
-    }
+    if (titleEl) titleEl.textContent = title;
+    if (els.walletMsgText) els.walletMsgText.textContent = text || "";
   }
 
   function hideWalletMsg() {
-    if (els.walletMsg) {
-      els.walletMsg.hidden = true;
-    }
-
-    if (els.walletMsgText) {
-      els.walletMsgText.textContent = "";
-    }
+    if (els.walletMsg) els.walletMsg.hidden = true;
+    if (els.walletMsgText) els.walletMsgText.textContent = "";
   }
 
   function extractInvokeErrorDetails(error) {
@@ -203,28 +241,58 @@
     try {
       const { data, error } = await client
         .from("entitlements")
-        .select("id, status, cancel_at_period_end")
+        .select("status, current_period_end, cancel_at_period_end")
         .eq("user_id", userId)
         .eq("key", "creator_plan")
-        .in("status", ["active", "trialing"])
         .maybeSingle();
 
       if (error) throw error;
-
-      if (data) {
-        state.creatorPlanCanceling = !!data.cancel_at_period_end;
+      if (!data) {
+        state.creatorPlanCanceling = false;
+        return false;
       }
 
-      return !!data;
+      const status = String(data.status || "").toLowerCase();
+      const currentPeriodEndMs = data.current_period_end
+        ? new Date(data.current_period_end).getTime()
+        : 0;
+      const now = Date.now();
+
+      state.creatorPlanCanceling = !!data.cancel_at_period_end;
+
+      if (["active", "trialing", "past_due"].includes(status)) return true;
+      if (status === "canceled" && currentPeriodEndMs && currentPeriodEndMs > now) {
+        return true;
+      }
+
+      return false;
     } catch (error) {
       console.warn("hasActiveCreatorPlan error:", error);
+      state.creatorPlanCanceling = false;
       return false;
+    }
+  }
+
+  async function getCreatorPlanStatus(userId) {
+    try {
+      const { data, error } = await client
+        .from("entitlements")
+        .select("status, current_period_end, cancel_at_period_end, stripe_subscription_id")
+        .eq("user_id", userId)
+        .eq("key", "creator_plan")
+        .maybeSingle();
+
+      if (error) throw error;
+      return data || null;
+    } catch (error) {
+      console.warn("getCreatorPlanStatus error:", error);
+      return null;
     }
   }
 
   function renderEmptyState(title, hint) {
     return `
-      <div class="locked dashboardLockedTop">
+      <div class="locked">
         <b>${esc(title)}</b>
         <div class="hint">${esc(hint)}</div>
       </div>
@@ -233,11 +301,74 @@
 
   function renderErrorState(title, message) {
     return `
-      <div class="locked dashboardLockedTop">
+      <div class="locked">
         <b>${esc(title)}</b>
         <div class="hint">${esc(message)}</div>
       </div>
     `;
+  }
+
+  function mediaBlock(post) {
+    if (!post?.media_url) return "";
+
+    const url = esc(post.media_url);
+    const isVideo =
+      String(post.media_type || "").toLowerCase() === "video" ||
+      String(post.media_type || "").toLowerCase().startsWith("video");
+
+    if (isVideo) {
+      return `<div class="mediaWrap"><video controls playsinline src="${url}"></video></div>`;
+    }
+
+    return `<div class="mediaWrap"><img src="${url}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer"></div>`;
+  }
+
+  function renderReusablePostCard(post) {
+    const title = post.title || "Untitled";
+    const id = post.id;
+
+    if (window.OnlyPawsPostCard?.renderPostCard) {
+      return window.OnlyPawsPostCard.renderPostCard({
+        id,
+        creator_username: state.creatorUsername || "creator",
+        title,
+        excerpt: post.content || post.preview || "",
+        price_cents: null,
+        currency: "eur",
+        is_locked: false,
+        media_url: post.media_url || null,
+        media_type: post.media_type || null,
+      });
+    }
+
+    if (window.OnlyPawsPost?.renderPost) {
+      return window.OnlyPawsPost.renderPost({
+        id,
+        creator_username: state.creatorUsername || "creator",
+        title,
+        content: post.content || "",
+        excerpt: post.preview || post.content || "",
+        price_cents: post.is_paid ? (post.price_cents ?? 0) : null,
+        currency: "eur",
+        is_locked: false,
+        media_url: post.media_url || null,
+        media_type: post.media_type || null,
+        created_at: post.created_at || null,
+      });
+    }
+
+    return "";
+  }
+
+  function initReusablePostCards() {
+    if (window.OnlyPawsPostCard?.initPostCards && els.myPosts) {
+      window.OnlyPawsPostCard.initPostCards(els.myPosts);
+      return;
+    }
+
+    if (window.OnlyPawsPost?.initPosts && els.myPosts) {
+      window.OnlyPawsPost.initPosts(els.myPosts);
+    }
   }
 
   function renderMyPosts(posts) {
@@ -251,53 +382,35 @@
       return;
     }
 
-    if (window.OnlyPawsPost?.renderPost) {
+    const canUseReusable =
+      !!window.OnlyPawsPostCard?.renderPostCard || !!window.OnlyPawsPost?.renderPost;
+
+    if (canUseReusable) {
       els.myPosts.innerHTML = posts.map((post) => {
-        const title = post.title || "Untitled";
         const date = post.created_at ? new Date(post.created_at).toLocaleString() : "";
-        const id = post.id;
-
-        const cardHtml = window.OnlyPawsPost.renderPost({
-          id,
-          creator_username: state.creatorUsername || "creator",
-          title,
-          content: post.content || "",
-          excerpt: post.preview || post.content || "",
-          price_cents: post.is_paid ? (post.price_cents ?? 0) : null,
-          currency: "eur",
-          is_locked: false,
-          media_url: post.media_url || null,
-          media_type: post.media_type || null,
-          created_at: post.created_at || null,
-        });
-
         const visibilityLabel = post.is_public ? "🌍 PUBLIC" : "🙈 PRIVATE";
         const typeLabel = post.is_paid ? "🔒 PREMIUM" : "🆓 FREE";
 
         return `
-          <div class="rowCard dashboardRowCard" data-post-id="${esc(id)}">
-            <div class="postMeta dashboardPostMetaFull">
-              <div class="dashboardBadgeRow">
+          <div class="rowCard" data-post-id="${esc(post.id)}">
+            <div class="postMeta" style="width:100%;">
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
                 <span class="badge">${typeLabel}</span>
                 <span class="badge">${visibilityLabel}</span>
                 ${date ? `<span class="badge">${esc(date)}</span>` : ""}
               </div>
-
-              ${cardHtml}
+              ${renderReusablePostCard(post)}
             </div>
 
             <div class="postActions">
-              <a class="ghost" href="${creatorCreatePostUrl(id)}">Edit</a>
+              <a class="ghost" href="${creatorCreatePostUrl(post.id)}">Edit</a>
               <button class="ghost danger" type="button" data-action="delete">Delete</button>
             </div>
           </div>
         `;
       }).join("");
 
-      if (window.OnlyPawsPost?.initPosts) {
-        window.OnlyPawsPost.initPosts(els.myPosts);
-      }
-
+      initReusablePostCards();
       return;
     }
 
@@ -309,25 +422,17 @@
       const typeLabel = post.is_paid ? "🔒 PREMIUM" : "🆓 FREE";
 
       return `
-        <div class="rowCard dashboardRowCard" data-post-id="${esc(post.id)}">
+        <div class="rowCard" data-post-id="${esc(post.id)}">
           <div class="postMeta">
-            <div class="dashboardBadgeRow dashboardBadgeRowSmall">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
               <span class="badge">${typeLabel}</span>
               <span class="badge">${visibilityLabel}</span>
               ${date ? `<span class="badge">${esc(date)}</span>` : ""}
             </div>
 
             <b>${esc(title)}</b>
-
-            ${post.media_url ? `
-              <div class="mediaWrap">
-                ${String(post.media_type || "").startsWith("video")
-                  ? `<video controls playsinline src="${esc(post.media_url)}"></video>`
-                  : `<img src="${esc(post.media_url)}" alt="Post media" loading="lazy" decoding="async" referrerpolicy="no-referrer">`}
-              </div>
-            ` : ""}
-
-            <div class="small dashboardSmallTop">${esc(previewText || "")}</div>
+            ${mediaBlock(post)}
+            <div class="small" style="margin-top:8px;">${esc(previewText || "")}</div>
           </div>
 
           <div class="postActions">
@@ -350,9 +455,9 @@
 
       const row = button.closest(".rowCard");
       const postId = row?.getAttribute("data-post-id");
-
       if (!postId) return;
-      if (!window.confirm("Delete this post? This can't be undone.")) return;
+
+      if (!window.confirm("Delete this post? This can’t be undone.")) return;
 
       setElementBusy(button, true, "Deleting…");
 
@@ -414,7 +519,7 @@
           <div class="petMeta">
             <div class="petLine">
               ${avatarHtml}
-              <b class="dashboardPetTitle">${esc(name)} ${esc(species)} ${esc(breed)} ${esc(age)}</b>
+              <b style="margin:0;">${esc(name)} ${esc(species)} ${esc(breed)} ${esc(age)}</b>
             </div>
             <div class="small">${esc(bio)}</div>
           </div>
@@ -433,7 +538,7 @@
     if (!subscriptions || subscriptions.length === 0) {
       els.subsList.innerHTML = renderEmptyState(
         "No subscribers yet",
-        "Subscriptions will show here once monetization is active."
+        "Subscriptions will show here."
       );
       return;
     }
@@ -468,7 +573,6 @@
       const periodEndMs = subscription.current_period_end
         ? new Date(subscription.current_period_end).getTime()
         : 0;
-
       const hasAccess = !!periodEndMs && periodEndMs > now;
       const endDate = subscription.current_period_end
         ? new Date(subscription.current_period_end).toLocaleDateString()
@@ -502,9 +606,11 @@
         : `<div class="avatarMini">🐾</div>`;
 
       const renewText = endDate
-        ? (cancelAtPeriodEnd
-            ? `Access until ${endDate}`
-            : (hasAccess ? `Renews ${endDate}` : `Ended ${endDate}`))
+        ? (
+            cancelAtPeriodEnd
+              ? `Access until ${endDate}`
+              : (hasAccess ? `Renews ${endDate}` : `Ended ${endDate}`)
+          )
         : "";
 
       const metaLine = [sinceDate ? `Subscribed: ${sinceDate}` : "", renewText]
@@ -518,17 +624,17 @@
           <div class="postMeta">
             <div class="subLine">
               ${avatarHtml}
-              <div class="dashboardColText">
-                <b class="dashboardNoMargin">
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <b style="margin:0;">
                   ${esc(name)}
-                  ${usernameLabel ? `<span class="dashboardHandle">${esc(usernameLabel)}</span>` : ""}
+                  ${usernameLabel ? `<span style="opacity:.85;font-weight:700;">${esc(usernameLabel)}</span>` : ""}
                 </b>
-                <span class="small dashboardMetaLine">${esc(metaLine)}</span>
+                <span class="small" style="opacity:.9;">${esc(metaLine)}</span>
               </div>
             </div>
           </div>
 
-          <div class="dashboardBadgeWrap">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center">
             <span class="badge">${badgeIcon} ${esc(badgeText)}</span>
           </div>
         </div>
@@ -576,12 +682,12 @@
           <div class="postMeta">
             <div class="subLine">
               ${avatarHtml}
-              <div class="dashboardColText">
-                <b class="dashboardNoMargin">
+              <div style="display:flex;flex-direction:column;gap:2px;">
+                <b style="margin:0;">
                   ${esc(name)}
-                  ${usernameLabel ? `<span class="dashboardHandle">${esc(usernameLabel)}</span>` : ""}
+                  ${usernameLabel ? `<span style="opacity:.85;font-weight:700;">${esc(usernameLabel)}</span>` : ""}
                 </b>
-                <span class="small dashboardMetaLine">${esc(metaLine)}</span>
+                <span class="small" style="opacity:.9;">${esc(metaLine)}</span>
               </div>
             </div>
           </div>
@@ -618,7 +724,7 @@
       renderMyPosts(data || []);
       els.myPostsHint.textContent = data?.length ? "Loaded ✅" : "No posts yet.";
     } catch (error) {
-      els.myPostsHint.textContent = "Couldn't load posts";
+      els.myPostsHint.textContent = "Couldn’t load posts";
       els.myPosts.innerHTML = renderErrorState("Posts list error", error?.message || String(error));
     }
   }
@@ -642,7 +748,7 @@
       renderPets(data || []);
       els.petsHint.textContent = data?.length ? "Loaded ✅" : "No pets yet.";
     } catch (error) {
-      els.petsHint.textContent = "Couldn't load pets";
+      els.petsHint.textContent = "Couldn’t load pets";
       els.petsList.innerHTML = renderErrorState("Pets list error", error?.message || String(error));
     }
   }
@@ -654,33 +760,6 @@
     els.followersHint.textContent = "Loading…";
     els.subsList.innerHTML = "";
     els.followersList.innerHTML = "";
-
-    if (!state.creatorPlanActive) {
-      els.subsHint.textContent = "Creator Plan required.";
-      els.subsList.innerHTML = renderEmptyState(
-        "Monetization locked",
-        "Activate Creator Plan to unlock subscriptions."
-      );
-
-      try {
-        const { data, error } = await client
-          .from("v_followers_creator")
-          .select("*")
-          .eq("creator_id", session.user.id)
-          .order("created_at", { ascending: false })
-          .limit(200);
-
-        if (error) throw error;
-
-        renderFollowers(data || []);
-        els.followersHint.textContent = data?.length ? "Loaded ✅" : "No followers yet.";
-      } catch (error) {
-        els.followersHint.textContent = "Couldn't load followers";
-        els.followersList.innerHTML = renderErrorState("Followers error", error?.message || String(error));
-      }
-
-      return;
-    }
 
     try {
       const { data: subscriptionRows, error } = await client
@@ -713,7 +792,6 @@
 
       const subscriptions = (subscriptionRows || []).map((row) => {
         const profile = profileMap.get(row.fan_id) || {};
-
         return {
           ...row,
           fan_username: profile.username || null,
@@ -722,10 +800,10 @@
         };
       });
 
-      renderSubs(subscriptions);
-      els.subsHint.textContent = subscriptions.length ? "Loaded ✅" : "No subscribers yet.";
+      renderSubs(subscriptions || []);
+      els.subsHint.textContent = subscriptions?.length ? "Loaded ✅" : "No subscribers yet.";
     } catch (error) {
-      els.subsHint.textContent = "Couldn't load subscribers";
+      els.subsHint.textContent = "Couldn’t load subscribers";
       els.subsList.innerHTML = renderErrorState("Subscribers error", error?.message || String(error));
     }
 
@@ -742,7 +820,7 @@
       renderFollowers(data || []);
       els.followersHint.textContent = data?.length ? "Loaded ✅" : "No followers yet.";
     } catch (error) {
-      els.followersHint.textContent = "Couldn't load followers";
+      els.followersHint.textContent = "Couldn’t load followers";
       els.followersList.innerHTML = renderErrorState("Followers error", error?.message || String(error));
     }
   }
@@ -763,19 +841,15 @@
 
     try {
       if (!state.creatorPlanActive) {
-        els.walletHint.textContent = "Creator Plan required for monetization.";
-        showWalletMsg(
-          "Monetization locked",
-          "Activate Creator Plan to unlock premium posts, subscriptions, payouts, and Stripe onboarding."
-        );
+        els.walletHint.textContent = "Creator Plan required to view balance.";
         return;
       }
 
       if (!state.payoutEnabled) {
-        els.walletHint.textContent = "Stripe onboarding required.";
+        els.walletHint.textContent = "Stripe setup required to show balance.";
         showWalletMsg(
           "Action required",
-          "Complete Stripe onboarding to enable payouts and monetization. If you already have a Stripe account, just log in during onboarding. All withdrawals are handled in Stripe."
+          "Complete Stripe onboarding to view your balance. If you already have a Stripe account, just log in during the onboarding — Stripe handles both login and registration. All payouts/withdrawals are handled in Stripe."
         );
 
         els.enablePayoutBtn.textContent = "Complete onboarding (Stripe)";
@@ -792,11 +866,14 @@
 
       if (error) throw error;
 
-      els.walletAvailable.textContent = fmtEUR(data?.available_cents || 0);
-      els.walletPending.textContent = fmtEUR(data?.pending_cents || 0);
+      const available = Number(data?.available_cents || 0);
+      const pending = Number(data?.pending_cents || 0);
+
+      els.walletAvailable.textContent = fmtEUR(available);
+      els.walletPending.textContent = fmtEUR(pending);
       els.walletHint.textContent = "Loaded ✅";
     } catch (error) {
-      els.walletHint.textContent = "Couldn't load balance";
+      els.walletHint.textContent = "Couldn’t load balance";
       showWalletMsg("Balance error", extractInvokeErrorDetails(error));
       els.enablePayoutBtn.hidden = !state.creatorPlanActive;
     }
@@ -808,17 +885,6 @@
     if (!state.profileUserId) {
       els.earningsHint.textContent = "Unavailable";
       els.earningsTable.innerHTML = "";
-      return;
-    }
-
-    if (!state.creatorPlanActive) {
-      els.earningsHint.textContent = "Creator Plan required.";
-      els.earningsTable.innerHTML = `
-        <div class="locked">
-          <b>Monetization locked</b>
-          <div class="hint">Activate Creator Plan to unlock subscriptions, wallet, and earnings.</div>
-        </div>
-      `;
       return;
     }
 
@@ -847,7 +913,7 @@
         return;
       }
 
-      const fanIds = [...new Set(data.map((entry) => entry.fan_id).filter(Boolean))];
+      const fanIds = [...new Set((data || []).map((entry) => entry.fan_id).filter(Boolean))];
       const fanMap = new Map();
 
       if (fanIds.length) {
@@ -858,7 +924,9 @@
 
         if (profileError) throw profileError;
 
-        (profiles || []).forEach((profile) => fanMap.set(profile.user_id, profile));
+        (profiles || []).forEach((profile) => {
+          fanMap.set(profile.user_id, profile);
+        });
       }
 
       const planIdByFanId = new Map();
@@ -897,7 +965,7 @@
         }
       }
 
-      els.earningsTable.innerHTML = data.map((entry) => {
+      els.earningsTable.innerHTML = (data || []).map((entry) => {
         const planId = entry.fan_id ? planIdByFanId.get(entry.fan_id) : null;
         const planName = planId ? planNameById.get(planId) : null;
 
@@ -926,16 +994,16 @@
             <div class="postMeta">
               <div class="subLine">
                 ${avatarHtml}
-                <div class="dashboardColText dashboardMinWidthZero">
-                  <b class="dashboardNoMargin">${esc(typeLabel)}</b>
-                  <div class="small dashboardMetaLine">
+                <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
+                  <b style="margin:0;">${esc(typeLabel)}</b>
+                  <div class="small" style="opacity:.92;">
                     ${esc(fanLabel)}${roleLabel ? ` • ${esc(roleLabel)}` : ""}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="dashboardAmountCol">
+            <div style="text-align:right;">
               <b>${fmtEUR(entry.amount_cents)}</b>
               <div class="small">${esc(date)}</div>
             </div>
@@ -954,7 +1022,7 @@
 
       els.earningsHint.textContent = "Loaded ✅";
     } catch (error) {
-      els.earningsHint.textContent = "Couldn't load earnings";
+      els.earningsHint.textContent = "Couldn’t load earnings";
       els.earningsTable.innerHTML = `
         <div class="locked">
           <b>Error</b>
@@ -965,11 +1033,6 @@
   }
 
   async function openPayoutSetup() {
-    if (!state.creatorPlanActive) {
-      alert("Creator Plan required before Stripe onboarding.");
-      return;
-    }
-
     if (!els.enablePayoutBtn) return;
 
     const isOnboarded = !!state.payoutEnabled;
@@ -994,8 +1057,8 @@
       } else {
         ({ data, error } = await client.functions.invoke("update-connect-account", {
           body: {
-            return_path: creatorPayoutSetupUrl(true),
-            refresh_path: creatorPayoutSetupUrl(false),
+            return_path: creatorPayoutSetupPath(true),
+            refresh_path: creatorPayoutSetupPath(false),
           },
         }));
       }
@@ -1019,16 +1082,6 @@
     } finally {
       setElementBusy(els.enablePayoutBtn, false, null, idleLabel);
     }
-  }
-
-  async function resumeCreatorPlan() {
-    const { error } = await client.functions.invoke("resume-creator-plan", {
-      body: {},
-    });
-
-    if (error) throw error;
-
-    window.location.reload();
   }
 
   async function loadDashboard() {
@@ -1115,14 +1168,20 @@
     state.creatorUsername = (profile?.username || "").trim();
 
     if (els.createPostBtn) {
-      els.createPostBtn.href = creatorCreatePostUrl();
+      els.createPostBtn.href = creatorCreatePostUrl("", state.creatorUsername);
     }
 
     if (els.managePetsBtn) {
       els.managePetsBtn.href = creatorPetsUrl();
     }
 
-    if ((profile?.role || "fan") !== "creator") {
+    const email = session.user?.email || "creator";
+    const role = profile?.role || "fan";
+    const handle = state.creatorUsername
+      ? `@${state.creatorUsername}`
+      : (profile?.display_name || email);
+
+    if (role !== "creator") {
       enableAction(els.createPostBtn, false);
       enableAction(els.managePetsBtn, false);
 
@@ -1157,36 +1216,38 @@
       );
 
       const extrasHtml = `
-        <div class="btnRow dashboardBtnRow">
+        <div class="btnRow" style="margin-top:12px;">
           ${
             cameFromStripe
-              ? `<button class="navBtn primary" type="button" disabled>Creator Plan processing…</button>`
-              : `<button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Activate Creator Plan — €10/month</button>`
+              ? `<button class="navBtn primary" type="button" disabled style="opacity:.65;cursor:not-allowed;">Creator Plan processing…</button>`
+              : `<button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Unlock Creator Access — €10/month</button>`
           }
           <button class="navBtn" type="button" id="refreshPlanBtn">Refresh</button>
         </div>
         ${
           cameFromStripe
-            ? `<div class="hint dashboardInfoGap">✅ Payment started — waiting for Stripe confirmation. Then press Refresh.</div>`
-            : `<div class="hint dashboardInfoGap">Free posting is already available. Activate Creator Plan to unlock premium posts, subscriptions, payouts, and Stripe onboarding.</div>`
+            ? `<div class="hint" style="margin-top:10px;">✅ Payment started — waiting for Stripe confirmation. Then press Refresh.</div>`
+            : ``
         }
       `;
 
       setStateBox(
-        "✨ Creator ready",
+        "🔒 Creator tools locked",
         cameFromStripe
-          ? "Your Creator Plan payment is processing. Free posting is already available. Monetization unlocks after Stripe confirmation."
-          : "Your creator profile is active. You can already publish free posts and manage your page. Activate Creator Plan when you want to unlock monetization.",
+          ? "Thanks! Your payment is processing. Creator Plan stays disabled until our server receives confirmation from Stripe."
+          : "Your creator account is ready, but the Creator Plan is not active yet (or the dashboard can’t read it).",
         extrasHtml
       );
 
       const refreshPlanBtn = document.getElementById("refreshPlanBtn");
-      if (refreshPlanBtn) {
+      if (refreshPlanBtn && refreshPlanBtn.dataset.bound !== "1") {
+        refreshPlanBtn.dataset.bound = "1";
         refreshPlanBtn.addEventListener("click", () => window.location.reload());
       }
 
       const buyCreatorPlanBtn = document.getElementById("buyCreatorPlanBtn");
-      if (buyCreatorPlanBtn) {
+      if (buyCreatorPlanBtn && buyCreatorPlanBtn.dataset.bound !== "1") {
+        buyCreatorPlanBtn.dataset.bound = "1";
         buyCreatorPlanBtn.addEventListener("click", async () => {
           setElementBusy(buyCreatorPlanBtn, true, "Opening Stripe…");
 
@@ -1205,7 +1266,7 @@
               buyCreatorPlanBtn,
               false,
               null,
-              "Activate Creator Plan — €10/month"
+              "Unlock Creator Access — €10/month"
             );
             alert("❌ Checkout error: " + (error?.message || String(error)));
           }
@@ -1220,60 +1281,50 @@
       return;
     }
 
-    const extrasHtml = `
-      <div class="btnRow dashboardBtnRow">
-        ${
-          state.creatorPlanCanceling
-            ? `<button class="navBtn primary" type="button" id="resumePlanBtn">Resume plan</button>`
-            : `<button class="ghost danger" type="button" id="cancelPlanBtn">Cancel at period end</button>`
-        }
-        ${
-          state.payoutEnabled
-            ? `<button class="navBtn" type="button" id="openStripeInlineBtn">Open Stripe</button>`
-            : `<button class="navBtn primary" type="button" id="completeOnboardingInlineBtn">Complete Stripe onboarding</button>`
-        }
-      </div>
-      <div class="hint dashboardInfoGap">
-        ${
-          state.creatorPlanCanceling
-            ? "Your plan is set to cancel at the end of the current period. Resume to keep it active."
-            : `Creator Plan is active. ${state.payoutEnabled ? "Monetization is enabled." : "Complete Stripe onboarding to enable subscriptions, payouts, and monetization."}`
-        }
-      </div>
-    `;
+    const planData = await getCreatorPlanStatus(session.user.id);
+    let extrasHtml = "";
+
+    if (planData) {
+      const cpeIso = planData.current_period_end || null;
+      const cpeMs = cpeIso ? new Date(cpeIso).getTime() : 0;
+      const now = Date.now();
+
+      if (!!planData.cancel_at_period_end && cpeMs && cpeMs > now) {
+        const endLabel = new Date(cpeIso).toLocaleDateString();
+        extrasHtml = `
+          <div class="btnRow" style="margin-top:12px;">
+            <button class="ghost" type="button" id="resumePlanBtn">Resume Creator Plan</button>
+          </div>
+          <div class="hint" style="margin-top:8px;opacity:.9;">⏳ Access remains active until <b>${endLabel}</b>.</div>
+        `;
+      } else {
+        extrasHtml = `
+          <div class="btnRow" style="margin-top:12px;">
+            <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel</button>
+          </div>
+          <div class="hint" style="margin-top:8px;opacity:.9;">Cancels at the end of your current billing period.</div>
+        `;
+      }
+    } else {
+      extrasHtml = `
+        <div class="btnRow" style="margin-top:12px;">
+          <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel at period end</button>
+        </div>
+        <div class="hint" style="margin-top:8px;opacity:.9;">Cancels at the end of your current billing period.</div>
+      `;
+    }
 
     setStateBox(
-      state.creatorPlanCanceling
-        ? "⏳ Plan canceling"
-        : state.payoutEnabled
-          ? "✅ Monetization active"
-          : "💳 Monetization setup required",
-      state.creatorPlanCanceling
-        ? "Your Creator Plan will cancel at the end of the billing period. You can resume it anytime before then."
-        : state.payoutEnabled
-          ? "You can publish free or premium posts and manage monetization tools."
-          : "Creator Plan is active. Complete Stripe onboarding to unlock payouts and paid monetization features.",
+      (!!planData && !!planData.cancel_at_period_end) ? "⚠️ Creator plan canceled" : "✅ Creator unlocked",
+      (!!planData && !!planData.cancel_at_period_end)
+        ? "Your plan will end at the end of the billing period. You keep access until then."
+        : "Plan active. You can create posts and use creator tools.",
       extrasHtml
     );
 
-    const resumePlanBtn = document.getElementById("resumePlanBtn");
-    if (resumePlanBtn) {
-      resumePlanBtn.addEventListener("click", async () => {
-        if (!window.confirm("Resume your Creator Plan?")) return;
-
-        setElementBusy(resumePlanBtn, true, "Processing…");
-
-        try {
-          await resumeCreatorPlan();
-        } catch (error) {
-          setElementBusy(resumePlanBtn, false, null, "Resume plan");
-          alert("❌ Resume failed: " + (error?.message || String(error)));
-        }
-      });
-    }
-
     const cancelPlanBtn = document.getElementById("cancelPlanBtn");
-    if (cancelPlanBtn) {
+    if (cancelPlanBtn && cancelPlanBtn.dataset.bound !== "1") {
+      cancelPlanBtn.dataset.bound = "1";
       cancelPlanBtn.addEventListener("click", async () => {
         if (!window.confirm("Cancel your Creator Plan at the end of the current period?")) {
           return;
@@ -1295,14 +1346,24 @@
       });
     }
 
-    const openStripeInlineBtn = document.getElementById("openStripeInlineBtn");
-    if (openStripeInlineBtn) {
-      openStripeInlineBtn.addEventListener("click", openPayoutSetup);
-    }
+    const resumePlanBtn = document.getElementById("resumePlanBtn");
+    if (resumePlanBtn && resumePlanBtn.dataset.bound !== "1") {
+      resumePlanBtn.dataset.bound = "1";
+      resumePlanBtn.addEventListener("click", async () => {
+        setElementBusy(resumePlanBtn, true, "Processing…");
 
-    const completeOnboardingInlineBtn = document.getElementById("completeOnboardingInlineBtn");
-    if (completeOnboardingInlineBtn) {
-      completeOnboardingInlineBtn.addEventListener("click", openPayoutSetup);
+        try {
+          const { error } = await client.functions.invoke("resume-creator-plan", {
+            body: {},
+          });
+
+          if (error) throw error;
+          window.location.reload();
+        } catch (error) {
+          setElementBusy(resumePlanBtn, false, null, "Resume Creator Plan");
+          alert("❌ Resume failed: " + (error?.message || String(error)));
+        }
+      });
     }
 
     await loadWallet();
