@@ -54,6 +54,7 @@
   - update-connect-account
   - create-creator-plan-checkout
   - cancel-creator-plan
+  - resume-creator-plan
 
   Notes:
   - Balance is indicative only and managed by Stripe
@@ -74,7 +75,7 @@
 <body class="creatorDashPage">
   <div class="pageShell">
     <div class="wrap">
-      <div id="header-placeholder"></div>
+      <div id="header-placeholder" class="partialMount partialHeaderMount"></div>
 
       <main class="creatorDashMain">
         <section class="panel">
@@ -88,7 +89,14 @@
                 <div class="hint" id="stateBox">Loading…</div>
 
                 <div class="btnRow dashboardBtnRow">
-                  <a class="btn" id="createPostBtn" href="#" aria-disabled="true">Create post</a>
+                  <a
+                    class="btn dashboardIsDisabled"
+                    id="createPostBtn"
+                    href="/html/app/creators/create-post.html"
+                    aria-disabled="true"
+                  >
+                    Create post
+                  </a>
                 </div>
 
                 <div class="locked dashboardInfoBox">
@@ -142,7 +150,9 @@
 
                 <div class="locked dashboardInfoBox">
                   <b>Note</b>
-                  <div class="hint">Shows completed payments only. Stripe fees and OnlyPaws fee already excluded.</div>
+                  <div class="hint">
+                    Shows completed payments only. Stripe fees and OnlyPaws fee already excluded.
+                  </div>
                 </div>
               </div>
             </div>
@@ -154,7 +164,7 @@
           </div>
 
           <div class="btnRow dashboardTightRow">
-            <a class="ghost" id="managePetsBtn" href="#">➕ Add / manage pets</a>
+            <a class="ghost" id="managePetsBtn" href="/html/app/creators/pets.html">➕ Add / manage pets</a>
           </div>
 
           <div class="list" id="petsList"></div>
@@ -182,7 +192,7 @@
         </section>
       </main>
 
-      <div class="footerWrap" id="footer-placeholder"></div>
+      <div id="footer-placeholder" class="partialMount partialFooterMount footerWrap"></div>
     </div>
   </div>
 
