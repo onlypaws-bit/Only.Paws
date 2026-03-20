@@ -13,6 +13,7 @@
   - /js/auth-guard.js
   - /js/partials.js
   - /js/nav.js
+  - /js/app/likes.js
   - /js/app/post.js
 -->
 
@@ -73,12 +74,19 @@
           <button
             class="singlePostLikeBtn"
             id="likeBtn"
+            data-like-button
+            data-post-id=""
             data-liked="false"
+            aria-pressed="false"
             type="button"
           >
-            <span id="likeIcon">♡</span>
-            <span class="likeBtnLabel">Like</span>
-            <span id="likeCount" class="singlePostLikeCount">0</span>
+            <span id="likeIcon" data-like-icon>🤍</span>
+            <span class="likeBtnLabel" data-like-label>Like</span>
+            <span
+              id="likeCount"
+              class="singlePostLikeCount"
+              data-like-count-inline
+            >0</span>
           </button>
 
           <button class="ghost" id="copyLinkBtn" type="button">
@@ -104,6 +112,7 @@
   <script src="/js/auth-guard.js"></script>
   <script src="/js/partials.js"></script>
   <script src="/js/nav.js"></script>
+  <script src="/js/app/likes.js"></script>
   <script src="/js/app/post.js"></script>
 
   <script>
