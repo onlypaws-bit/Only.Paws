@@ -123,28 +123,8 @@
     if (!likesApi) return;
 
     try {
-      if (typeof likesApi.initLikes === "function") {
-        await likesApi.initLikes(container);
-        return;
-      }
-
-      if (typeof likesApi.initPostLikes === "function") {
-        await likesApi.initPostLikes(container);
-        return;
-      }
-
-      if (typeof likesApi.initFeedLikes === "function") {
-        await likesApi.initFeedLikes(container);
-        return;
-      }
-
-      if (typeof likesApi.bindLikeButtons === "function") {
-        await likesApi.bindLikeButtons(container);
-        return;
-      }
-
-      if (typeof likesApi.init === "function") {
-        await likesApi.init(container);
+      if (typeof likesApi.initLikeButtons === "function") {
+        await likesApi.initLikeButtons(container);
       }
     } catch (error) {
       console.warn("[feed] likes init failed", error);
