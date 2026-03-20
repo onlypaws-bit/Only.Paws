@@ -296,13 +296,16 @@
 
         <div class="op-postBottom">
           <button
-            class="op-likeBtn ${liked ? "op-liked" : ""}"
+            class="op-likeBtn ${liked ? "op-liked is-liked" : ""}"
             type="button"
+            data-like-button
             data-post-id="${esc(id)}"
             data-liked="${liked ? "true" : "false"}"
+            aria-pressed="${liked ? "true" : "false"}"
           >
-            <span class="op-likeIcon">${liked ? "♥" : "♡"}</span>
-            <span class="op-likeCount">${Number(post?.likes_count || 0)}</span>
+            <span class="op-likeIcon" data-like-icon>${liked ? "❤️" : "🤍"}</span>
+            <span class="op-likeLabel" data-like-label>Like</span>
+            <span class="op-likeCount" data-like-count-inline>${Number(post?.likes_count || 0)}</span>
           </button>
         </div>
       </article>
@@ -318,6 +321,10 @@
     const author = $("author");
     const authorUsername = $("authorUsername");
     const authorAvatarImg = $("authorAvatarImg");
+
+    const likeBtn = $("likeBtn");
+    const likeIcon = $("likeIcon");
+    const likeCount = $("likeCount");
 
     const profile = await fetchCreatorProfile(post.creator_id);
     const creatorUsername = String(profile?.username || "").trim() || "creator";
@@ -388,6 +395,22 @@
       }
     }
 
+    if (likeBtn) {
+      likeBtn.dataset.postId = String(post.id || "");
+      likeBtn.dataset.liked = "false";
+      likeBtn.setAttribute("aria-pressed", "false");
+      likeBtn.classList.remove("is-liked");
+      likeBtn.classList.remove("op-liked");
+    }
+
+    if (likeIcon) {
+      likeIcon.textContent = "🤍";
+    }
+
+    if (likeCount) {
+      likeCount.textContent = String(Number(post.likes_count || 0));
+    }
+
     return {
       profile,
       creatorUsername,
@@ -426,6 +449,11 @@
       }
 
       await renderSinglePost(post, userId);
+
+      const likesApi = window.onlypawsLikes || null;
+      if (likesApi?.initLikeButtons) {
+        await likesApi.initLikeButtons(document);
+      }
 
       if (backBtn) {
         backBtn.href = getFeedPath();
