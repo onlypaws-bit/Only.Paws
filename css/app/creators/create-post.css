@@ -1,16 +1,148 @@
 /* =========================================================
    OnlyPaws
-   File: css/app/creators/create-post.css
+   File: /css/app/creators/create-post.css
    Purpose: styles specific to the create post page
    ========================================================= */
 
-
-.op-hidden {
-  display: none !important;
+.createPostPage {
+  min-height: 100vh;
 }
 
-.op-section-space {
+.createPostWrap {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 18px 70px;
+}
+
+.createPostLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.createPostPanel,
+.createPostPreviewPanel {
+  border-radius: 22px;
+  padding: 22px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25);
+}
+
+.createPostHero {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.createPostHeroMain {
+  min-width: 0;
+}
+
+.createPostPanel h1 {
+  margin: 10px 0 8px;
+  font-size: 2.1rem;
+  letter-spacing: -0.03em;
+}
+
+.createPostSub {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.55;
+}
+
+.createPostSection {
+  margin-top: 14px;
+}
+
+.createPostGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  outline: none;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.field textarea {
+  min-height: 130px;
+  resize: vertical;
+}
+
+.createPostPreviewField textarea {
+  min-height: 110px;
+}
+
+.createPostFileBox {
   margin-top: 8px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.createPostFileMeta {
+  margin-top: 8px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.locked {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  line-height: 1.5;
+  display: none;
+}
+
+.locked b {
+  display: block;
+  margin-bottom: 6px;
 }
 
 .op-top-actions {
@@ -20,6 +152,123 @@
 .op-help-text {
   margin-top: 8px;
   opacity: 0.9;
+}
+
+.msg {
+  margin-top: 12px;
+  min-height: 18px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.createPostPreviewPanel {
+  position: sticky;
+  top: 20px;
+}
+
+.previewHeader h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.previewHeader p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.5;
+}
+
+.createPostPreview {
+  margin-top: 16px;
+}
+
+.createPostPreviewCard {
+  border-radius: 22px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.createPostPreviewTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.createPostPreviewMeta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.createPostPreviewPill,
+.createPostPreviewType {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.createPostPreviewPill {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.createPostPreviewType.isFree {
+  background: rgba(170, 255, 200, 0.14);
+  border: 1px solid rgba(170, 255, 200, 0.28);
+  color: #d7ffd7;
+}
+
+.createPostPreviewType.isPremium {
+  background: rgba(255, 220, 170, 0.14);
+  border: 1px solid rgba(255, 220, 170, 0.3);
+  color: #ffe6b8;
+}
+
+.createPostPreviewTitle {
+  margin: 14px 0 8px;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.createPostPreviewExcerpt {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.createPostPreviewLocked {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.createPostPreviewLocked b {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.createPostPreviewMediaWrap {
+  margin-top: 14px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .op-preview-panel {
@@ -41,4 +290,84 @@
 .op-preview-video {
   max-height: 420px;
   background: rgba(0, 0, 0, 0.2);
+}
+
+.createPostPreviewEmpty {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.createPostPreviewHint {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+}
+
+.op-hidden {
+  display: none !important;
+}
+
+.op-section-space {
+  margin-top: 8px;
+}
+
+#modePill {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  .createPostLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .createPostPreviewPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 720px) {
+  .createPostGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .createPostWrap {
+    padding: 20px 14px 56px;
+  }
+
+  .createPostPanel,
+  .createPostPreviewPanel {
+    padding: 18px;
+  }
+
+  .createPostHero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btnRow {
+    align-items: stretch;
+  }
+
+  .btn,
+  .ghost {
+    width: 100%;
+  }
+
+  .createPostPreviewTop {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
