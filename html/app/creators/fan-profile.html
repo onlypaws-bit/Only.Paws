@@ -10,35 +10,9 @@
   - Loads a public fan profile by ?u=<username_or_user_id>
   - Shows fan identity and public bio
   - Displays following and subscription counts
+  - Keeps a ready slot for likes count
   - Lists creators followed by the fan
   - Keeps logged-in app navigation available
-
-  Main sections:
-  - Fan profile summary
-  - Stats
-  - Following creators
-
-  Dependencies:
-  CSS
-  - /css/styles.css
-  - /css/app/creators/fan-profile.css
-
-  JS
-  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
-  - /js/paths.js
-  - /js/onlypawsClient.js
-  - /js/nav.js
-  - /js/partials.js
-  - /js/app/creators/fan-profile.js
-
-  Supabase:
-  - profiles
-  - followers
-  - fan_subscriptions
-
-  Notes:
-  - Accepts both username and UUID via ?u=
-  - If the resolved profile is a creator, the page shows a hint
   =========================================================
 -->
 
@@ -85,8 +59,8 @@
 
             <div class="miniCard">
               <div class="miniK">Likes</div>
-              <div class="miniV">—</div>
-              <div class="hint fanProfileSoonHint">Coming soon</div>
+              <div class="miniV" id="statLikes">—</div>
+              <div class="hint fanProfileSoonHint" id="statLikesHint">Coming soon</div>
             </div>
 
             <div class="miniCard">
