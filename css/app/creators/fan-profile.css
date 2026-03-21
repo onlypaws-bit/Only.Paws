@@ -1,39 +1,290 @@
 /* =========================================================
    OnlyPaws
-   File: /css/app/creators/fan-profile.css
-   Purpose: styles specific to the fan profile page
+   File: /css/app/fans/fan-profile.css
+   Purpose: fan profile page styles
    ========================================================= */
 
-.fanProfilePage {
-  min-height: 100vh;
+.fanProfilePage .wrap{
+  max-width:1040px;
+  margin:0 auto;
+  padding:28px 18px 70px;
 }
 
-.fanProfileMain {
-  padding-top: 22px;
-  padding-bottom: 70px;
+.fanProfilePage .nav{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:18px;
 }
 
-.fanProfilePublicHint {
-  margin-top: 10px;
-  opacity: .9;
+.fanProfilePage .navRight{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
 }
 
-.fanProfileStatsGrid {
-  margin-top: 14px;
+.fanProfilePage .panel{
+  border-radius:22px;
+  padding:22px;
+  background:var(--card);
+  border:1px solid var(--stroke);
+  backdrop-filter:blur(10px);
+  box-shadow:0 20px 45px var(--shadow);
 }
 
-.fanProfileSoonHint {
-  margin-top: 6px;
-  opacity: .85;
+.fanProfilePage .grid{
+  display:grid;
+  grid-template-columns:1.25fr 0.75fr;
+  gap:12px;
 }
 
-.followingSectionHint {
-  margin-top: 0;
+.fanProfilePage .pill{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  padding:10px 14px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.18);
+  font-size:13px;
+  color:rgba(255,255,255,.85);
+  white-space:nowrap;
 }
 
-@media (max-width: 920px) {
-  .fanProfileMain {
-    padding-top: 16px;
-    padding-bottom: 56px;
+.fanProfilePage h1{
+  margin:10px 0 6px;
+  font-size:clamp(2rem, 4vw, 2.6rem);
+  line-height:1.05;
+  letter-spacing:-0.6px;
+}
+
+.fanProfilePage .sub{
+  margin:0;
+  color:var(--muted);
+  font-size:1.02rem;
+  line-height:1.55;
+}
+
+.fanProfilePage .heroRow{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.fanProfilePage .avatar{
+  width:64px;
+  height:64px;
+  border-radius:20px;
+  background:rgba(0,0,0,.18);
+  border:1px solid rgba(255,255,255,.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  font-size:22px;
+  overflow:hidden;
+}
+
+.fanProfilePage .avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.fanProfilePage .meta b{
+  display:block;
+  font-size:1.05rem;
+}
+
+.fanProfilePage .meta span{
+  display:block;
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  margin-top:2px;
+  white-space:pre-wrap;
+}
+
+.fanProfilePage .hint{
+  color:rgba(255,255,255,.78);
+  font-size:13px;
+  line-height:1.4;
+  margin-top:10px;
+  white-space:pre-wrap;
+}
+
+.fanProfilePage .miniGrid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px;
+}
+
+.fanProfilePage .miniCard{
+  border-radius:18px;
+  padding:14px 14px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+}
+
+.fanProfilePage .miniK{
+  font-size:12px;
+  opacity:.9;
+  font-weight:700;
+}
+
+.fanProfilePage .miniV{
+  font-size:20px;
+  font-weight:900;
+  margin-top:4px;
+}
+
+.fanProfilePage .list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:12px;
+}
+
+.fanProfilePage .listItem{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:18px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  text-decoration:none;
+  color:inherit;
+  transition:transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.fanProfilePage .listItem:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.12);
+  border-color:rgba(255,255,255,.22);
+}
+
+.fanProfilePage .listAvatar{
+  width:38px;
+  height:38px;
+  border-radius:14px;
+  background:rgba(0,0,0,.20);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  flex:0 0 auto;
+}
+
+.fanProfilePage .listAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.fanProfilePage .listMeta{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+.fanProfilePage .listMeta b{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.fanProfilePage .listMeta span{
+  opacity:.9;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ===== footer ===== */
+
+.globalFooter{
+  text-align:center;
+  padding:30px 20px;
+  font-size:14px;
+  opacity:.9;
+  line-height:1.6;
+}
+
+.globalFooter .small{
+  margin-top:6px;
+  font-size:13px;
+  opacity:.8;
+}
+
+.globalFooter .footerLinks{
+  margin-top:14px;
+}
+
+.globalFooter a{
+  color:rgba(255,255,255,.9);
+  text-decoration:none;
+  opacity:.85;
+  transition:opacity .2s ease, text-decoration .2s ease;
+}
+
+.globalFooter a:hover{
+  text-decoration:underline;
+  opacity:1;
+}
+
+/* ===== responsive ===== */
+
+@media (max-width: 920px){
+  .fanProfilePage .grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 860px){
+  .fanProfilePage .grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 640px){
+  .fanProfilePage .wrap{
+    padding:22px 14px 56px;
+  }
+
+  .fanProfilePage .nav{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .fanProfilePage .navRight{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  .fanProfilePage .panel{
+    padding:18px;
+    border-radius:20px;
+  }
+
+  .fanProfilePage .miniGrid{
+    grid-template-columns:1fr;
+  }
+
+  .fanProfilePage .heroRow{
+    align-items:flex-start;
+  }
+
+  .fanProfilePage .avatar{
+    width:58px;
+    height:58px;
+    border-radius:18px;
   }
 }
