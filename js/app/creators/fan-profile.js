@@ -181,6 +181,14 @@
     if (el) el.textContent = message || "";
   }
 
+  function initLikesPlaceholder() {
+    const statLikes = document.getElementById("statLikes");
+    const statLikesHint = document.getElementById("statLikesHint");
+
+    if (statLikes) statLikes.textContent = "—";
+    if (statLikesHint) statLikesHint.textContent = "Coming soon";
+  }
+
   async function boot() {
     if (window.OPPartials?.loadLayout) {
       await window.OPPartials.loadLayout();
@@ -189,6 +197,8 @@
     if (window.OPNav?.initNav) {
       await window.OPNav.initNav();
     }
+
+    initLikesPlaceholder();
 
     const { u } = getParams();
     if (!u) {
@@ -236,5 +246,6 @@
     loadFollowingCreators,
   };
 
+  window.goFanProfileHome = goHome;
   window.addEventListener("DOMContentLoaded", boot);
 })();
