@@ -2,6 +2,12 @@
    OnlyPaws
    File: /js/app/creators/creator-dash.js
    Purpose: creator dashboard page logic
+
+   Creator access model:
+   - role = creator => can create posts
+   - Creator Plan => monetization only
+   - Stripe onboarding => payout / Stripe tools access
+
    Dependencies:
    - window.OP_PATHS
    - window.OPRoutes
@@ -20,6 +26,8 @@
   const state = {
     creatorUsername: "",
     profileUserId: null,
+    isCreator: false,
+    canPost: false,
     creatorPlanActive: false,
     creatorPlanCanceling: false,
     payoutEnabled: false,
@@ -63,17 +71,6 @@
       return ROUTES.get("home") || ROUTES.get("index") || "/";
     }
     return routeGet(PATHS?.home, routeGet(PATHS?.index, "/"));
-  }
-
-  function creatorsLandingUrl() {
-    if (ROUTES?.get) {
-      return ROUTES.get("marketing.creators") || "/html/marketing/creators.html";
-    }
-    return (
-      PATHS?.marketing?.creators ||
-      PATHS?.creators ||
-      "/html/marketing/creators.html"
-    );
   }
 
   function profileUrl(username) {
@@ -840,8 +837,17 @@
     els.enablePayoutBtn.hidden = true;
 
     try {
+      if (!state.isCreator) {
+        els.walletHint.textContent = "Creator account required.";
+        return;
+      }
+
       if (!state.creatorPlanActive) {
-        els.walletHint.textContent = "Creator Plan required to view balance.";
+        els.walletHint.textContent = "Monetization plan required to view balance.";
+        showWalletMsg(
+          "Monetization locked",
+          "Posting is available for creators, but monetization requires an active Creator Plan."
+        );
         return;
       }
 
@@ -849,7 +855,7 @@
         els.walletHint.textContent = "Stripe setup required to show balance.";
         showWalletMsg(
           "Action required",
-          "Complete Stripe onboarding to view your balance. If you already have a Stripe account, just log in during the onboarding — Stripe handles both login and registration. All payouts/withdrawals are handled in Stripe."
+          "Complete Stripe onboarding to view your balance. If you already have a Stripe account, just log in during the onboarding — Stripe handles both login and registration. All payouts and withdrawals are handled in Stripe."
         );
 
         els.enablePayoutBtn.textContent = "Complete onboarding (Stripe)";
@@ -875,7 +881,7 @@
     } catch (error) {
       els.walletHint.textContent = "Couldn’t load balance";
       showWalletMsg("Balance error", extractInvokeErrorDetails(error));
-      els.enablePayoutBtn.hidden = !state.creatorPlanActive;
+      els.enablePayoutBtn.hidden = !(state.isCreator && state.creatorPlanActive);
     }
   }
 
@@ -885,6 +891,24 @@
     if (!state.profileUserId) {
       els.earningsHint.textContent = "Unavailable";
       els.earningsTable.innerHTML = "";
+      return;
+    }
+
+    if (!state.isCreator) {
+      els.earningsHint.textContent = "Creator account required.";
+      els.earningsTable.innerHTML = renderEmptyState(
+        "Creator account required",
+        "Only creator accounts can view monetization data."
+      );
+      return;
+    }
+
+    if (!state.creatorPlanActive) {
+      els.earningsHint.textContent = "Monetization plan required.";
+      els.earningsTable.innerHTML = renderEmptyState(
+        "Monetization locked",
+        "Posting is available, but earnings are shown only when Creator Plan is active."
+      );
       return;
     }
 
@@ -906,7 +930,7 @@
         els.earningsTable.innerHTML = `
           <div class="locked">
             <b>No earnings yet</b>
-            <div class="hint">Completed payments will appear here.</div>
+            <div class="hint">Completed monetized payments will appear here.</div>
           </div>
         `;
         els.earningsHint.textContent = "No earnings yet.";
@@ -1084,6 +1108,185 @@
     }
   }
 
+  function bindRefreshPlanButton() {
+    const refreshPlanBtn = document.getElementById("refreshPlanBtn");
+    if (!refreshPlanBtn || refreshPlanBtn.dataset.bound === "1") return;
+
+    refreshPlanBtn.dataset.bound = "1";
+    refreshPlanBtn.addEventListener("click", () => window.location.reload());
+  }
+
+  function bindBuyCreatorPlanButton() {
+    const buyCreatorPlanBtn = document.getElementById("buyCreatorPlanBtn");
+    if (!buyCreatorPlanBtn || buyCreatorPlanBtn.dataset.bound === "1") return;
+
+    buyCreatorPlanBtn.dataset.bound = "1";
+    buyCreatorPlanBtn.addEventListener("click", async () => {
+      setElementBusy(buyCreatorPlanBtn, true, "Opening Stripe…");
+
+      try {
+        const { data, error } = await client.functions.invoke(
+          "create-creator-plan-checkout",
+          { body: {} }
+        );
+
+        if (error) throw error;
+        if (!data?.url) throw new Error("Missing Stripe URL");
+
+        window.open(data.url, "_blank", "noopener,noreferrer");
+      } catch (error) {
+        setElementBusy(
+          buyCreatorPlanBtn,
+          false,
+          null,
+          "Unlock monetization — €10/month"
+        );
+        alert("❌ Checkout error: " + (error?.message || String(error)));
+      }
+    });
+  }
+
+  function bindCancelPlanButton() {
+    const cancelPlanBtn = document.getElementById("cancelPlanBtn");
+    if (!cancelPlanBtn || cancelPlanBtn.dataset.bound === "1") return;
+
+    cancelPlanBtn.dataset.bound = "1";
+    cancelPlanBtn.addEventListener("click", async () => {
+      if (!window.confirm("Cancel your Creator Plan at the end of the current period?")) {
+        return;
+      }
+
+      setElementBusy(cancelPlanBtn, true, "Processing…");
+
+      try {
+        const { error } = await client.functions.invoke("cancel-creator-plan", {
+          body: {},
+        });
+
+        if (error) throw error;
+        window.location.reload();
+      } catch (error) {
+        setElementBusy(cancelPlanBtn, false, null, "Cancel at period end");
+        alert("❌ Cancel failed: " + (error?.message || String(error)));
+      }
+    });
+  }
+
+  function bindResumePlanButton() {
+    const resumePlanBtn = document.getElementById("resumePlanBtn");
+    if (!resumePlanBtn || resumePlanBtn.dataset.bound === "1") return;
+
+    resumePlanBtn.dataset.bound = "1";
+    resumePlanBtn.addEventListener("click", async () => {
+      setElementBusy(resumePlanBtn, true, "Processing…");
+
+      try {
+        const { error } = await client.functions.invoke("resume-creator-plan", {
+          body: {},
+        });
+
+        if (error) throw error;
+        window.location.reload();
+      } catch (error) {
+        setElementBusy(resumePlanBtn, false, null, "Resume Creator Plan");
+        alert("❌ Resume failed: " + (error?.message || String(error)));
+      }
+    });
+  }
+
+  function renderCreatorStatusNoPlan() {
+    const query = new URLSearchParams(window.location.search);
+    const cameFromStripe = (
+      query.has("session_id") ||
+      query.has("success") ||
+      query.has("checkout") ||
+      query.has("payment_intent") ||
+      query.has("redirect_status")
+    );
+
+    const extrasHtml = `
+      <div class="btnRow" style="margin-top:12px;">
+        ${
+          cameFromStripe
+            ? `<button class="navBtn primary" type="button" disabled style="opacity:.65;cursor:not-allowed;">Monetization processing…</button>`
+            : `<button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Unlock monetization — €10/month</button>`
+        }
+        <button class="navBtn" type="button" id="refreshPlanBtn">Refresh</button>
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        ${
+          cameFromStripe
+            ? "✅ Payment started — waiting for Stripe confirmation. Then press Refresh."
+            : "You can already create posts. Activate Creator Plan only if you want monetization tools."
+        }
+      </div>
+    `;
+
+    setStateBox(
+      "✅ Creator profile active",
+      cameFromStripe
+        ? "Your creator profile is active and posting is available. Monetization will unlock after Stripe confirmation."
+        : "Your creator profile is active. You can create posts now. Creator Plan is optional and only needed for monetization.",
+      extrasHtml
+    );
+
+    bindRefreshPlanButton();
+    bindBuyCreatorPlanButton();
+  }
+
+  function renderCreatorStatusPlanActive(planData) {
+    let extrasHtml = "";
+
+    if (planData) {
+      const cpeIso = planData.current_period_end || null;
+      const cpeMs = cpeIso ? new Date(cpeIso).getTime() : 0;
+      const now = Date.now();
+
+      if (!!planData.cancel_at_period_end && cpeMs && cpeMs > now) {
+        const endLabel = new Date(cpeIso).toLocaleDateString();
+        extrasHtml = `
+          <div class="btnRow" style="margin-top:12px;">
+            <button class="ghost" type="button" id="resumePlanBtn">Resume Creator Plan</button>
+          </div>
+          <div class="hint" style="margin-top:8px;opacity:.9;">
+            ⏳ Monetization remains active until <b>${endLabel}</b>.
+          </div>
+        `;
+      } else {
+        extrasHtml = `
+          <div class="btnRow" style="margin-top:12px;">
+            <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel</button>
+          </div>
+          <div class="hint" style="margin-top:8px;opacity:.9;">
+            Cancels at the end of your current billing period.
+          </div>
+        `;
+      }
+    } else {
+      extrasHtml = `
+        <div class="btnRow" style="margin-top:12px;">
+          <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel at period end</button>
+        </div>
+        <div class="hint" style="margin-top:8px;opacity:.9;">
+          Cancels at the end of your current billing period.
+        </div>
+      `;
+    }
+
+    setStateBox(
+      (!!planData && !!planData.cancel_at_period_end)
+        ? "⚠️ Monetization plan ending"
+        : "💸 Monetization active",
+      (!!planData && !!planData.cancel_at_period_end)
+        ? "Your creator profile is active and posting stays available. Monetization will end at the end of the billing period."
+        : "Your creator profile is active. Posting is available, and monetization tools are enabled.",
+      extrasHtml
+    );
+
+    bindCancelPlanButton();
+    bindResumePlanButton();
+  }
+
   async function loadDashboard() {
     if (!client) {
       setStateBox("❌ onlypawsClient missing", "Check onlypawsClient.js path and script order.");
@@ -1114,6 +1317,8 @@
     state.payoutEnabled = false;
     state.profileUserId = null;
     state.creatorUsername = "";
+    state.isCreator = false;
+    state.canPost = false;
 
     if (els.enablePayoutBtn) {
       els.enablePayoutBtn.hidden = true;
@@ -1175,13 +1380,12 @@
       els.managePetsBtn.href = creatorPetsUrl();
     }
 
-    const email = session.user?.email || "creator";
     const role = profile?.role || "fan";
-    const handle = state.creatorUsername
-      ? `@${state.creatorUsername}`
-      : (profile?.display_name || email);
 
-    if (role !== "creator") {
+    state.isCreator = role === "creator";
+    state.canPost = state.isCreator;
+
+    if (!state.isCreator) {
       enableAction(els.createPostBtn, false);
       enableAction(els.managePetsBtn, false);
 
@@ -1195,7 +1399,7 @@
       return;
     }
 
-    enableAction(els.createPostBtn, true);
+    enableAction(els.createPostBtn, !!state.canPost);
     enableAction(els.managePetsBtn, true);
 
     const activePlan = await hasActiveCreatorPlan(session.user.id);
@@ -1206,72 +1410,7 @@
     );
 
     if (!state.creatorPlanActive) {
-      const query = new URLSearchParams(window.location.search);
-      const cameFromStripe = (
-        query.has("session_id") ||
-        query.has("success") ||
-        query.has("checkout") ||
-        query.has("payment_intent") ||
-        query.has("redirect_status")
-      );
-
-      const extrasHtml = `
-        <div class="btnRow" style="margin-top:12px;">
-          ${
-            cameFromStripe
-              ? `<button class="navBtn primary" type="button" disabled style="opacity:.65;cursor:not-allowed;">Creator Plan processing…</button>`
-              : `<button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Unlock Creator Access — €10/month</button>`
-          }
-          <button class="navBtn" type="button" id="refreshPlanBtn">Refresh</button>
-        </div>
-        ${
-          cameFromStripe
-            ? `<div class="hint" style="margin-top:10px;">✅ Payment started — waiting for Stripe confirmation. Then press Refresh.</div>`
-            : ``
-        }
-      `;
-
-      setStateBox(
-        "🔒 Creator tools locked",
-        cameFromStripe
-          ? "Thanks! Your payment is processing. Creator Plan stays disabled until our server receives confirmation from Stripe."
-          : "Your creator account is ready, but the Creator Plan is not active yet (or the dashboard can’t read it).",
-        extrasHtml
-      );
-
-      const refreshPlanBtn = document.getElementById("refreshPlanBtn");
-      if (refreshPlanBtn && refreshPlanBtn.dataset.bound !== "1") {
-        refreshPlanBtn.dataset.bound = "1";
-        refreshPlanBtn.addEventListener("click", () => window.location.reload());
-      }
-
-      const buyCreatorPlanBtn = document.getElementById("buyCreatorPlanBtn");
-      if (buyCreatorPlanBtn && buyCreatorPlanBtn.dataset.bound !== "1") {
-        buyCreatorPlanBtn.dataset.bound = "1";
-        buyCreatorPlanBtn.addEventListener("click", async () => {
-          setElementBusy(buyCreatorPlanBtn, true, "Opening Stripe…");
-
-          try {
-            const { data, error } = await client.functions.invoke(
-              "create-creator-plan-checkout",
-              { body: {} }
-            );
-
-            if (error) throw error;
-            if (!data?.url) throw new Error("Missing Stripe URL");
-
-            window.open(data.url, "_blank", "noopener,noreferrer");
-          } catch (error) {
-            setElementBusy(
-              buyCreatorPlanBtn,
-              false,
-              null,
-              "Unlock Creator Access — €10/month"
-            );
-            alert("❌ Checkout error: " + (error?.message || String(error)));
-          }
-        });
-      }
+      renderCreatorStatusNoPlan();
 
       await loadWallet();
       await loadEarnings();
@@ -1282,89 +1421,7 @@
     }
 
     const planData = await getCreatorPlanStatus(session.user.id);
-    let extrasHtml = "";
-
-    if (planData) {
-      const cpeIso = planData.current_period_end || null;
-      const cpeMs = cpeIso ? new Date(cpeIso).getTime() : 0;
-      const now = Date.now();
-
-      if (!!planData.cancel_at_period_end && cpeMs && cpeMs > now) {
-        const endLabel = new Date(cpeIso).toLocaleDateString();
-        extrasHtml = `
-          <div class="btnRow" style="margin-top:12px;">
-            <button class="ghost" type="button" id="resumePlanBtn">Resume Creator Plan</button>
-          </div>
-          <div class="hint" style="margin-top:8px;opacity:.9;">⏳ Access remains active until <b>${endLabel}</b>.</div>
-        `;
-      } else {
-        extrasHtml = `
-          <div class="btnRow" style="margin-top:12px;">
-            <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel</button>
-          </div>
-          <div class="hint" style="margin-top:8px;opacity:.9;">Cancels at the end of your current billing period.</div>
-        `;
-      }
-    } else {
-      extrasHtml = `
-        <div class="btnRow" style="margin-top:12px;">
-          <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel at period end</button>
-        </div>
-        <div class="hint" style="margin-top:8px;opacity:.9;">Cancels at the end of your current billing period.</div>
-      `;
-    }
-
-    setStateBox(
-      (!!planData && !!planData.cancel_at_period_end) ? "⚠️ Creator plan canceled" : "✅ Creator unlocked",
-      (!!planData && !!planData.cancel_at_period_end)
-        ? "Your plan will end at the end of the billing period. You keep access until then."
-        : "Plan active. You can create posts and use creator tools.",
-      extrasHtml
-    );
-
-    const cancelPlanBtn = document.getElementById("cancelPlanBtn");
-    if (cancelPlanBtn && cancelPlanBtn.dataset.bound !== "1") {
-      cancelPlanBtn.dataset.bound = "1";
-      cancelPlanBtn.addEventListener("click", async () => {
-        if (!window.confirm("Cancel your Creator Plan at the end of the current period?")) {
-          return;
-        }
-
-        setElementBusy(cancelPlanBtn, true, "Processing…");
-
-        try {
-          const { error } = await client.functions.invoke("cancel-creator-plan", {
-            body: {},
-          });
-
-          if (error) throw error;
-          window.location.reload();
-        } catch (error) {
-          setElementBusy(cancelPlanBtn, false, null, "Cancel at period end");
-          alert("❌ Cancel failed: " + (error?.message || String(error)));
-        }
-      });
-    }
-
-    const resumePlanBtn = document.getElementById("resumePlanBtn");
-    if (resumePlanBtn && resumePlanBtn.dataset.bound !== "1") {
-      resumePlanBtn.dataset.bound = "1";
-      resumePlanBtn.addEventListener("click", async () => {
-        setElementBusy(resumePlanBtn, true, "Processing…");
-
-        try {
-          const { error } = await client.functions.invoke("resume-creator-plan", {
-            body: {},
-          });
-
-          if (error) throw error;
-          window.location.reload();
-        } catch (error) {
-          setElementBusy(resumePlanBtn, false, null, "Resume Creator Plan");
-          alert("❌ Resume failed: " + (error?.message || String(error)));
-        }
-      });
-    }
+    renderCreatorStatusPlanActive(planData);
 
     await loadWallet();
     await loadEarnings();
