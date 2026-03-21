@@ -1227,7 +1227,7 @@ showWalletMsg(
     ${
       cameFromStripe
         ? `<div class="hint" style="margin-top:10px;">✅ Payment started — waiting for Stripe confirmation. Then press Refresh.</div>`
-        : `<div class="hint" style="margin-top:10px;">Posting is already available. Activate Creator Plan to unlock monetization.</div>`
+        : `<div class="hint" style="margin-top:10px;"> Activate Creator Plan to unlock monetization.</div>`
     }
   `;
 
