@@ -8,6 +8,7 @@
   /css/styles.css
   /css/marketing/layout.css
   /css/marketing/auth.css
+  /css/marketing/email-confirmed.css
 
   JS:
   /js/paths.js
@@ -25,6 +26,7 @@
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/marketing/layout.css" />
   <link rel="stylesheet" href="/css/marketing/auth.css" />
+  <link rel="stylesheet" href="/css/marketing/email-confirmed.css" />
 </head>
 
 <body>
@@ -32,45 +34,38 @@
     <div class="wrap">
       <div id="header-placeholder"></div>
 
-      <main class="hero authLayout">
-        <section class="panel" style="max-width:720px;margin:0 auto;text-align:center;">
-          <div class="pill">Email confirmed 🐾</div>
+      <main class="hero authLayout emailConfirmedWrap">
+        <section class="panel emailConfirmedCard">
+          <div class="emailConfirmedIcon" aria-hidden="true">🐾</div>
 
-          <h1>Welcome to OnlyPaws</h1>
+          <div class="pill">Email confirmed</div>
 
-          <p class="sub" style="max-width:560px;margin:0 auto 18px;">
+          <h1 class="emailConfirmedTitle">Welcome to OnlyPaws</h1>
+
+          <p class="sub emailConfirmedLead">
             Your email has been confirmed and your account is ready.
             We’re already walking you in.
           </p>
 
-          <div
-            style="
-              margin:22px auto 24px;
-              max-width:540px;
-              padding:18px 20px;
-              border:1px solid rgba(255,255,255,.14);
-              border-radius:18px;
-              background:rgba(255,255,255,.06);
-              color:var(--muted);
-              line-height:1.6;
-            "
-          >
-            <strong style="color:var(--text);">Leash on. Tail up. Let’s go.</strong><br />
-            In a few seconds we’ll walk you over to your profile so you can start exploring OnlyPaws.
+          <div class="emailConfirmedMessage">
+            <strong>Leash on. Tail up. Let’s go.</strong>
+            In a few seconds we’ll walk you over to your profile so you can start
+            exploring OnlyPaws.
           </div>
 
-          <div class="btnRow" style="justify-content:center;">
+          <div class="btnRow emailConfirmedActions">
             <a class="btn" id="goProfileBtn" href="/html/app/profile.html">
               Go to profile
             </a>
           </div>
 
-          <p
-            id="redirectNote"
-            class="note"
-            style="margin-top:18px;text-align:center;"
-          >
-            Walking you in<span id="redirectDots">...</span>
+          <p id="redirectNote" class="note emailConfirmedStatus">
+            <strong>Walking you in</strong><span id="redirectDots" class="emailConfirmedDots">...</span>
+          </p>
+
+          <p class="emailConfirmedHint">
+            Don’t want to wait?
+            <a href="/html/app/profile.html">Open your profile now</a>.
           </p>
         </section>
       </main>
@@ -92,11 +87,11 @@
         "/html/app/profile.html";
 
       const btn = document.getElementById("goProfileBtn");
+      const hintLink = document.querySelector(".emailConfirmedHint a");
       const dots = document.getElementById("redirectDots");
 
-      if (btn) {
-        btn.href = profileUrl;
-      }
+      if (btn) btn.href = profileUrl;
+      if (hintLink) hintLink.href = profileUrl;
 
       let dotCount = 0;
       const dotTimer = setInterval(() => {
