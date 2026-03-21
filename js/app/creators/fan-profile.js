@@ -80,6 +80,30 @@
     }
   }
 
+  function setLikesLoading() {
+    const statLikes = document.getElementById("statLikes");
+    const statLikesHint = document.getElementById("statLikesHint");
+
+    if (statLikes) statLikes.textContent = "…";
+    if (statLikesHint) statLikesHint.textContent = "";
+  }
+
+  function setLikesValue(count) {
+    const statLikes = document.getElementById("statLikes");
+    const statLikesHint = document.getElementById("statLikesHint");
+
+    if (statLikes) statLikes.textContent = String(count ?? 0);
+    if (statLikesHint) statLikesHint.textContent = "";
+  }
+
+  function setLikesError(message) {
+    const statLikes = document.getElementById("statLikes");
+    const statLikesHint = document.getElementById("statLikesHint");
+
+    if (statLikes) statLikes.textContent = "—";
+    if (statLikesHint) statLikesHint.textContent = message || "";
+  }
+
   async function loadFanByParam(value) {
     const selectFields = "user_id, username, display_name, bio, avatar_url, role";
     const query = client.from("profiles").select(selectFields);
@@ -110,6 +134,16 @@
       .select("fan_id", { count: "exact", head: true })
       .eq("fan_id", fanUserId)
       .in("status", ["active", "trialing", "past_due"]);
+
+    if (error) throw error;
+    return count ?? 0;
+  }
+
+  async function countLikes(fanUserId) {
+    const { count, error } = await client
+      .from("post_likes")
+      .select("post_id", { count: "exact", head: true })
+      .eq("fan_id", fanUserId);
 
     if (error) throw error;
     return count ?? 0;
@@ -181,14 +215,6 @@
     if (el) el.textContent = message || "";
   }
 
-  function initLikesPlaceholder() {
-    const statLikes = document.getElementById("statLikes");
-    const statLikesHint = document.getElementById("statLikesHint");
-
-    if (statLikes) statLikes.textContent = "—";
-    if (statLikesHint) statLikesHint.textContent = "Coming soon";
-  }
-
   async function boot() {
     if (window.OPPartials?.loadLayout) {
       await window.OPPartials.loadLayout();
@@ -198,11 +224,12 @@
       await window.OPNav.initNav();
     }
 
-    initLikesPlaceholder();
+    setLikesLoading();
 
     const { u } = getParams();
     if (!u) {
       setHint("Missing ?u=username (or UUID)");
+      setLikesError("");
       const followingHint = document.getElementById("followingHint");
       if (followingHint) followingHint.textContent = "";
       return;
@@ -218,9 +245,10 @@
         setHint("");
       }
 
-      const [followingCount, subscriptionCount, creators] = await Promise.all([
+      const [followingCount, subscriptionCount, likesCount, creators] = await Promise.all([
         countFollowing(fan.user_id),
         countSubscriptions(fan.user_id),
+        countLikes(fan.user_id),
         loadFollowingCreators(fan.user_id),
       ]);
 
@@ -230,9 +258,11 @@
       if (statFollowing) statFollowing.textContent = String(followingCount);
       if (statSubscriptions) statSubscriptions.textContent = String(subscriptionCount);
 
+      setLikesValue(likesCount);
       renderFollowingList(creators);
     } catch (error) {
       setHint("❌ " + (error?.message || String(error)));
+      setLikesError("Failed to load");
       const followingHint = document.getElementById("followingHint");
       if (followingHint) followingHint.textContent = "";
     }
@@ -243,6 +273,7 @@
     loadFanByParam,
     countFollowing,
     countSubscriptions,
+    countLikes,
     loadFollowingCreators,
   };
 
