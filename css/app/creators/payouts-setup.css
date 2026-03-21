@@ -1,8 +1,12 @@
 /* =========================================================
    OnlyPaws
-   File: css/app/creators/payouts-setup.css
+   File: /css/app/creators/payouts-setup.css
    Purpose: styles specific to the payouts setup page
    ========================================================= */
+
+.payoutsSetupMain {
+  padding-top: 4px;
+}
 
 .payoutsBox {
   margin-top: 14px;
@@ -43,6 +47,7 @@
   font-size: 13px;
   line-height: 1.55;
   color: rgba(255,255,255,.82);
+  word-break: break-word;
 }
 
 .payoutsOkLine {
@@ -66,4 +71,38 @@
   margin-top: 6px;
   font-size: 12px;
   opacity: .85;
+}
+
+.op-hidden {
+  display: none !important;
+}
+
+@media (max-width: 640px) {
+  .payoutsSetupMain {
+    padding-top: 0;
+  }
+
+  .payoutsBox {
+    padding: 13px;
+    border-radius: 16px;
+  }
+
+  .payoutsStatusLine {
+    gap: 9px;
+  }
+
+  .payoutsLockIcon {
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+  }
+
+  .payoutsStatusText,
+  .payoutsOkLine {
+    font-size: 12.5px;
+  }
+
+  .payoutsNote {
+    font-size: 11.5px;
+  }
 }
