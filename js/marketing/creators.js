@@ -1,13 +1,7 @@
 /* =========================================================
    OnlyPaws
    File: /js/marketing/creators.js
-   Purpose: marketing creators page logic
-
-   Rules for this page:
-   - users entering from this page must end up with role = creator
-   - never create a fan profile here
-   - if a profile already exists as fan, upgrade it to creator
-
+   Purpose: creator auth flow, creator profile bootstrap, and support CTA
    Dependencies:
    - window.OP_PATHS
    - window.onlypawsClient
@@ -19,47 +13,31 @@
 (function () {
   const client = window.onlypawsClient;
   const PATHS = window.OP_PATHS || {};
-
   const CREATOR_ROLE = "creator";
 
   const els = {
     form: document.getElementById("creator-auth-form"),
-    msg: document.getElementById("creatorMsg"),
     email: document.getElementById("creator-email"),
     password: document.getElementById("creator-password"),
-    loginBtn: document.getElementById("creatorLoginBtn"),
     signupBtn: document.getElementById("creatorSignupBtn"),
-
+    loginBtn: document.getElementById("creatorLoginBtn"),
     forgotBtn: document.getElementById("forgotBtn"),
-    resetBox: document.getElementById("resetBox"),
     sendResetBtn: document.getElementById("sendResetBtn"),
     cancelResetBtn: document.getElementById("cancelResetBtn"),
+    resetBox: document.getElementById("resetBox"),
+    msg: document.getElementById("creatorMsg"),
   };
 
-  function path(...candidates) {
-    for (const key of candidates) {
-      if (!key) continue;
+  function path(key) {
+    const resolved =
+      PATHS?.app?.[key] ||
+      PATHS?.marketing?.[key] ||
+      PATHS?.thanks?.[key] ||
+      PATHS?.legal?.[key] ||
+      PATHS?.faq?.[key] ||
+      PATHS?.[key];
 
-      if (typeof key === "string" && key.includes("/")) {
-        return key;
-      }
-
-      const resolved =
-        PATHS?.app?.creators?.[key] ||
-        PATHS?.app?.fans?.[key] ||
-        PATHS?.app?.[key] ||
-        PATHS?.marketing?.[key] ||
-        PATHS?.thanks?.[key] ||
-        PATHS?.faq?.[key] ||
-        PATHS?.legal?.[key] ||
-        PATHS?.[key];
-
-      if (resolved) {
-        return resolved;
-      }
-    }
-
-    return "";
+    return resolved || "";
   }
 
   function setMsg(text) {
@@ -77,9 +55,7 @@
       els.sendResetBtn,
       els.cancelResetBtn,
     ].forEach((el) => {
-      if (el) {
-        el.disabled = !!isBusy;
-      }
+      if (el) el.disabled = !!isBusy;
     });
   }
 
@@ -261,8 +237,11 @@
         return;
       }
 
+      const emailConfirmedPath =
+        path("emailConfirmed") || "/html/marketing/email-confirmed.html";
+
       const emailRedirectTo =
-        `${window.location.origin}${path("emailConfirmed") || "/html/marketing/email-confirmed.html"}`;
+        `${window.location.origin}${emailConfirmedPath}?role=creator`;
 
       const { data, error } = await client.auth.signUp({
         email,
