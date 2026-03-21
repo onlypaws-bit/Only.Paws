@@ -49,14 +49,14 @@
   }
 
   function clearForm() {
-    els.fName.value = "";
-    els.fSpecies.value = "";
-    els.fBreed.value = "";
-    els.fBirth.value = "";
-    els.fAge.value = "";
-    els.fBio.value = "";
-    els.fHealthNotes.value = "";
-    els.fSpecialMarks.value = "";
+    if (els.fName) els.fName.value = "";
+    if (els.fSpecies) els.fSpecies.value = "";
+    if (els.fBreed) els.fBreed.value = "";
+    if (els.fBirth) els.fBirth.value = "";
+    if (els.fAge) els.fAge.value = "";
+    if (els.fBio) els.fBio.value = "";
+    if (els.fHealthNotes) els.fHealthNotes.value = "";
+    if (els.fSpecialMarks) els.fSpecialMarks.value = "";
     if (els.fAvatarFile) els.fAvatarFile.value = "";
   }
 
@@ -106,7 +106,11 @@
       } catch (_) {}
     }
 
-    if (pet.age_years !== null && pet.age_years !== undefined && pet.age_years !== "") {
+    if (
+      pet.age_years !== null &&
+      pet.age_years !== undefined &&
+      pet.age_years !== ""
+    ) {
       parts.push(`${pet.age_years}y`);
     }
 
@@ -121,62 +125,112 @@
       return;
     }
 
-    els.petsList.innerHTML = list.map((pet) => {
-      const avatar = pet.avatar_url
-        ? `<img class="petsAvatarMini" src="${esc(pet.avatar_url)}" alt="pet avatar">`
-        : `<div class="petsAvatarMiniFallback">🐾</div>`;
+    els.petsList.innerHTML = list
+      .map((pet) => {
+        const avatar = pet.avatar_url
+          ? `<img class="petsAvatarMini" src="${esc(
+              pet.avatar_url
+            )}" alt="pet avatar">`
+          : `<div class="petsAvatarMiniFallback">🐾</div>`;
 
-      const topLine = petSummaryLine(pet);
+        const topLine = petSummaryLine(pet);
 
-      return `
-        <article class="petsRowCard" data-id="${esc(pet.id)}">
-          ${avatar}
+        return `
+          <article class="petsRowCard" data-id="${esc(pet.id)}">
+            ${avatar}
 
-          <div class="petsMeta">
-            <div class="petsBadges">
-              <span class="petsBadge">🐾 PET</span>
-              ${pet.created_at ? `<span class="petsBadge">📅 ${esc(new Date(pet.created_at).toLocaleDateString())}</span>` : ""}
-            </div>
+            <div class="petsMeta">
+              <div class="petsBadges">
+                <span class="petsBadge">🐾 PET</span>
+                ${
+                  pet.created_at
+                    ? `<span class="petsBadge">📅 ${esc(
+                        new Date(pet.created_at).toLocaleDateString()
+                      )}</span>`
+                    : ""
+                }
+              </div>
 
-            <b class="petsNameLine">
-              ${esc(pet.name || "Pet")}
-              ${topLine ? `<span class="petsTopLine"> • ${esc(topLine)}</span>` : ""}
-            </b>
+              <b class="petsNameLine">
+                ${esc(pet.name || "Pet")}
+                ${
+                  topLine
+                    ? `<span class="petsTopLine"> • ${esc(topLine)}</span>`
+                    : ""
+                }
+              </b>
 
-            ${pet.bio ? `<div class="petsSmall" style="margin-top:6px;">${esc(pet.bio)}</div>` : ""}
-            ${pet.health_notes ? `<div class="petsSmall" style="margin-top:6px;"><b>Health:</b> ${esc(pet.health_notes)}</div>` : ""}
-            ${pet.special_marks ? `<div class="petsSmall" style="margin-top:6px;"><b>Special marks:</b> ${esc(pet.special_marks)}</div>` : ""}
+              ${
+                pet.bio
+                  ? `<div class="petsSmall" style="margin-top:6px;">${esc(
+                      pet.bio
+                    )}</div>`
+                  : ""
+              }
+              ${
+                pet.health_notes
+                  ? `<div class="petsSmall" style="margin-top:6px;"><b>Health:</b> ${esc(
+                      pet.health_notes
+                    )}</div>`
+                  : ""
+              }
+              ${
+                pet.special_marks
+                  ? `<div class="petsSmall" style="margin-top:6px;"><b>Special marks:</b> ${esc(
+                      pet.special_marks
+                    )}</div>`
+                  : ""
+              }
 
-            <div class="petsDivider"></div>
+              <div class="petsDivider"></div>
 
-            <div class="petsEditorBlock">
-              <div class="petsEditorTitle">Edit basics</div>
+              <div class="petsEditorBlock">
+                <div class="petsEditorTitle">Edit basics</div>
 
-              <div class="petsFormGrid">
-                <input class="petsRowInput" data-k="name" type="text" placeholder="Name" value="${esc(pet.name || "")}">
-                <input class="petsRowInput" data-k="species" type="text" placeholder="Species" value="${esc(pet.species || "")}">
-                <input class="petsRowInput" data-k="breed" type="text" placeholder="Breed" value="${esc(pet.breed || "")}">
-                <input class="petsRowInput" data-k="birth_date" type="date" value="${pet.birth_date ? esc(String(pet.birth_date).slice(0, 10)) : ""}">
-                <input class="petsRowInput" data-k="age_years" type="number" min="0" step="1" placeholder="Age years" value="${esc(pet.age_years ?? "")}">
-                <textarea class="petsRowTextarea" data-k="bio" placeholder="Bio">${esc(pet.bio || "")}</textarea>
-                <textarea class="petsRowTextarea" data-k="health_notes" placeholder="Health notes">${esc(pet.health_notes || "")}</textarea>
-                <textarea class="petsRowTextarea" data-k="special_marks" placeholder="Special marks">${esc(pet.special_marks || "")}</textarea>
+                <div class="petsFormGrid">
+                  <input class="petsRowInput" data-k="name" type="text" placeholder="Name" value="${esc(
+                    pet.name || ""
+                  )}">
+                  <input class="petsRowInput" data-k="species" type="text" placeholder="Species" value="${esc(
+                    pet.species || ""
+                  )}">
+                  <input class="petsRowInput" data-k="breed" type="text" placeholder="Breed" value="${esc(
+                    pet.breed || ""
+                  )}">
+                  <input class="petsRowInput" data-k="birth_date" type="date" value="${
+                    pet.birth_date
+                      ? esc(String(pet.birth_date).slice(0, 10))
+                      : ""
+                  }">
+                  <input class="petsRowInput" data-k="age_years" type="number" min="0" step="1" placeholder="Age years" value="${esc(
+                    pet.age_years ?? ""
+                  )}">
+                  <textarea class="petsRowTextarea" data-k="bio" placeholder="Bio">${esc(
+                    pet.bio || ""
+                  )}</textarea>
+                  <textarea class="petsRowTextarea" data-k="health_notes" placeholder="Health notes">${esc(
+                    pet.health_notes || ""
+                  )}</textarea>
+                  <textarea class="petsRowTextarea" data-k="special_marks" placeholder="Special marks">${esc(
+                    pet.special_marks || ""
+                  )}</textarea>
+                </div>
+              </div>
+
+              <div class="petsField">
+                <label class="petsLabel">Change pet photo</label>
+                <input class="petsRowInputFile" data-kfile="avatar" type="file" accept="image/*">
+              </div>
+
+              <div class="btnRow">
+                <button class="ghost" type="button" data-action="save">Save</button>
+                <button class="ghost danger" type="button" data-action="delete">Delete</button>
               </div>
             </div>
-
-            <div class="petsField">
-              <label class="petsLabel">Change pet photo</label>
-              <input class="petsRowInputFile" data-kfile="avatar" type="file" accept="image/*">
-            </div>
-
-            <div class="btnRow">
-              <button class="ghost" type="button" data-action="save">Save</button>
-              <button class="ghost danger" type="button" data-action="delete">Delete</button>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join("");
+          </article>
+        `;
+      })
+      .join("");
 
     bindRowActions();
   }
@@ -219,6 +273,7 @@
 
       const fileInput = row.querySelector('[data-kfile="avatar"]');
       const file = fileInput?.files?.[0] || null;
+
       if (file) {
         const url = await uploadPetAvatar(session.user.id, petId, file);
         payload.avatar_url = url;
@@ -282,6 +337,8 @@
   }
 
   function bindRowActions() {
+    if (!els.petsList) return;
+
     els.petsList.querySelectorAll('[data-action="save"]').forEach((button) => {
       button.addEventListener("click", () => {
         const row = button.closest(".petsRowCard");
@@ -303,14 +360,18 @@
 
     const res = await client
       .from("pets")
-      .select("id, name, species, breed, avatar_url, bio, created_at, owner_id, age_years, birth_date, health_notes, special_marks")
+      .select(
+        "id, name, species, breed, avatar_url, bio, created_at, owner_id, age_years, birth_date, health_notes, special_marks"
+      )
       .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
 
     if (res.error) {
       if (els.listHint) els.listHint.textContent = "Couldn’t load pets";
       if (els.petsList) {
-        els.petsList.innerHTML = `<div class="petsHint">${esc(res.error.message)}</div>`;
+        els.petsList.innerHTML = `<div class="petsHint">${esc(
+          res.error.message
+        )}</div>`;
       }
       return;
     }
@@ -331,22 +392,25 @@
       const session = await getSession();
       if (!session) throw new Error("Not logged in");
 
-      const name = String(els.fName.value || "").trim();
+      const name = String(els.fName?.value || "").trim();
       if (!name) throw new Error("Name is required");
 
       const insertPayload = {
         owner_id: session.user.id,
         name,
-        species: toNullableTrimmed(els.fSpecies.value),
-        breed: toNullableTrimmed(els.fBreed.value),
-        birth_date: els.fBirth.value ? els.fBirth.value : null,
-        age_years: els.fAge.value === "" ? null : Number(els.fAge.value),
-        bio: toNullableTrimmed(els.fBio.value),
-        health_notes: toNullableTrimmed(els.fHealthNotes.value),
-        special_marks: toNullableTrimmed(els.fSpecialMarks.value),
+        species: toNullableTrimmed(els.fSpecies?.value),
+        breed: toNullableTrimmed(els.fBreed?.value),
+        birth_date: els.fBirth?.value ? els.fBirth.value : null,
+        age_years: els.fAge?.value === "" ? null : Number(els.fAge?.value),
+        bio: toNullableTrimmed(els.fBio?.value),
+        health_notes: toNullableTrimmed(els.fHealthNotes?.value),
+        special_marks: toNullableTrimmed(els.fSpecialMarks?.value),
       };
 
-      if (insertPayload.age_years !== null && Number.isNaN(insertPayload.age_years)) {
+      if (
+        insertPayload.age_years !== null &&
+        Number.isNaN(insertPayload.age_years)
+      ) {
         insertPayload.age_years = null;
       }
 
@@ -388,41 +452,22 @@
 
   async function initLayout() {
     try {
-      if (window.OPPartials?.loadAppShell) {
-        await window.OPPartials.loadAppShell({
-          headerTargetId: "header-placeholder",
-          footerTargetId: "footer-placeholder",
-        });
-      } else if (window.loadAppLayout) {
-        await window.loadAppLayout({
-          headerTargetId: "header-placeholder",
-          footerTargetId: "footer-placeholder",
-        });
+      if (window.OPPartials?.loadLayout) {
+        await window.OPPartials.loadLayout();
       }
-    } catch (_) {}
+    } catch (error) {
+      console.error("Failed to load layout:", error);
+    }
   }
 
   async function initNav() {
     try {
-      const session = await getSession();
-
-      if (window.OPNav?.init) {
-        await window.OPNav.init({
-          activeApp: "creator-dashboard",
-          requireAuth: false,
-          session,
-        });
-        return;
+      if (window.OPNav?.initNav) {
+        await window.OPNav.initNav();
       }
-
-      if (window.initNav) {
-        await window.initNav({
-          activeApp: "creator-dashboard",
-          requireAuth: false,
-          session,
-        });
-      }
-    } catch (_) {}
+    } catch (error) {
+      console.error("Failed to init nav:", error);
+    }
   }
 
   function goHome() {
@@ -443,7 +488,9 @@
       const session = await getSession();
 
       if (!session) {
-        if (els.addHint) els.addHint.textContent = "You must log in to manage pets.";
+        if (els.addHint) {
+          els.addHint.textContent = "You must log in to manage pets.";
+        }
         if (els.addBtn) els.addBtn.disabled = true;
         if (els.listHint) els.listHint.textContent = "Not logged in";
         return;
@@ -458,8 +505,13 @@
     }
   }
 
-  els.addBtn?.addEventListener("click", addPet);
-  els.resetBtn?.addEventListener("click", clearForm);
+  if (els.addBtn) {
+    els.addBtn.addEventListener("click", addPet);
+  }
+
+  if (els.resetBtn) {
+    els.resetBtn.addEventListener("click", clearForm);
+  }
 
   window.addEventListener("DOMContentLoaded", async () => {
     if (!window.onlypawsClient) {
@@ -475,7 +527,7 @@
       return;
     }
 
-    boot();
+    await boot();
   });
 
   window.goPetsHome = goHome;
