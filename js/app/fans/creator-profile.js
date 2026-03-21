@@ -302,13 +302,10 @@
 
     return posts.map((post) => {
       const isPremium = post.is_paid === true;
-      const isPrivate = post.is_public === false;
 
       let canView = false;
 
-      if (isPrivate) {
-        canView = state.isSelf;
-      } else if (!isPremium) {
+      if (!isPremium) {
         canView = true;
       } else {
         canView = state.isSelf || access.hasAccess;
@@ -333,7 +330,15 @@
   function renderPosts(posts) {
     if (!els.posts) return;
 
-    if (!posts.length) {
+    const visiblePosts = (posts || []).filter((post) => {
+      const isDraft = post.is_public === false;
+      if (isDraft && !state.isSelf) {
+        return false;
+      }
+      return true;
+    });
+
+    if (!visiblePosts.length) {
       els.posts.innerHTML = `
         <div class="postCard">
           <h3>No posts yet</h3>
@@ -354,7 +359,8 @@
       return;
     }
 
-    const enriched = enrichPostsForRenderer(posts);
+    const enriched = enrichPostsForRenderer(visiblePosts);
+
     els.posts.innerHTML = enriched.map((post) =>
       postApi.buildPostCard(post, {
         creatorUsername: post.creator_username,
