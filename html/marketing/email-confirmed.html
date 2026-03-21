@@ -78,42 +78,44 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/paths.js"></script>
-  <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/partials.js"></script>
-  <script src="/js/nav.js"></script>
+<script src="/js/paths.js"></script>
+<script src="/js/onlypawsClient.js"></script>
+<script src="/js/partials.js"></script>
+<script src="/js/nav.js"></script>
 
-  <script>
-    (function () {
-      const PATHS = window.OP_PATHS || {};
-      const profileUrl =
-        PATHS?.app?.profile ||
-        "/html/app/profile.html";
+<script>
+  (async function () {
+    const PATHS = window.OP_PATHS || {};
+    const profileUrl =
+      PATHS?.app?.profile ||
+      "/html/app/profile.html";
 
-      const btn = document.getElementById("goProfileBtn");
-      const hintLink = document.querySelector(".emailConfirmedHint a");
-      const dots = document.getElementById("redirectDots");
+    if (window.OPPartials?.loadMarketingLayout) {
+      await window.OPPartials.loadMarketingLayout();
+    }
 
-      if (btn) btn.href = profileUrl;
-      if (hintLink) hintLink.href = profileUrl;
+    const btn = document.getElementById("goProfileBtn");
+    const hintLink = document.querySelector(".emailConfirmedHint a");
+    const dots = document.getElementById("redirectDots");
 
-      let dotCount = 0;
-      const dotTimer = setInterval(() => {
-        dotCount = (dotCount + 1) % 4;
-        if (dots) {
-          dots.textContent = ".".repeat(dotCount || 3);
-        }
-      }, 450);
+    if (btn) btn.href = profileUrl;
+    if (hintLink) hintLink.href = profileUrl;
 
-      const previewMode = new URLSearchParams(window.location.search).has("preview");
-
-      if (!previewMode) {
-        setTimeout(() => {
-          clearInterval(dotTimer);
-          window.location.assign(profileUrl);
-        }, 3500);
+    let dotCount = 0;
+    const dotTimer = setInterval(() => {
+      dotCount = (dotCount + 1) % 4;
+      if (dots) {
+        dots.textContent = ".".repeat(dotCount || 3);
       }
-    })();
-  </script>
-</body>
-</html>
+    }, 450);
+
+    const previewMode = new URLSearchParams(window.location.search).has("preview");
+
+    if (!previewMode) {
+      setTimeout(() => {
+        clearInterval(dotTimer);
+        window.location.assign(profileUrl);
+      }, 3500);
+    }
+  })();
+</script>
