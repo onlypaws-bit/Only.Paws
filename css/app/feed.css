@@ -24,12 +24,20 @@
   flex:1;
   min-width:240px;
   width:100%;
-  padding:12px 14px;
+  padding:13px 15px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.12);
-  color:white;
+  background:rgba(255,255,255,.10);
+  color:#fff;
   outline:none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 6px 18px rgba(0,0,0,.10);
+  transition:
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
 }
 
 .search::placeholder{
@@ -37,28 +45,33 @@
 }
 
 .search:focus{
-  border-color:rgba(255,255,255,.28);
+  border-color:rgba(255,255,255,.30);
   background:rgba(255,255,255,.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 10px 24px rgba(0,0,0,.14);
 }
 
-/* ===== SUPPORT LINE FIX ===== */
+/* ===== SUPPORT LINE ===== */
 
 .subtleLine{
-  margin-top:12px;
+  margin-top:14px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
+  gap:14px;
   flex-wrap:wrap;
-  color:rgba(255,255,255,.74);
+  color:rgba(255,255,255,.76);
   font-size:13px;
 }
 
 .subtleLine > :first-child{
   flex:1 1 260px;
   min-width:0;
+  line-height:1.45;
 }
 
+/* glass support button */
 .subtleLine .btn,
 .subtleLine button,
 .subtleLine a{
@@ -74,6 +87,35 @@
   font-weight:800;
   line-height:1.2;
   white-space:nowrap;
+  color:#fff;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 8px 20px rgba(0,0,0,.16);
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+.subtleLine .btn:hover,
+.subtleLine button:hover,
+.subtleLine a:hover{
+  background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.26);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.20),
+    0 12px 24px rgba(0,0,0,.18);
+  transform:translateY(-1px);
+}
+
+.subtleLine .btn:active,
+.subtleLine button:active,
+.subtleLine a:active{
+  transform:translateY(0) scale(.985);
 }
 
 .debug{
@@ -112,24 +154,34 @@
   margin-top:14px;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px;
+  gap:12px;
 }
 
 .creatorCard{
   text-decoration:none;
   color:inherit;
   display:block;
-  border-radius:18px;
+  border-radius:20px;
   padding:14px;
   background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.16);
-  transition:transform .16s ease, background .16s ease, border-color .16s ease;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 10px 24px rgba(0,0,0,.08);
+  transition:
+    transform .16s ease,
+    background .16s ease,
+    border-color .16s ease,
+    box-shadow .16s ease;
 }
 
 .creatorCard:hover{
-  transform:translateY(-1px);
+  transform:translateY(-2px);
   background:rgba(255,255,255,.13);
   border-color:rgba(255,255,255,.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 14px 28px rgba(0,0,0,.12);
 }
 
 .creatorCard:active{
@@ -154,6 +206,7 @@
   flex:0 0 auto;
   overflow:hidden;
   font-size:20px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
 }
 
 .creatorAvatar{
@@ -177,13 +230,15 @@
 
 .creatorMeta strong{
   display:block;
+  font-size:15px;
+  line-height:1.25;
 }
 
 .creatorMeta span{
   display:block;
   color:rgba(255,255,255,.78);
   font-size:13px;
-  margin-top:2px;
+  margin-top:3px;
 }
 
 .creatorBio{
@@ -270,10 +325,12 @@
   color:white;
   font-weight:900;
   cursor:pointer;
+  transition:background .16s ease, transform .16s ease;
 }
 
 .mediaModalClose:hover{
   background:rgba(255,255,255,.18);
+  transform:translateY(-1px);
 }
 
 .isHidden{
