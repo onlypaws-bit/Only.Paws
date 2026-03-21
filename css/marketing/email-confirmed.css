@@ -175,3 +175,39 @@
     margin-top:16px;
   }
 }
+
+
+/* =========================================================
+   BRAND LOGO
+   ========================================================= */
+
+.emailConfirmedBrand{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.emailConfirmedBrand img{
+  width:64px;
+  height:64px;
+  object-fit:contain;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.25));
+}
+
+
+/* =========================================================
+   CENTERING FIX (IMPORTANT)
+   ========================================================= */
+
+.emailConfirmedWrap{
+  min-height:calc(100vh - 120px); /* header + footer breathing */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.emailConfirmedCard{
+  margin:0;
+}
+
