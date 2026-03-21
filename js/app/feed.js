@@ -440,20 +440,25 @@
     }
   }
 
-  function initSupportButton() {
+  async function initSupportButton() {
     const btn = document.getElementById("supportBtn");
     if (!btn) return;
 
-    if (window.OPSupport?.bindSupportButton) {
-      window.OPSupport.bindSupportButton(btn);
+    if (typeof window.initSupportUsButton === "function") {
+      await window.initSupportUsButton({
+        buttonId: "supportBtn",
+        messageId: "supportMsg",
+        successPath:
+          PATHS?.thanks?.supportUs || "/html/thanks/thanks-support-us.html",
+        cancelPath: window.location.pathname + window.location.search,
+        supportLabel: "Support OnlyPaws 🐾",
+        cancelLabel: "Cancel support",
+        resumeLabel: "Resume support",
+      });
       return;
     }
 
-    if (window.OPSupport?.openSupportModal) {
-      btn.addEventListener("click", () => {
-        window.OPSupport.openSupportModal();
-      });
-    }
+    console.warn("[feed] initSupportUsButton not available.");
   }
 
   async function initFeedPage() {
@@ -474,7 +479,7 @@
       }
 
       setupSearch();
-      initSupportButton();
+      await initSupportButton();
 
       await Promise.all([
         loadFeaturedCreators(),
