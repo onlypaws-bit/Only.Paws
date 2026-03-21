@@ -1,13 +1,177 @@
 /* =========================================================
    OnlyPaws
-   File: css/marketing/email-confirmed.css
+   File: /css/marketing/email-confirmed.css
    Purpose: styles specific to the email confirmed page
    ========================================================= */
 
-.emailConfirmedCard {
-  text-align: center;
+.emailConfirmedWrap{
+  width:100%;
 }
 
-.emailConfirmedIcon {
-  font-size: 42px;
+.emailConfirmedCard{
+  max-width:720px;
+  margin:0 auto;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.emailConfirmedCard::before{
+  content:"";
+  position:absolute;
+  inset:-80px auto auto -80px;
+  width:180px;
+  height:180px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 70%);
+  pointer-events:none;
+}
+
+.emailConfirmedCard::after{
+  content:"";
+  position:absolute;
+  inset:auto -90px -90px auto;
+  width:220px;
+  height:220px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 72%);
+  pointer-events:none;
+}
+
+.emailConfirmedIcon{
+  width:78px;
+  height:78px;
+  margin:0 auto 18px;
+  display:grid;
+  place-items:center;
+  font-size:38px;
+  line-height:1;
+  border-radius:999px;
+  background:linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:
+    0 14px 34px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter:blur(8px);
+}
+
+.emailConfirmedTitle{
+  margin:0 0 12px;
+  font-size:clamp(30px, 5vw, 46px);
+  line-height:1.06;
+  letter-spacing:-.02em;
+}
+
+.emailConfirmedLead{
+  max-width:580px;
+  margin:0 auto 18px;
+}
+
+.emailConfirmedMessage{
+  margin:24px auto 26px;
+  max-width:560px;
+  padding:20px 22px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:22px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+  box-shadow:
+    0 14px 36px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  color:var(--muted);
+  line-height:1.65;
+}
+
+.emailConfirmedMessage strong{
+  display:block;
+  margin-bottom:6px;
+  color:var(--text);
+  font-size:16px;
+}
+
+.emailConfirmedActions{
+  justify-content:center;
+}
+
+.emailConfirmedActions .btn,
+.emailConfirmedActions .ghost{
+  min-width:190px;
+}
+
+.emailConfirmedStatus{
+  margin-top:18px;
+  text-align:center;
+  color:rgba(255,255,255,.78);
+}
+
+.emailConfirmedStatus strong{
+  color:var(--text);
+  font-weight:800;
+}
+
+.emailConfirmedDots{
+  display:inline-block;
+  min-width:20px;
+  text-align:left;
+}
+
+.emailConfirmedHint{
+  max-width:520px;
+  margin:14px auto 0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.66);
+}
+
+.emailConfirmedHint a{
+  color:#fff;
+  font-weight:700;
+  text-decoration:none;
+}
+
+.emailConfirmedHint a:hover{
+  text-decoration:underline;
+}
+
+@media (max-width: 780px){
+  .emailConfirmedCard{
+    max-width:100%;
+  }
+
+  .emailConfirmedMessage{
+    padding:18px 16px;
+    border-radius:18px;
+  }
+}
+
+@media (max-width: 640px){
+  .emailConfirmedIcon{
+    width:68px;
+    height:68px;
+    font-size:32px;
+    margin-bottom:16px;
+  }
+
+  .emailConfirmedTitle{
+    font-size:clamp(26px, 9vw, 36px);
+  }
+
+  .emailConfirmedLead{
+    max-width:100%;
+  }
+
+  .emailConfirmedActions{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .emailConfirmedActions .btn,
+  .emailConfirmedActions .ghost{
+    width:100%;
+    min-width:0;
+  }
+
+  .emailConfirmedStatus{
+    margin-top:16px;
+  }
 }
