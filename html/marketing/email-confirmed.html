@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="/css/marketing/email-confirmed.css" />
 </head>
 
-<body>
+<body data-page="email-confirmed">
   <div class="pageShell">
     <div class="wrap">
       <div id="header-placeholder"></div>
@@ -78,44 +78,63 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/paths.js"></script>
-<script src="/js/onlypawsClient.js"></script>
-<script src="/js/partials.js"></script>
-<script src="/js/nav.js"></script>
+  <script src="/js/paths.js"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
 
-<script>
-  (async function () {
-    const PATHS = window.OP_PATHS || {};
-    const profileUrl =
-      PATHS?.app?.profile ||
-      "/html/app/profile.html";
+  <script>
+    (async function () {
+      const PATHS = window.OP_PATHS || {};
+      const params = new URLSearchParams(window.location.search);
+      const role = (params.get("role") || "").trim().toLowerCase();
+      const previewMode = params.has("preview");
 
-    if (window.OPPartials?.loadMarketingLayout) {
-      await window.OPPartials.loadMarketingLayout();
-    }
-
-    const btn = document.getElementById("goProfileBtn");
-    const hintLink = document.querySelector(".emailConfirmedHint a");
-    const dots = document.getElementById("redirectDots");
-
-    if (btn) btn.href = profileUrl;
-    if (hintLink) hintLink.href = profileUrl;
-
-    let dotCount = 0;
-    const dotTimer = setInterval(() => {
-      dotCount = (dotCount + 1) % 4;
-      if (dots) {
-        dots.textContent = ".".repeat(dotCount || 3);
+      if (window.OPPartials?.loadMarketingLayout) {
+        await window.OPPartials.loadMarketingLayout();
       }
-    }, 450);
 
-    const previewMode = new URLSearchParams(window.location.search).has("preview");
+      if (window.OPNav?.initNav) {
+        await window.OPNav.initNav();
+      }
 
-    if (!previewMode) {
-      setTimeout(() => {
-        clearInterval(dotTimer);
-        window.location.assign(profileUrl);
-      }, 3500);
-    }
-  })();
-</script>
+      const profileUrl =
+        PATHS?.app?.profile ||
+        PATHS?.profile ||
+        "/html/app/profile.html";
+
+      const creatorsUrl =
+        PATHS?.marketing?.creators ||
+        PATHS?.creators ||
+        "/html/marketing/creators.html";
+
+      const nextUrl =
+        role === "creator"
+          ? `${creatorsUrl}?next=profile&confirmed=1`
+          : profileUrl;
+
+      const btn = document.getElementById("goProfileBtn");
+      const hintLink = document.querySelector(".emailConfirmedHint a");
+      const dots = document.getElementById("redirectDots");
+
+      if (btn) btn.href = nextUrl;
+      if (hintLink) hintLink.href = nextUrl;
+
+      let dotCount = 0;
+      const dotTimer = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        if (dots) {
+          dots.textContent = ".".repeat(dotCount || 3);
+        }
+      }, 450);
+
+      if (!previewMode) {
+        setTimeout(() => {
+          clearInterval(dotTimer);
+          window.location.assign(nextUrl);
+        }, 3500);
+      }
+    })();
+  </script>
+</body>
+</html>
