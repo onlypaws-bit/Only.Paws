@@ -326,8 +326,10 @@
       };
 
       if (!viewerId) {
-        const enrichedLoggedOut = posts.map((post) =>
-          enrich(post, post.is_public === false || post.is_paid === true)
+        const visiblePosts = posts.filter((post) => post.is_public !== false);
+
+        const enrichedLoggedOut = visiblePosts.map((post) =>
+          enrich(post, post.is_paid === true)
         );
 
         if (!enrichedLoggedOut.length) {
@@ -343,9 +345,17 @@
         return;
       }
 
+      const visiblePosts = posts.filter((post) => {
+        const isMine = String(post.creator_id || "") === String(viewerId || "");
+        if (post.is_public === false && !isMine) {
+          return false;
+        }
+        return true;
+      });
+
       const creatorIdsToCheck = [
         ...new Set(
-          posts
+          visiblePosts
             .filter(
               (post) =>
                 post?.creator_id &&
@@ -399,13 +409,11 @@
         }
       }
 
-      const enriched = posts.map((post) => {
+      const enriched = visiblePosts.map((post) => {
         const isMine = String(post.creator_id || "") === String(viewerId || "");
         let locked = false;
 
-        if (post.is_public === false) {
-          locked = !isMine;
-        } else if (post.is_paid === true) {
+        if (post.is_paid === true) {
           const isSub = subMap.get(post.creator_id) === true;
           locked = !(isMine || isSub);
         }
