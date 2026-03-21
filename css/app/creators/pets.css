@@ -17,10 +17,13 @@
 }
 
 .petsCard {
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 16px;
   background: rgba(255,255,255,.10);
   border: 1px solid rgba(255,255,255,.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 12px 28px rgba(0,0,0,.10);
 }
 
 .petsCardTitle {
@@ -59,6 +62,13 @@
   background: rgba(255,255,255,.12);
   color: var(--text);
   outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 8px 20px rgba(0,0,0,.08);
+  transition:
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
 }
 
 .petsInput::placeholder,
@@ -68,15 +78,94 @@
   color: rgba(255,255,255,.65);
 }
 
+.petsInput:focus,
+.petsTextarea:focus,
+.petsRowInput:focus,
+.petsRowTextarea:focus {
+  border-color: rgba(255,255,255,.34);
+  background: rgba(255,255,255,.15);
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.08),
+    0 10px 24px rgba(0,0,0,.10);
+}
+
 .petsInputFile,
 .petsRowInputFile {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid rgba(255,255,255,.18);
-  border-radius: 14px;
+  border-radius: 16px;
   background: rgba(255,255,255,.12);
   color: var(--text);
   outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    0 8px 20px rgba(0,0,0,.08);
+  transition:
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease;
+}
+
+.petsInputFile:hover,
+.petsRowInputFile:hover {
+  background: rgba(255,255,255,.14);
+  border-color: rgba(255,255,255,.24);
+}
+
+.petsInputFile:focus,
+.petsRowInputFile:focus,
+.petsInputFile:focus-visible,
+.petsRowInputFile:focus-visible {
+  border-color: rgba(255,255,255,.34);
+  background: rgba(255,255,255,.15);
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,.08),
+    0 10px 24px rgba(0,0,0,.10);
+}
+
+.petsInputFile::file-selector-button,
+.petsRowInputFile::file-selector-button {
+  margin-right: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.20);
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
+  transition:
+    background .16s ease,
+    border-color .16s ease,
+    transform .16s ease;
+}
+
+.petsInputFile::file-selector-button:hover,
+.petsRowInputFile::file-selector-button:hover {
+  background: rgba(255,255,255,.24);
+  border-color: rgba(255,255,255,.30);
+  transform: translateY(-1px);
+}
+
+.petsInputFile::file-selector-button:active,
+.petsRowInputFile::file-selector-button:active {
+  transform: translateY(0) scale(.985);
+}
+
+.petsInputFile::-webkit-file-upload-button,
+.petsRowInputFile::-webkit-file-upload-button {
+  margin-right: 12px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.20);
+  background: rgba(255,255,255,.18);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14);
 }
 
 .petsTextarea,
@@ -97,10 +186,13 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  border-radius: 18px;
+  border-radius: 20px;
   padding: 14px;
   background: rgba(255,255,255,.10);
   border: 1px solid rgba(255,255,255,.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 10px 24px rgba(0,0,0,.08);
 }
 
 .petsAvatarMini,
@@ -112,6 +204,9 @@
   border: 1px solid rgba(255,255,255,.16);
   background: rgba(0,0,0,.18);
   overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.05),
+    0 8px 18px rgba(0,0,0,.08);
 }
 
 .petsAvatarMini {
@@ -149,6 +244,7 @@
   font-size: 12px;
   font-weight: 900;
   white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 
 .petsNameLine {
