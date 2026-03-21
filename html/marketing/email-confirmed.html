@@ -1,6 +1,6 @@
 <!--
   OnlyPaws
-  File: /html/marketing/creators.html
+  File: /html/marketing/email-confirmed.html
 
   Uses central paths from /js/paths.js
 
@@ -8,28 +8,23 @@
   /css/styles.css
   /css/marketing/layout.css
   /css/marketing/auth.css
-  /css/marketing/creators.css
 
   JS:
   /js/paths.js
   /js/onlypawsClient.js
   /js/partials.js
-  /js/nav.js
-  /js/support-us.js
-  /js/marketing/creators.js
 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OnlyPaws — For Creators</title>
+  <title>Email confirmed — OnlyPaws</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/marketing/layout.css" />
   <link rel="stylesheet" href="/css/marketing/auth.css" />
-  <link rel="stylesheet" href="/css/marketing/creators.css" />
 </head>
 
 <body>
@@ -38,127 +33,45 @@
       <div id="header-placeholder"></div>
 
       <main class="hero authLayout">
-        <section class="panel">
-          <div class="pill">Publish pet content. Earn support.</div>
+        <section class="panel" style="max-width:720px;margin:0 auto;text-align:center;">
+          <div class="pill">Email confirmed 🐾</div>
 
-          <h1>Become a creator</h1>
+          <h1>Welcome to OnlyPaws</h1>
 
-          <p class="sub creatorsHeroIntro">
-            Build your creator profile, showcase your pets, and monetize your content with subscriptions.
-            Payments are handled securely through Stripe.
+          <p class="sub" style="max-width:560px;margin:0 auto 18px;">
+            Your email has been confirmed and your account is ready.
+            We’re already walking you in.
           </p>
 
-          <div class="creatorsFeatureList">
-            <div class="creatorsFeatureItem">📸 Post exclusive photos &amp; videos</div>
-            <div class="creatorsFeatureItem">🐾 Build a creator profile with your pets</div>
-            <div class="creatorsFeatureItem">💳 Secure payouts &amp; billing via Stripe</div>
-            <div class="creatorsFeatureItem">🔒 Pet-first content policy</div>
+          <div
+            style="
+              margin:22px auto 24px;
+              max-width:540px;
+              padding:18px 20px;
+              border:1px solid rgba(255,255,255,.14);
+              border-radius:18px;
+              background:rgba(255,255,255,.06);
+              color:var(--muted);
+              line-height:1.6;
+            "
+          >
+            <strong style="color:var(--text);">Leash on. Tail up. Let’s go.</strong><br />
+            In a few seconds we’ll walk you over to your profile so you can start exploring OnlyPaws.
           </div>
 
-          <div class="authBox">
-            <form id="creator-auth-form" class="authForm">
-              <div class="authFieldGroup">
-                <input
-                  type="email"
-                  id="creator-email"
-                  class="authField"
-                  placeholder="Email"
-                  required
-                />
-
-                <input
-                  type="password"
-                  id="creator-password"
-                  class="authField"
-                  placeholder="Password (min 6)"
-                  required
-                />
-              </div>
-
-              <div class="btnRow authActionsRow">
-                <button type="submit" class="btn" id="creatorLoginBtn">Log in</button>
-                <button type="button" class="ghost" id="creatorSignupBtn">Create creator account</button>
-              </div>
-
-              <div class="forgotRow">
-                <button type="button" class="tinyLink" id="forgotBtn">Forgot password?</button>
-                <span class="hint">You’ll receive an email link</span>
-              </div>
-
-              <div class="resetBox" id="resetBox">
-                <div class="hint">
-                  Send a password reset email to the address above.
-                </div>
-
-                <div class="btnRow resetActions">
-                  <button type="button" class="btn" id="sendResetBtn">Send reset email</button>
-                  <button type="button" class="ghost" id="cancelResetBtn">Cancel</button>
-                </div>
-              </div>
-
-              <div id="creatorMsg" class="authMsg"></div>
-            </form>
-          </div>
-
-          <div class="note">
-            After signup or login you’ll be redirected to your creator area.
-          </div>
-        </section>
-
-        <section class="panel authPanelStack">
-          <div class="pill">For creators</div>
-
-          <h2 class="sectionTitle creatorsSectionSpacer">Creator Plan</h2>
-
-          <p class="sub">
-            Creator Plan costs €10/month and requires an active account.
-            Registration is required before purchasing.
-          </p>
-
-          <div class="creatorPlanCard">
-            <div class="creatorPlanTitle">Monthly creator access</div>
-            <div class="creatorPlanPrice">€10<span>/month</span></div>
-            <div class="creatorPlanNote">
-              Cancel anytime • Secure payments via Stripe
-            </div>
-          </div>
-
-          <div class="btnRow creatorsSectionSpacer">
-            <a class="ghost" id="creatorFaqLink" href="/html/marketing/faq/faq-creators.html">
-              Creator FAQ
-            </a>
-            <a class="ghost" id="fanLandingLink" href="/html/marketing/fans.html">
-              I’m a fan
+          <div class="btnRow" style="justify-content:center;">
+            <a class="btn" id="goProfileBtn" href="/html/app/profile.html">
+              Go to profile
             </a>
           </div>
 
-          <div class="supportCard">
-            <div class="brandImage creatorsAsideImage">
-              <img
-                id="creatorsImage"
-                src="/assets/images/onlypaws-creators.png"
-                alt="OnlyPaws creators"
-              />
-            </div>
-
-            <h3>Support Us 🐾</h3>
-
-            <p>
-              Love OnlyPaws and want to support the project?
-              This is a recurring support contribution billed every 3 months.
-              It does not unlock any features or memberships.
-              It simply helps us keep OnlyPaws alive, improve the platform,
-              and take care of our furry friends 💜
-            </p>
-
-            <div class="btnRow indexSupportActions">
-              <button class="btn" id="supportUsBtn" type="button">
-                Support OnlyPaws 🐾
-              </button>
-            </div>
-
-            <div id="supportUsMsg" class="authMsg"></div>
-          </div>
+          <p
+            id="redirectNote"
+            class="note"
+            style="margin-top:18px;text-align:center;"
+          >
+            Walking you in<span id="redirectDots">...</span>
+          </p>
         </section>
       </main>
 
@@ -170,8 +83,34 @@
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
   <script src="/js/partials.js"></script>
-  <script src="/js/nav.js"></script>
-  <script src="/js/support-us.js"></script>
-  <script src="/js/marketing/creators.js"></script>
+
+  <script>
+    (function () {
+      const PATHS = window.OP_PATHS || {};
+      const profileUrl =
+        PATHS?.app?.profile ||
+        "/html/app/profile.html";
+
+      const btn = document.getElementById("goProfileBtn");
+      const dots = document.getElementById("redirectDots");
+
+      if (btn) {
+        btn.href = profileUrl;
+      }
+
+      let dotCount = 0;
+      const dotTimer = setInterval(() => {
+        dotCount = (dotCount + 1) % 4;
+        if (dots) {
+          dots.textContent = ".".repeat(dotCount || 3);
+        }
+      }, 450);
+
+      setTimeout(() => {
+        clearInterval(dotTimer);
+        window.location.assign(profileUrl);
+      }, 3500);
+    })();
+  </script>
 </body>
 </html>
