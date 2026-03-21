@@ -41,6 +41,8 @@
   background:rgba(255,255,255,.14);
 }
 
+/* ===== SUPPORT LINE FIX ===== */
+
 .subtleLine{
   margin-top:12px;
   display:flex;
@@ -48,8 +50,30 @@
   justify-content:space-between;
   gap:12px;
   flex-wrap:wrap;
-  color:rgba(255,255,255,.70);
+  color:rgba(255,255,255,.74);
   font-size:13px;
+}
+
+.subtleLine > :first-child{
+  flex:1 1 260px;
+  min-width:0;
+}
+
+.subtleLine .btn,
+.subtleLine button,
+.subtleLine a{
+  flex:0 0 auto;
+  min-height:42px;
+  padding:10px 16px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:800;
+  line-height:1.2;
+  white-space:nowrap;
 }
 
 .debug{
@@ -256,15 +280,27 @@
   display:none !important;
 }
 
-@media (max-width: 920px){
+@media (max-width:920px){
   .creatorList{
     grid-template-columns:1fr;
   }
 }
 
-@media (max-width: 640px){
+@media (max-width:640px){
   .subtleLine{
     align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .subtleLine > :first-child{
+    width:100%;
+    flex:1 1 auto;
+  }
+
+  .subtleLine .btn,
+  .subtleLine button,
+  .subtleLine a{
+    width:100%;
   }
 
   .postsHeader{
