@@ -1,62 +1,41 @@
 /* =========================================================
    OnlyPaws
    File: /js/app/creators/pets.js
-   Purpose: manage creator pets
+   Purpose: creator pets management page logic
    Dependencies:
-   - window.onlypawsClient
    - window.OP_PATHS
-   - window.OPRoutes
+   - window.onlypawsClient
    - window.OPPartials
    - window.OPNav
-   - window.OPAuth
    ========================================================= */
 
 (function () {
-
-  const client = window.onlypawsClient;
   const PATHS = window.OP_PATHS || {};
-  const ROUTES = window.OPRoutes || null;
+  const client = window.onlypawsClient;
 
   const PET_AVATAR_BUCKET = "pets";
 
-  const addHint = document.getElementById("addHint") || { textContent: "" };
-  const listHint = document.getElementById("listHint");
-  const petsList = document.getElementById("petsList");
+  const els = {
+    petsList: document.getElementById("petsList"),
+    listHint: document.getElementById("listHint"),
+    addHint: document.getElementById("addHint"),
 
-  const fName = document.getElementById("fName");
-  const fSpecies = document.getElementById("fSpecies");
-  const fBreed = document.getElementById("fBreed");
-  const fBirth = document.getElementById("fBirth");
-  const fAge = document.getElementById("fAge");
-  const fAvatarFile = document.getElementById("fAvatarFile");
-  const fBio = document.getElementById("fBio");
+    fName: document.getElementById("fName"),
+    fSpecies: document.getElementById("fSpecies"),
+    fBreed: document.getElementById("fBreed"),
+    fBirth: document.getElementById("fBirth"),
+    fAge: document.getElementById("fAge"),
+    fAvatarFile: document.getElementById("fAvatarFile"),
+    fBio: document.getElementById("fBio"),
+    fHealthNotes: document.getElementById("fHealthNotes"),
+    fSpecialMarks: document.getElementById("fSpecialMarks"),
 
-  const addBtn = document.getElementById("addBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  function goHome() {
-
-    if (ROUTES?.replace) {
-      ROUTES.replace("home");
-      return;
-    }
-
-    window.location.replace(PATHS?.home || "/index.html");
-
-  }
-
-  function creatorsLoginHref() {
-
-    if (ROUTES?.get) {
-      return ROUTES.get("marketing.creators") || "creators.html";
-    }
-
-    return PATHS?.marketing?.creators || "/html/marketing/creators.html";
-
-  }
+    addBtn: document.getElementById("addBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+  };
 
   function esc(value) {
-    return (value ?? "").toString()
+    return String(value ?? "")
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")
       .replaceAll(">", "&gt;")
@@ -64,499 +43,440 @@
       .replaceAll("'", "&#039;");
   }
 
+  function toNullableTrimmed(value) {
+    const v = String(value ?? "").trim();
+    return v === "" ? null : v;
+  }
+
   function clearForm() {
-
-    fName.value = "";
-    fSpecies.value = "";
-    fBreed.value = "";
-    fBirth.value = "";
-    fAge.value = "";
-    fBio.value = "";
-
-    if (fAvatarFile) {
-      fAvatarFile.value = "";
-    }
-
+    els.fName.value = "";
+    els.fSpecies.value = "";
+    els.fBreed.value = "";
+    els.fBirth.value = "";
+    els.fAge.value = "";
+    els.fBio.value = "";
+    els.fHealthNotes.value = "";
+    els.fSpecialMarks.value = "";
+    if (els.fAvatarFile) els.fAvatarFile.value = "";
   }
 
   function getExtFromFile(file) {
-
-    const name = (file?.name || "").toLowerCase();
+    const name = String(file?.name || "").toLowerCase();
     const dot = name.lastIndexOf(".");
-
     return dot >= 0 ? name.slice(dot + 1) : "jpg";
-
   }
 
-  async function requireCreatorSession() {
-
-    const session = await window.OPAuth.getSession();
-
-    if (!session) {
-      window.location.replace(creatorsLoginHref());
-      return null;
-    }
-
-    const profile = await window.OPAuth.getProfile(session.user.id);
-
-    if (!profile || profile.role !== "creator") {
-      goHome();
-      return null;
-    }
-
-    return { session, profile };
-
+  async function getSession() {
+    const { data, error } = await client.auth.getSession();
+    if (error) throw error;
+    return data?.session || null;
   }
 
   async function uploadPetAvatar(ownerId, petId, file) {
-
     if (!file) return null;
 
     const ext = getExtFromFile(file);
     const path = `${ownerId}/${petId}/${Date.now()}.${ext}`;
 
-    const upload = await client
-      .storage
+    const uploadRes = await client.storage
       .from(PET_AVATAR_BUCKET)
       .upload(path, file, { upsert: true });
 
-    if (upload.error) throw upload.error;
+    if (uploadRes.error) throw uploadRes.error;
 
-    const pub = client
-      .storage
+    const publicRes = client.storage
       .from(PET_AVATAR_BUCKET)
       .getPublicUrl(path);
 
-    const url = pub?.data?.publicUrl;
-
-    if (!url) {
-      throw new Error("Could not get public URL for uploaded file");
-    }
+    const url = publicRes?.data?.publicUrl;
+    if (!url) throw new Error("Could not get public URL for uploaded file");
 
     return url;
+  }
 
+  function petSummaryLine(pet) {
+    const parts = [];
+
+    if (pet.species) parts.push(pet.species);
+    if (pet.breed) parts.push(pet.breed);
+
+    if (pet.birth_date) {
+      try {
+        parts.push(`born ${new Date(pet.birth_date).toLocaleDateString()}`);
+      } catch (_) {}
+    }
+
+    if (pet.age_years !== null && pet.age_years !== undefined && pet.age_years !== "") {
+      parts.push(`${pet.age_years}y`);
+    }
+
+    return parts.join(" • ");
   }
 
   function renderPets(list) {
+    if (!els.petsList) return;
 
     if (!list || list.length === 0) {
-
-      petsList.innerHTML =
-        `<div class="hint">No pets yet.</div>`;
-
+      els.petsList.innerHTML = `<div class="petsHint">No pets yet.</div>`;
       return;
     }
 
-    petsList.innerHTML = list.map((pet) => {
-
+    els.petsList.innerHTML = list.map((pet) => {
       const avatar = pet.avatar_url
-        ? `<img class="avatarMini" src="${esc(pet.avatar_url)}" alt="pet avatar">`
-        : `<div class="avatarMini">🐾</div>`;
+        ? `<img class="petsAvatarMini" src="${esc(pet.avatar_url)}" alt="pet avatar">`
+        : `<div class="petsAvatarMiniFallback">🐾</div>`;
 
-      const species = pet.species ? `• ${pet.species}` : "";
-      const breed = pet.breed ? `• ${pet.breed}` : "";
-
-      const born =
-        pet.birth_date
-          ? new Date(pet.birth_date).toLocaleDateString()
-          : "";
-
-      const age =
-        pet.age_years != null && pet.age_years !== ""
-          ? `${pet.age_years}y`
-          : "";
-
-      const topLine = [
-        species,
-        breed,
-        born ? `• born ${born}` : "",
-        age ? `• ${age}` : ""
-      ]
-        .join(" ")
-        .replace(/\s+/g, " ")
-        .trim();
+      const topLine = petSummaryLine(pet);
 
       return `
-        <div class="rowCard" data-id="${esc(pet.id)}">
-
+        <article class="petsRowCard" data-id="${esc(pet.id)}">
           ${avatar}
 
-          <div class="meta">
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
-              <span class="badge">🐾 PET</span>
-              ${pet.created_at
-                ? `<span class="badge">📅 ${esc(new Date(pet.created_at).toLocaleDateString())}</span>`
-                : ""}
+          <div class="petsMeta">
+            <div class="petsBadges">
+              <span class="petsBadge">🐾 PET</span>
+              ${pet.created_at ? `<span class="petsBadge">📅 ${esc(new Date(pet.created_at).toLocaleDateString())}</span>` : ""}
             </div>
 
-            <b>
+            <b class="petsNameLine">
               ${esc(pet.name || "Pet")}
-              ${
-                topLine
-                  ? `<span style="opacity:.9;font-weight:800;"> ${esc(topLine)}</span>`
-                  : ""
-              }
+              ${topLine ? `<span class="petsTopLine"> • ${esc(topLine)}</span>` : ""}
             </b>
 
-            <div class="small" style="margin-top:6px;">
-              ${esc(pet.bio || "")}
+            ${pet.bio ? `<div class="petsSmall" style="margin-top:6px;">${esc(pet.bio)}</div>` : ""}
+            ${pet.health_notes ? `<div class="petsSmall" style="margin-top:6px;"><b>Health:</b> ${esc(pet.health_notes)}</div>` : ""}
+            ${pet.special_marks ? `<div class="petsSmall" style="margin-top:6px;"><b>Special marks:</b> ${esc(pet.special_marks)}</div>` : ""}
+
+            <div class="petsDivider"></div>
+
+            <div class="petsEditorBlock">
+              <div class="petsEditorTitle">Edit basics</div>
+
+              <div class="petsFormGrid">
+                <input class="petsRowInput" data-k="name" type="text" placeholder="Name" value="${esc(pet.name || "")}">
+                <input class="petsRowInput" data-k="species" type="text" placeholder="Species" value="${esc(pet.species || "")}">
+                <input class="petsRowInput" data-k="breed" type="text" placeholder="Breed" value="${esc(pet.breed || "")}">
+                <input class="petsRowInput" data-k="birth_date" type="date" value="${pet.birth_date ? esc(String(pet.birth_date).slice(0, 10)) : ""}">
+                <input class="petsRowInput" data-k="age_years" type="number" min="0" step="1" placeholder="Age years" value="${esc(pet.age_years ?? "")}">
+                <textarea class="petsRowTextarea" data-k="bio" placeholder="Bio">${esc(pet.bio || "")}</textarea>
+                <textarea class="petsRowTextarea" data-k="health_notes" placeholder="Health notes">${esc(pet.health_notes || "")}</textarea>
+                <textarea class="petsRowTextarea" data-k="special_marks" placeholder="Special marks">${esc(pet.special_marks || "")}</textarea>
+              </div>
             </div>
 
-            <div class="divider"></div>
-
-            <div class="field" style="margin-top:10px;">
-
-              <div class="label">Edit basics</div>
-
-              <input data-k="name" placeholder="Name" value="${esc(pet.name || "")}">
-              <input data-k="species" placeholder="Species" value="${esc(pet.species || "")}">
-              <input data-k="breed" placeholder="Breed" value="${esc(pet.breed || "")}">
-
-              <input
-                data-k="birth_date"
-                type="date"
-                value="${
-                  pet.birth_date
-                    ? esc(String(pet.birth_date).slice(0,10))
-                    : ""
-                }"
-              >
-
-              <input
-                data-k="age_years"
-                type="number"
-                min="0"
-                step="1"
-                placeholder="Age years"
-                value="${esc(pet.age_years ?? "")}"
-              >
-
-              <textarea data-k="bio" placeholder="Bio">${esc(pet.bio || "")}</textarea>
-
-            </div>
-
-            <div class="field">
-              <div class="label">Change pet photo</div>
-              <input data-kfile="avatar" type="file" accept="image/*">
+            <div class="petsField">
+              <label class="petsLabel">Change pet photo</label>
+              <input class="petsRowInputFile" data-kfile="avatar" type="file" accept="image/*">
             </div>
 
             <div class="btnRow">
-              <button class="ghost" data-action="save">Save</button>
-              <button class="ghost danger" data-action="delete">Delete</button>
+              <button class="ghost" type="button" data-action="save">Save</button>
+              <button class="ghost danger" type="button" data-action="delete">Delete</button>
             </div>
-
           </div>
-
-        </div>
+        </article>
       `;
-
     }).join("");
 
-    bindPetRowEvents(list);
-
+    bindRowActions();
   }
 
-  function bindPetRowEvents(list) {
+  function buildRowPayload(row) {
+    const payload = {};
 
-    petsList.querySelectorAll('[data-action="save"]').forEach((btn) => {
+    row.querySelectorAll("[data-k]").forEach((input) => {
+      const key = input.getAttribute("data-k");
+      let value = input.value;
 
-      btn.addEventListener("click", async () => {
+      if (key === "age_years") {
+        value = value === "" ? null : Number(value);
+        if (value !== null && Number.isNaN(value)) value = null;
+      } else if (key === "birth_date") {
+        value = value === "" ? null : value;
+      } else {
+        value = toNullableTrimmed(value);
+      }
 
-        const row = btn.closest(".rowCard");
-        const id = row?.getAttribute("data-id");
-
-        if (!id) return;
-
-        btn.disabled = true;
-        btn.textContent = "Saving…";
-        listHint.textContent = "";
-
-        try {
-
-          const auth = await requireCreatorSession();
-          if (!auth) throw new Error("Not logged in");
-
-          const payload = {};
-
-          row.querySelectorAll("[data-k]").forEach((input) => {
-
-            const key = input.getAttribute("data-k");
-            let value = input.value;
-
-            if (key === "age_years") {
-
-              value = value === "" ? null : Number(value);
-              if (value != null && Number.isNaN(value)) value = null;
-
-            } else if (key === "birth_date") {
-
-              value = value === "" ? null : value;
-
-            } else {
-
-              value = value.trim() === "" ? null : value.trim();
-
-            }
-
-            payload[key] = value;
-
-          });
-
-          const fileInput = row.querySelector("[data-kfile='avatar']");
-          const file = fileInput?.files?.[0] || null;
-
-          if (file) {
-
-            const url =
-              await uploadPetAvatar(auth.session.user.id, id, file);
-
-            payload.avatar_url = url;
-
-          }
-
-          const { error } = await client
-            .from("pets")
-            .update(payload)
-            .eq("id", id)
-            .eq("owner_id", auth.session.user.id);
-
-          if (error) throw error;
-
-          listHint.textContent = "Saved ✅";
-
-          await loadPets(auth.session.user.id);
-
-        } catch (error) {
-
-          alert("❌ Save failed: " + (error?.message || String(error)));
-
-        } finally {
-
-          btn.disabled = false;
-          btn.textContent = "Save";
-
-        }
-
-      });
-
+      payload[key] = value;
     });
 
-    petsList.querySelectorAll('[data-action="delete"]').forEach((btn) => {
+    return payload;
+  }
 
-      btn.addEventListener("click", async () => {
+  async function savePet(row, button) {
+    const petId = row?.getAttribute("data-id");
+    if (!petId) return;
 
-        const row = btn.closest(".rowCard");
-        const id = row?.getAttribute("data-id");
+    button.disabled = true;
+    button.textContent = "Saving…";
+    if (els.listHint) els.listHint.textContent = "";
 
-        if (!id) return;
+    try {
+      const session = await getSession();
+      if (!session) throw new Error("Not logged in");
 
-        if (!confirm("Delete this pet? This can’t be undone.")) return;
+      const payload = buildRowPayload(row);
 
-        btn.disabled = true;
-        btn.textContent = "Deleting…";
+      const fileInput = row.querySelector('[data-kfile="avatar"]');
+      const file = fileInput?.files?.[0] || null;
+      if (file) {
+        const url = await uploadPetAvatar(session.user.id, petId, file);
+        payload.avatar_url = url;
+      }
 
-        try {
+      const updateRes = await client
+        .from("pets")
+        .update(payload)
+        .eq("id", petId)
+        .eq("owner_id", session.user.id);
 
-          const auth = await requireCreatorSession();
-          if (!auth) throw new Error("Not logged in");
+      if (updateRes.error) throw updateRes.error;
 
-          const { error } = await client
-            .from("pets")
-            .delete()
-            .eq("id", id)
-            .eq("owner_id", auth.session.user.id);
+      if (els.listHint) els.listHint.textContent = "Saved ✅";
+      await loadPets(session.user.id);
+    } catch (error) {
+      alert("❌ Save failed: " + (error?.message || String(error)));
+    } finally {
+      button.disabled = false;
+      button.textContent = "Save";
+    }
+  }
 
-          if (error) throw error;
+  async function deletePet(row, button) {
+    const petId = row?.getAttribute("data-id");
+    if (!petId) return;
 
-          row.remove();
+    const confirmed = window.confirm("Delete this pet? This can’t be undone.");
+    if (!confirmed) return;
 
-          listHint.textContent = "Deleted ✅";
+    button.disabled = true;
+    button.textContent = "Deleting…";
+    if (els.listHint) els.listHint.textContent = "";
 
-        } catch (error) {
+    try {
+      const session = await getSession();
+      if (!session) throw new Error("Not logged in");
 
-          alert("❌ Delete failed: " + (error?.message || String(error)));
+      const deleteRes = await client
+        .from("pets")
+        .delete()
+        .eq("id", petId)
+        .eq("owner_id", session.user.id);
 
-        } finally {
+      if (deleteRes.error) throw deleteRes.error;
 
-          btn.disabled = false;
-          btn.textContent = "Delete";
+      row.remove();
 
-        }
+      if (!els.petsList.querySelector(".petsRowCard")) {
+        renderPets([]);
+        if (els.listHint) els.listHint.textContent = "No pets yet.";
+      } else if (els.listHint) {
+        els.listHint.textContent = "Deleted ✅";
+      }
+    } catch (error) {
+      alert("❌ Delete failed: " + (error?.message || String(error)));
+    } finally {
+      button.disabled = false;
+      button.textContent = "Delete";
+    }
+  }
 
+  function bindRowActions() {
+    els.petsList.querySelectorAll('[data-action="save"]').forEach((button) => {
+      button.addEventListener("click", () => {
+        const row = button.closest(".petsRowCard");
+        savePet(row, button);
       });
-
     });
 
+    els.petsList.querySelectorAll('[data-action="delete"]').forEach((button) => {
+      button.addEventListener("click", () => {
+        const row = button.closest(".petsRowCard");
+        deletePet(row, button);
+      });
+    });
   }
 
   async function loadPets(ownerId) {
+    if (els.listHint) els.listHint.textContent = "Loading…";
+    if (els.petsList) els.petsList.innerHTML = "";
 
-    listHint.textContent = "Loading…";
-    petsList.innerHTML = "";
-
-    const { data, error } = await client
+    const res = await client
       .from("pets")
-      .select("id,name,species,breed,avatar_url,bio,created_at,owner_id,age_years,birth_date")
+      .select("id, name, species, breed, avatar_url, bio, created_at, owner_id, age_years, birth_date, health_notes, special_marks")
       .eq("owner_id", ownerId)
       .order("created_at", { ascending: false });
 
-    if (error) {
-
-      listHint.textContent = "Couldn’t load pets";
-
-      petsList.innerHTML =
-        `<div class="hint">${esc(error.message)}</div>`;
-
+    if (res.error) {
+      if (els.listHint) els.listHint.textContent = "Couldn’t load pets";
+      if (els.petsList) {
+        els.petsList.innerHTML = `<div class="petsHint">${esc(res.error.message)}</div>`;
+      }
       return;
-
     }
 
-    renderPets(data || []);
+    const data = res.data || [];
+    renderPets(data);
 
-    listHint.textContent =
-      data && data.length
-        ? "Loaded ✅"
-        : "No pets yet.";
-
+    if (els.listHint) {
+      els.listHint.textContent = data.length ? "Loaded ✅" : "No pets yet.";
+    }
   }
 
   async function addPet() {
-
-    addHint.textContent = "Adding…";
-    addBtn.disabled = true;
+    if (els.addHint) els.addHint.textContent = "Adding…";
+    if (els.addBtn) els.addBtn.disabled = true;
 
     try {
+      const session = await getSession();
+      if (!session) throw new Error("Not logged in");
 
-      const auth = await requireCreatorSession();
-      if (!auth) throw new Error("Not logged in");
-
-      const name = fName.value.trim();
-
-      if (!name) {
-        throw new Error("Name is required");
-      }
+      const name = String(els.fName.value || "").trim();
+      if (!name) throw new Error("Name is required");
 
       const insertPayload = {
-
-        owner_id: auth.session.user.id,
+        owner_id: session.user.id,
         name,
-
-        species: fSpecies.value.trim() || null,
-        breed: fBreed.value.trim() || null,
-        birth_date: fBirth.value || null,
-
-        age_years:
-          fAge.value === ""
-            ? null
-            : Number(fAge.value),
-
-        bio: fBio.value.trim() || null,
-
+        species: toNullableTrimmed(els.fSpecies.value),
+        breed: toNullableTrimmed(els.fBreed.value),
+        birth_date: els.fBirth.value ? els.fBirth.value : null,
+        age_years: els.fAge.value === "" ? null : Number(els.fAge.value),
+        bio: toNullableTrimmed(els.fBio.value),
+        health_notes: toNullableTrimmed(els.fHealthNotes.value),
+        special_marks: toNullableTrimmed(els.fSpecialMarks.value),
       };
 
-      if (
-        insertPayload.age_years != null &&
-        Number.isNaN(insertPayload.age_years)
-      ) {
+      if (insertPayload.age_years !== null && Number.isNaN(insertPayload.age_years)) {
         insertPayload.age_years = null;
       }
 
-      const inserted = await client
+      const insertRes = await client
         .from("pets")
         .insert(insertPayload)
         .select("id")
         .single();
 
-      if (inserted.error) throw inserted.error;
+      if (insertRes.error) throw insertRes.error;
 
-      const petId = inserted.data?.id;
+      const petId = insertRes.data?.id;
+      if (!petId) throw new Error("Missing new pet id");
 
-      if (!petId) {
-        throw new Error("Missing new pet id");
-      }
-
-      const file = fAvatarFile?.files?.[0] || null;
-
+      const file = els.fAvatarFile?.files?.[0] || null;
       if (file) {
+        const avatarUrl = await uploadPetAvatar(session.user.id, petId, file);
 
-        const url =
-          await uploadPetAvatar(auth.session.user.id, petId, file);
-
-        const updated = await client
+        const avatarUpdateRes = await client
           .from("pets")
-          .update({ avatar_url: url })
+          .update({ avatar_url: avatarUrl })
           .eq("id", petId)
-          .eq("owner_id", auth.session.user.id);
+          .eq("owner_id", session.user.id);
 
-        if (updated.error) throw updated.error;
-
+        if (avatarUpdateRes.error) throw avatarUpdateRes.error;
       }
 
       clearForm();
-
-      addHint.textContent = "Added ✅";
-
-      await loadPets(auth.session.user.id);
-
+      if (els.addHint) els.addHint.textContent = "Added ✅";
+      await loadPets(session.user.id);
     } catch (error) {
-
-      addHint.textContent =
-        "❌ " + (error?.message || String(error));
-
+      if (els.addHint) {
+        els.addHint.textContent = "❌ " + (error?.message || String(error));
+      }
     } finally {
-
-      addBtn.disabled = false;
-
+      if (els.addBtn) els.addBtn.disabled = false;
     }
-
   }
 
-  function bindEvents() {
+  async function initLayout() {
+    try {
+      if (window.OPPartials?.loadAppShell) {
+        await window.OPPartials.loadAppShell({
+          headerTargetId: "header-placeholder",
+          footerTargetId: "footer-placeholder",
+        });
+      } else if (window.loadAppLayout) {
+        await window.loadAppLayout({
+          headerTargetId: "header-placeholder",
+          footerTargetId: "footer-placeholder",
+        });
+      }
+    } catch (_) {}
+  }
 
-    addBtn.addEventListener("click", addPet);
-    resetBtn.addEventListener("click", clearForm);
+  async function initNav() {
+    try {
+      const session = await getSession();
 
+      if (window.OPNav?.init) {
+        await window.OPNav.init({
+          activeApp: "creator-dashboard",
+          requireAuth: false,
+          session,
+        });
+        return;
+      }
+
+      if (window.initNav) {
+        await window.initNav({
+          activeApp: "creator-dashboard",
+          requireAuth: false,
+          session,
+        });
+      }
+    } catch (_) {}
+  }
+
+  function goHome() {
+    const target =
+      PATHS?.home ||
+      PATHS?.index ||
+      PATHS?.marketing?.index ||
+      "/";
+
+    window.location.replace(target);
   }
 
   async function boot() {
+    try {
+      await initLayout();
+      await initNav();
 
-    if (window.OPPartials?.loadLayout) {
-      await window.OPPartials.loadLayout();
+      const session = await getSession();
+
+      if (!session) {
+        if (els.addHint) els.addHint.textContent = "You must log in to manage pets.";
+        if (els.addBtn) els.addBtn.disabled = true;
+        if (els.listHint) els.listHint.textContent = "Not logged in";
+        return;
+      }
+
+      if (els.addBtn) els.addBtn.disabled = false;
+      await loadPets(session.user.id);
+    } catch (error) {
+      if (els.listHint) {
+        els.listHint.textContent = error?.message || "Something went wrong";
+      }
     }
-
-    if (window.OPNav?.initNav) {
-      await window.OPNav.initNav();
-    }
-
-    bindEvents();
-
-    const auth = await requireCreatorSession();
-
-    if (!auth) {
-
-      addHint.textContent = "You must log in to manage pets.";
-      addBtn.disabled = true;
-
-      listHint.textContent = "Not logged in";
-
-      return;
-
-    }
-
-    addBtn.disabled = false;
-
-    await loadPets(auth.session.user.id);
-
   }
 
-  window.OPCreatorPets = {
-    boot,
-    loadPets,
-    addPet,
-    uploadPetAvatar,
-  };
+  els.addBtn?.addEventListener("click", addPet);
+  els.resetBtn?.addEventListener("click", clearForm);
 
-  window.addEventListener("DOMContentLoaded", boot);
+  window.addEventListener("DOMContentLoaded", async () => {
+    if (!window.onlypawsClient) {
+      try {
+        if (window.onlypawsClientReady) {
+          await window.onlypawsClientReady;
+        }
+      } catch (_) {}
+    }
 
+    if (!window.onlypawsClient) {
+      if (els.listHint) els.listHint.textContent = "Supabase client not available";
+      return;
+    }
+
+    boot();
+  });
+
+  window.goPetsHome = goHome;
 })();
