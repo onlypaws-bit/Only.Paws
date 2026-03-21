@@ -1,68 +1,132 @@
-<div class="wrap">
-  <div id="header-placeholder"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Pets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <main class="petsPageMain">
-    <section class="panel">
-      <h1>Your pets</h1>
-      <p class="sub">Add and manage the pets that appear on your creator profile.</p>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/creators/pets.css" />
+</head>
+<body>
+  <div class="pageShell">
+    <div id="header-placeholder" class="partialMount partialHeaderMount"></div>
 
-      <div class="petsGrid">
-        <!-- ADD PET -->
-        <div class="petsCard">
-          <h3 class="petsCardTitle">Add a pet</h3>
+    <main class="wrap petsPage">
+      <section class="panel">
+        <h1>Your pets</h1>
+        <p class="sub">
+          Add and manage the pets that appear on your creator profile.
+        </p>
 
-          <div class="petsField">
-            <div class="petsLabel">Name</div>
-            <input class="petsInput" id="fName" />
-          </div>
+        <div class="petsGrid">
+          <section class="petsCard">
+            <h2 class="petsCardTitle">Add a pet</h2>
 
-          <div class="petsField">
-            <div class="petsLabel">Species</div>
-            <input class="petsInput" id="fSpecies" placeholder="Dog / Cat / ..." />
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fName">Name</label>
+              <input class="petsInput" id="fName" type="text" />
+            </div>
 
-          <div class="petsField">
-            <div class="petsLabel">Breed</div>
-            <input class="petsInput" id="fBreed" placeholder="Mix, Labrador, ..." />
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fSpecies">Species</label>
+              <input
+                class="petsInput"
+                id="fSpecies"
+                type="text"
+                placeholder="Dog / Cat / ..."
+              />
+            </div>
 
-          <div class="petsField">
-            <div class="petsLabel">Birth date</div>
-            <input class="petsInput" id="fBirth" type="date" />
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fBreed">Breed</label>
+              <input
+                class="petsInput"
+                id="fBreed"
+                type="text"
+                placeholder="Mix, Labrador, ..."
+              />
+            </div>
 
-          <div class="petsField">
-            <div class="petsLabel">Age (years)</div>
-            <input class="petsInput" id="fAge" type="number" min="0" step="1" placeholder="2" />
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fBirth">Birth date</label>
+              <input class="petsInput" id="fBirth" type="date" />
+            </div>
 
-          <div class="petsField">
-            <div class="petsLabel">Pet photo (upload)</div>
-            <input class="petsInputFile" id="fAvatarFile" type="file" accept="image/*" />
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fAge">Age (years)</label>
+              <input
+                class="petsInput"
+                id="fAge"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="2"
+              />
+            </div>
 
-          <div class="petsField">
-            <div class="petsLabel">Bio</div>
-            <textarea class="petsTextarea" id="fBio" placeholder="Short bio (optional)"></textarea>
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fAvatarFile">Pet photo</label>
+              <input
+                class="petsInputFile"
+                id="fAvatarFile"
+                type="file"
+                accept="image/*"
+              />
+            </div>
 
-          <div class="btnRow">
-            <button class="btn" id="addBtn" type="button">Add pet</button>
-            <button class="ghost" id="resetBtn" type="button">Reset</button>
-          </div>
+            <div class="petsField">
+              <label class="petsLabel" for="fBio">Bio</label>
+              <textarea
+                class="petsTextarea"
+                id="fBio"
+                placeholder="Short bio (optional)"
+              ></textarea>
+            </div>
 
-          <div class="petsHint" id="addHint"></div>
+            <div class="petsField">
+              <label class="petsLabel" for="fHealthNotes">Health notes</label>
+              <textarea
+                class="petsTextarea"
+                id="fHealthNotes"
+                placeholder="Optional: epilepsy, allergies, blind in one eye..."
+              ></textarea>
+            </div>
+
+            <div class="petsField">
+              <label class="petsLabel" for="fSpecialMarks">Special marks</label>
+              <textarea
+                class="petsTextarea"
+                id="fSpecialMarks"
+                placeholder="Optional: heart-shaped spot, scar on ear, missing tail tip..."
+              ></textarea>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn" id="addBtn" type="button">Add pet</button>
+              <button class="ghost" id="resetBtn" type="button">Reset</button>
+            </div>
+
+            <div class="petsHint" id="addHint"></div>
+          </section>
+
+          <section class="petsCard">
+            <h2 class="petsCardTitle">Your list</h2>
+            <div class="petsHint" id="listHint">Loading…</div>
+            <div class="petsList" id="petsList"></div>
+          </section>
         </div>
+      </section>
+    </main>
 
-        <!-- PET LIST -->
-        <div class="petsCard">
-          <h3 class="petsCardTitle">Your list</h3>
-          <div class="petsHint" id="listHint">Loading…</div>
-          <div class="petsList" id="petsList"></div>
-        </div>
-      </div>
-    </section>
-  </main>
+    <div id="footer-placeholder" class="partialMount partialFooterMount"></div>
+  </div>
 
-  <div id="footer-placeholder"></div>
-</div>
+  <script src="/js/paths.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/app/creators/pets.js"></script>
+</body>
+</html>
