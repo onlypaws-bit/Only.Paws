@@ -4,6 +4,7 @@
    OnlyPaws
    File: /js/app/creators/create-post.js
    Purpose: create and edit creator posts
+
    Dependencies:
    - window.onlypawsClient
    - window.OP_PATHS
@@ -55,11 +56,19 @@
     content: document.getElementById("content"),
     preview: document.getElementById("preview"),
     mediaFile: document.getElementById("mediaFile"),
+    mediaField: document.getElementById("mediaField"),
+    mediaMeta: document.getElementById("mediaMeta"),
 
-    mediaPreviewWrap: document.getElementById("mediaPreviewWrap"),
-    mediaPreviewImage: document.getElementById("mediaPreviewImage"),
-    mediaPreviewVideo: document.getElementById("mediaPreviewVideo"),
-    mediaPreviewEmpty: document.getElementById("mediaPreviewEmpty"),
+    previewVisibilityPill: document.getElementById("previewVisibilityPill"),
+    previewTypePill: document.getElementById("previewTypePill"),
+    previewTitleText: document.getElementById("previewTitleText"),
+    previewContentText: document.getElementById("previewContentText"),
+    previewLockedBox: document.getElementById("previewLockedBox"),
+    previewTeaserText: document.getElementById("previewTeaserText"),
+    previewMediaWrap: document.getElementById("previewMediaWrap"),
+    previewImage: document.getElementById("previewImage"),
+    previewVideo: document.getElementById("previewVideo"),
+    previewMediaEmpty: document.getElementById("previewMediaEmpty"),
   };
 
   function setMessage(text) {
@@ -94,36 +103,21 @@
     return PATHS?.home || PATHS?.index || "/index.html";
   }
 
-  function setEditorEnabled(enabled) {
-    if (els.isPublic) els.isPublic.disabled = !enabled;
-    if (els.title) els.title.disabled = !enabled;
-    if (els.content) els.content.disabled = !enabled;
-    if (els.preview) els.preview.disabled = !enabled;
-    if (els.mediaFile) els.mediaFile.disabled = !enabled;
-    if (els.publishBtn) els.publishBtn.disabled = !enabled;
-
-    if (els.isPaid) {
-      if (enabled) {
-        els.isPaid.disabled = !state.creatorPlanActive;
-      } else {
-        els.isPaid.disabled = true;
-      }
-    }
-  }
-
-  function updatePlanUI() {
-    if (state.creatorPlanActive) {
-      setHidden(els.creatorLockBox, true);
-      if (els.isPaid) els.isPaid.disabled = false;
-      return;
+  function postHref(postId) {
+    if (ROUTES?.get) {
+      return ROUTES.get("app.post", { postId }) || `post.html?id=${encodeURIComponent(postId)}`;
     }
 
-    setHidden(els.creatorLockBox, false);
+    const base =
+      PATHS?.app?.post ||
+      PATHS?.app?.postDetail ||
+      "/html/app/post.html";
 
-    if (els.isPaid) {
-      els.isPaid.value = "false";
-      els.isPaid.disabled = true;
+    if (base.includes("?")) {
+      return `${base}&id=${encodeURIComponent(postId)}`;
     }
+
+    return `${base}?id=${encodeURIComponent(postId)}`;
   }
 
   function getFormValues() {
@@ -136,6 +130,39 @@
     };
   }
 
+  function setEditorEnabled(enabled) {
+    if (els.isPublic) els.isPublic.disabled = !enabled;
+    if (els.isPaid) els.isPaid.disabled = !enabled || !state.creatorPlanActive;
+    if (els.title) els.title.disabled = !enabled;
+    if (els.content) els.content.disabled = !enabled;
+    if (els.preview) els.preview.disabled = !enabled;
+    if (els.mediaFile) els.mediaFile.disabled = !enabled;
+    if (els.publishBtn) els.publishBtn.disabled = !enabled;
+  }
+
+  function updatePlanUI() {
+    const hasPlan = !!state.creatorPlanActive;
+
+    if (els.creatorLockBox) {
+      if (hasPlan) {
+        setHidden(els.creatorLockBox, true);
+      } else {
+        setHidden(els.creatorLockBox, false);
+      }
+    }
+
+    if (els.isPaid) {
+      if (hasPlan) {
+        els.isPaid.disabled = false;
+      } else {
+        els.isPaid.value = "false";
+        els.isPaid.disabled = true;
+      }
+    }
+
+    syncPostPreview();
+  }
+
   function resetForm() {
     if (els.title) els.title.value = "";
     if (els.content) els.content.value = "";
@@ -144,14 +171,17 @@
     if (els.isPaid) els.isPaid.value = "false";
     if (els.isPublic) els.isPublic.value = "true";
 
-    clearMediaPreview();
+    state.editingPost = null;
+
+    clearLocalMediaPreview();
     updatePlanUI();
+    syncPostPreview();
   }
 
   function detectMediaType(file) {
     if (!file) return "none";
-    if (file.type?.startsWith("image/")) return "image";
-    if (file.type?.startsWith("video/")) return "video";
+    if (file.type && file.type.startsWith("image/")) return "image";
+    if (file.type && file.type.startsWith("video/")) return "video";
     return "none";
   }
 
@@ -165,67 +195,120 @@
     state.currentPreviewUrl = null;
   }
 
-  function clearMediaPreview() {
-    setHidden(els.mediaPreviewWrap, true);
-    setHidden(els.mediaPreviewImage, true);
-    setHidden(els.mediaPreviewVideo, true);
-
-    if (els.mediaPreviewImage) {
-      els.mediaPreviewImage.removeAttribute("src");
-    }
-
-    if (els.mediaPreviewVideo) {
-      els.mediaPreviewVideo.pause();
-      els.mediaPreviewVideo.removeAttribute("src");
-      els.mediaPreviewVideo.load();
-    }
-
+  function clearLocalMediaPreview() {
     revokePreviewUrl();
 
-    if (els.mediaPreviewEmpty) {
-      els.mediaPreviewEmpty.textContent = "No media selected.";
+    if (els.previewImage) {
+      els.previewImage.removeAttribute("src");
     }
+
+    if (els.previewVideo) {
+      els.previewVideo.pause();
+      els.previewVideo.removeAttribute("src");
+      els.previewVideo.load();
+    }
+
+    setHidden(els.previewImage, true);
+    setHidden(els.previewVideo, true);
+    setHidden(els.previewMediaWrap, true);
+
+    if (els.previewMediaEmpty) {
+      els.previewMediaEmpty.textContent = "No media selected yet.";
+      setHidden(els.previewMediaEmpty, false);
+    }
+
+    if (els.mediaMeta) {
+      els.mediaMeta.textContent = "Image or video · max 25MB";
+    }
+  }
+
+  function syncPostPreviewText() {
+    const values = getFormValues();
+
+    if (els.previewVisibilityPill) {
+      els.previewVisibilityPill.textContent = values.is_public ? "Public" : "Private";
+    }
+
+    if (els.previewTypePill) {
+      els.previewTypePill.textContent = values.is_paid ? "🔒 PREMIUM" : "🆓 FREE";
+      els.previewTypePill.classList.toggle("isPremium", values.is_paid);
+      els.previewTypePill.classList.toggle("isFree", !values.is_paid);
+    }
+
+    if (els.previewTitleText) {
+      els.previewTitleText.textContent = values.title || "Your post title";
+    }
+
+    if (els.previewContentText) {
+      els.previewContentText.textContent =
+        values.content || "Start writing to see your post preview here…";
+    }
+
+    if (values.is_paid) {
+      if (els.previewTeaserText) {
+        els.previewTeaserText.textContent =
+          values.preview || "Short teaser shown when the premium post is locked.";
+      }
+      setHidden(els.previewLockedBox, false);
+    } else {
+      setHidden(els.previewLockedBox, true);
+    }
+  }
+
+  function syncPostPreview() {
+    syncPostPreviewText();
   }
 
   function updateMediaPreview() {
     const file = els.mediaFile?.files?.[0] || null;
 
     if (!file) {
-      clearMediaPreview();
+      clearLocalMediaPreview();
       return;
     }
 
     const mediaType = detectMediaType(file);
     revokePreviewUrl();
 
-    state.currentPreviewUrl = URL.createObjectURL(file);
+    const sizeMb = file.size / (1024 * 1024);
 
-    setHidden(els.mediaPreviewWrap, false);
-    setHidden(els.mediaPreviewImage, true);
-    setHidden(els.mediaPreviewVideo, true);
-
-    if (els.mediaPreviewEmpty) {
-      els.mediaPreviewEmpty.textContent = "";
+    if (els.mediaMeta) {
+      els.mediaMeta.textContent = `${file.name} · ${sizeMb.toFixed(1)}MB`;
     }
 
-    if (mediaType === "image") {
-      if (els.mediaPreviewImage) {
-        els.mediaPreviewImage.src = state.currentPreviewUrl;
+    if (mediaType === "none") {
+      setHidden(els.previewMediaWrap, true);
+
+      if (els.previewMediaEmpty) {
+        els.previewMediaEmpty.textContent = "Unsupported preview type.";
+        setHidden(els.previewMediaEmpty, false);
       }
-      setHidden(els.mediaPreviewImage, false);
+
+      setHidden(els.previewImage, true);
+      setHidden(els.previewVideo, true);
+      return;
+    }
+
+    state.currentPreviewUrl = URL.createObjectURL(file);
+
+    setHidden(els.previewMediaWrap, false);
+    setHidden(els.previewMediaEmpty, true);
+    setHidden(els.previewImage, true);
+    setHidden(els.previewVideo, true);
+
+    if (mediaType === "image") {
+      if (els.previewImage) {
+        els.previewImage.src = state.currentPreviewUrl;
+      }
+      setHidden(els.previewImage, false);
       return;
     }
 
     if (mediaType === "video") {
-      if (els.mediaPreviewVideo) {
-        els.mediaPreviewVideo.src = state.currentPreviewUrl;
+      if (els.previewVideo) {
+        els.previewVideo.src = state.currentPreviewUrl;
       }
-      setHidden(els.mediaPreviewVideo, false);
-      return;
-    }
-
-    if (els.mediaPreviewEmpty) {
-      els.mediaPreviewEmpty.textContent = "Unsupported preview type.";
+      setHidden(els.previewVideo, false);
     }
   }
 
@@ -259,7 +342,7 @@
     updatePlanUI();
 
     if (!state.creatorPlanActive) {
-      setMessage("Creator Plan unlocks premium posts and monetization. You can still publish free posts.");
+      setMessage("You can publish free posts already. Creator Plan unlocks premium posts and monetization.");
     } else {
       setMessage("");
     }
@@ -304,10 +387,20 @@
     if (els.title) els.title.value = data.title || "";
     if (els.content) els.content.value = data.content || "";
     if (els.preview) els.preview.value = data.preview || "";
-    if (els.isPaid) els.isPaid.value = data.is_paid ? "true" : "false";
-    if (els.isPublic) els.isPublic.value = data.is_public === false ? "false" : "true";
+    if (els.isPaid) {
+      if (state.creatorPlanActive) {
+        els.isPaid.value = data.is_paid ? "true" : "false";
+      } else {
+        els.isPaid.value = "false";
+      }
+    }
+    if (els.isPublic) {
+      els.isPublic.value = data.is_public === false ? "false" : "true";
+    }
 
     updatePlanUI();
+    clearLocalMediaPreview();
+    syncPostPreview();
     setMessage("Loaded ✅");
   }
 
@@ -389,7 +482,6 @@
         preview: values.preview || null,
         is_paid: values.is_paid,
         is_public: values.is_public,
-        creator_id: state.user.id,
       })
       .eq("id", postId)
       .eq("creator_id", state.user.id);
@@ -453,9 +545,15 @@
         await attachUploadedMediaToPost(editId);
 
         setMessage("Saved ✅");
-        if (els.mediaFile) els.mediaFile.value = "";
-        clearMediaPreview();
-        updatePlanUI();
+
+        if (els.mediaFile) {
+          els.mediaFile.value = "";
+        }
+
+        clearLocalMediaPreview();
+        syncPostPreview();
+
+        window.location.href = postHref(editId);
         return;
       }
 
@@ -464,6 +562,8 @@
 
       setMessage("Published ✅");
       resetForm();
+
+      window.location.href = postHref(newPostId);
     } catch (error) {
       console.warn(error);
       setMessage(error?.message || String(error));
@@ -471,6 +571,39 @@
       if (els.publishBtn) {
         els.publishBtn.disabled = false;
       }
+    }
+  }
+
+  function bindPreviewListeners() {
+    if (els.title) {
+      els.title.addEventListener("input", syncPostPreview);
+    }
+
+    if (els.content) {
+      els.content.addEventListener("input", syncPostPreview);
+    }
+
+    if (els.preview) {
+      els.preview.addEventListener("input", syncPostPreview);
+    }
+
+    if (els.isPublic) {
+      els.isPublic.addEventListener("change", syncPostPreview);
+    }
+
+    if (els.isPaid) {
+      els.isPaid.addEventListener("change", () => {
+        if (!state.creatorPlanActive && els.isPaid.value === "true") {
+          els.isPaid.value = "false";
+          setMessage("Creator Plan required for premium posts.");
+        }
+
+        syncPostPreview();
+      });
+    }
+
+    if (els.mediaFile) {
+      els.mediaFile.addEventListener("change", updateMediaPreview);
     }
   }
 
@@ -494,20 +627,9 @@
       els.refreshBtn.addEventListener("click", () => window.location.reload());
     }
 
-    if (els.mediaFile) {
-      els.mediaFile.addEventListener("change", updateMediaPreview);
-    }
-
-    if (els.isPaid) {
-      els.isPaid.addEventListener("change", () => {
-        if (!state.creatorPlanActive && els.isPaid.value === "true") {
-          els.isPaid.value = "false";
-          setMessage("Creator Plan required for premium posts.");
-        }
-      });
-    }
-
-    clearMediaPreview();
+    bindPreviewListeners();
+    clearLocalMediaPreview();
+    syncPostPreview();
 
     const hasAccess = await requireCreator();
     if (!hasAccess) return;
@@ -522,5 +644,6 @@
     }
   }
 
+  window.addEventListener("beforeunload", revokePreviewUrl);
   window.addEventListener("DOMContentLoaded", initPage);
 })();
