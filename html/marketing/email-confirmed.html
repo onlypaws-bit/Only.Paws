@@ -35,9 +35,10 @@
       <div id="header-placeholder"></div>
 
       <main class="hero authLayout emailConfirmedWrap">
-        <div class="emailConfirmedBrand">
-  <img src="/assets/images/logo.png" alt="OnlyPaws logo" />
-</div>
+        <section class="panel emailConfirmedCard">
+          <div class="emailConfirmedBrand">
+            <img src="/assets/images/logo.png" alt="OnlyPaws logo" />
+          </div>
 
           <div class="pill">Email confirmed</div>
 
@@ -102,10 +103,14 @@
         }
       }, 450);
 
-      setTimeout(() => {
-        clearInterval(dotTimer);
-        window.location.assign(profileUrl);
-      }, 3500);
+      const previewMode = new URLSearchParams(window.location.search).has("preview");
+
+      if (!previewMode) {
+        setTimeout(() => {
+          clearInterval(dotTimer);
+          window.location.assign(profileUrl);
+        }, 3500);
+      }
     })();
   </script>
 </body>
