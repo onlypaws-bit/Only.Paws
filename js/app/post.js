@@ -9,6 +9,7 @@
    Dependencies:
    - window.OP_PATHS
    - window.onlypawsClient
+   - window.onlypawsLikes
    ========================================================= */
 
 (function () {
@@ -96,7 +97,9 @@
     if (t === "video") return true;
 
     const cleanUrl = String(url || "").toLowerCase();
-    return [".mp4", ".webm", ".ogg", ".mov", ".m4v"].some((ext) => cleanUrl.includes(ext));
+    return [".mp4", ".webm", ".ogg", ".mov", ".m4v"].some((ext) =>
+      cleanUrl.includes(ext)
+    );
   }
 
   function getPostIdFromUrl() {
@@ -213,7 +216,7 @@
       creatorUsername = "creator",
       creatorAvatarUrl = "",
       canViewFull = false,
-      liked = false,
+      liked = null,
       variant = "",
     } = options;
 
@@ -229,7 +232,7 @@
     const hasMedia = !!url && type !== "none";
 
     const creatorHref = creatorProfileUrl(creatorUsername);
-    const postHref = postUrl(id);
+    const singlePostHref = postUrl(id);
 
     const badgeHtml = post?.is_paid
       ? (canViewFull
@@ -247,7 +250,7 @@
         mediaHtml = buildLockedMediaHtml(url, isVideo, creatorUsername);
       } else {
         mediaHtml = `
-          <a class="op-postMediaLink" href="${esc(postHref)}" aria-label="Open post">
+          <a class="op-postMediaLink" href="${esc(singlePostHref)}" aria-label="Open post">
             <div class="op-mediaWrap">
               ${
                 isVideo
@@ -261,6 +264,8 @@
     }
 
     const variantClass = variant ? ` op-postCard--${esc(variant)}` : "";
+    const likedBool = liked === true;
+    const initialLikeCount = Number(post?.likes_count || 0);
 
     return `
       <article class="op-postCard${variantClass}" data-post-id="${esc(id)}">
@@ -286,7 +291,7 @@
           </div>
 
           <div class="op-postBody">
-            <a class="op-postContentLink" href="${esc(postHref)}" aria-label="Open post">
+            <a class="op-postContentLink" href="${esc(singlePostHref)}" aria-label="Open post">
               ${rawTitle ? `<h3 class="op-title">${esc(rawTitle)}</h3>` : ""}
               ${previewText ? `<p class="op-excerpt">${esc(previewText)}</p>` : ""}
             </a>
@@ -296,16 +301,16 @@
 
         <div class="op-postBottom">
           <button
-            class="op-likeBtn ${liked ? "op-liked is-liked" : ""}"
+            class="op-likeBtn ${likedBool ? "op-liked is-liked" : ""}"
             type="button"
             data-like-button
             data-post-id="${esc(id)}"
-            data-liked="${liked ? "true" : "false"}"
-            aria-pressed="${liked ? "true" : "false"}"
+            data-liked="${likedBool ? "true" : "false"}"
+            aria-pressed="${likedBool ? "true" : "false"}"
           >
-            <span class="op-likeIcon" data-like-icon>${liked ? "❤️" : "🤍"}</span>
+            <span class="op-likeIcon" data-like-icon>${likedBool ? "❤️" : "🤍"}</span>
             <span class="op-likeLabel" data-like-label>Like</span>
-            <span class="op-likeCount" data-like-count-inline>${Number(post?.likes_count || 0)}</span>
+            <span class="op-likeCount" data-like-count data-post-id="${esc(id)}">${initialLikeCount}</span>
           </button>
         </div>
       </article>
@@ -397,6 +402,7 @@
 
     if (likeBtn) {
       likeBtn.dataset.postId = String(post.id || "");
+      likeBtn.dataset.likeButton = "true";
       likeBtn.dataset.liked = "false";
       likeBtn.setAttribute("aria-pressed", "false");
       likeBtn.classList.remove("is-liked");
@@ -404,10 +410,13 @@
     }
 
     if (likeIcon) {
+      likeIcon.setAttribute("data-like-icon", "");
       likeIcon.textContent = "🤍";
     }
 
     if (likeCount) {
+      likeCount.dataset.likeCount = "true";
+      likeCount.dataset.postId = String(post.id || "");
       likeCount.textContent = String(Number(post.likes_count || 0));
     }
 
