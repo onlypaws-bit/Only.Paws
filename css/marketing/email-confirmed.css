@@ -6,9 +6,14 @@
 
 .emailConfirmedWrap{
   width:100%;
+  min-height:calc(100vh - 120px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .emailConfirmedCard{
+  width:100%;
   max-width:720px;
   margin:0 auto;
   text-align:center;
@@ -19,7 +24,8 @@
 .emailConfirmedCard::before{
   content:"";
   position:absolute;
-  inset:-80px auto auto -80px;
+  top:-80px;
+  left:-80px;
   width:180px;
   height:180px;
   border-radius:999px;
@@ -30,7 +36,8 @@
 .emailConfirmedCard::after{
   content:"";
   position:absolute;
-  inset:auto -90px -90px auto;
+  right:-90px;
+  bottom:-90px;
   width:220px;
   height:220px;
   border-radius:999px;
@@ -38,22 +45,29 @@
   pointer-events:none;
 }
 
-.emailConfirmedIcon{
-  width:78px;
-  height:78px;
-  margin:0 auto 18px;
-  display:grid;
-  place-items:center;
-  font-size:38px;
-  line-height:1;
-  border-radius:999px;
-  background:linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.08));
-  border:1px solid rgba(255,255,255,.16);
-  box-shadow:
-    0 14px 34px rgba(0,0,0,.18),
-    inset 0 1px 0 rgba(255,255,255,.08);
-  backdrop-filter:blur(8px);
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.emailConfirmedBrand{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:14px;
 }
+
+.emailConfirmedBrand img{
+  width:68px;
+  height:68px;
+  object-fit:contain;
+  filter:
+    drop-shadow(0 10px 28px rgba(0,0,0,.25))
+    drop-shadow(0 0 18px rgba(140,110,255,.35));
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
 
 .emailConfirmedTitle{
   margin:0 0 12px;
@@ -73,8 +87,7 @@
   padding:20px 22px;
   border:1px solid rgba(255,255,255,.14);
   border-radius:22px;
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+  background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
   box-shadow:
     0 14px 36px rgba(0,0,0,.16),
     inset 0 1px 0 rgba(255,255,255,.06);
@@ -145,11 +158,9 @@
 }
 
 @media (max-width: 640px){
-  .emailConfirmedIcon{
-    width:68px;
-    height:68px;
-    font-size:32px;
-    margin-bottom:16px;
+  .emailConfirmedBrand img{
+    width:60px;
+    height:60px;
   }
 
   .emailConfirmedTitle{
@@ -175,39 +186,3 @@
     margin-top:16px;
   }
 }
-
-
-/* =========================================================
-   BRAND LOGO
-   ========================================================= */
-
-.emailConfirmedBrand{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  margin-bottom:14px;
-}
-
-.emailConfirmedBrand img{
-  width:64px;
-  height:64px;
-  object-fit:contain;
-  filter:drop-shadow(0 6px 18px rgba(0,0,0,.25));
-}
-
-
-/* =========================================================
-   CENTERING FIX (IMPORTANT)
-   ========================================================= */
-
-.emailConfirmedWrap{
-  min-height:calc(100vh - 120px); /* header + footer breathing */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.emailConfirmedCard{
-  margin:0;
-}
-
