@@ -59,16 +59,18 @@
   <link rel="stylesheet" href="/css/app/creators/create-post.css" />
 </head>
 <body class="createPostPage">
-  <div class="wrap">
+  <div class="wrap createPostWrap">
     <div id="header-placeholder"></div>
 
-    <main class="createPostMain">
-      <section class="panel">
-        <div class="row">
-          <div>
+    <main class="createPostMain createPostLayout">
+      <section class="panel createPostPanel">
+        <div class="createPostHero">
+          <div class="createPostHeroMain">
             <div class="pill op-section-space op-hidden" id="modePill">Create Post</div>
             <h1 id="pageTitle">Create a post</h1>
-            <p class="sub" id="pageSub">Creator-only. This writes into <b>posts</b>.</p>
+            <p class="sub createPostSub" id="pageSub">
+              Creator-only. This writes into <b>posts</b>.
+            </p>
           </div>
         </div>
 
@@ -85,68 +87,123 @@
           <div class="op-help-text">After checkout, tap Refresh.</div>
         </div>
 
-        <div class="field">
-          <label for="is_public">Visibility</label>
-          <select id="is_public">
-            <option value="true">Public (shows in feeds)</option>
-            <option value="false">Private (creator only)</option>
-          </select>
-        </div>
+        <div class="createPostGrid">
+          <div class="field">
+            <label for="is_public">Visibility</label>
+            <select id="is_public">
+              <option value="true">Public (shows in feeds)</option>
+              <option value="false">Private (creator only)</option>
+            </select>
+          </div>
 
-        <div class="field">
-          <label for="is_paid">Type</label>
-          <select id="is_paid">
-            <option value="false">🆓 FREE</option>
-            <option value="true">🔒 PREMIUM</option>
-          </select>
+          <div class="field">
+            <label for="is_paid">Type</label>
+            <select id="is_paid">
+              <option value="false">🆓 FREE</option>
+              <option value="true">🔒 PREMIUM</option>
+            </select>
+          </div>
         </div>
 
         <div class="field">
           <label for="title">Title</label>
-          <input id="title" type="text" placeholder="e.g. Lola doing chaos stuff 🐾" />
+          <input
+            id="title"
+            type="text"
+            placeholder="e.g. Lola doing chaos stuff 🐾"
+          />
         </div>
 
         <div class="field">
           <label for="content">Content</label>
-          <textarea id="content" placeholder="Write the post content…"></textarea>
+          <textarea
+            id="content"
+            placeholder="Write the post content…"
+          ></textarea>
         </div>
 
-        <div class="field">
+        <div class="field createPostPreviewField">
           <label for="preview">Preview (recommended for PREMIUM)</label>
-          <textarea id="preview" placeholder="Short teaser shown when locked…"></textarea>
+          <textarea
+            id="preview"
+            placeholder="Short teaser shown when locked…"
+          ></textarea>
         </div>
 
-        <div class="field">
+        <div class="field" id="mediaField">
           <label for="mediaFile">Media (optional)</label>
-          <input id="mediaFile" type="file" accept="image/*,video/*" />
-        </div>
 
-        <div class="field op-hidden" id="mediaPreviewWrap">
-          <label>Preview</label>
-
-          <div class="panel op-preview-panel">
-            <img
-              id="mediaPreviewImage"
-              class="op-preview-media op-preview-image op-hidden"
-              alt="Media preview"
-            />
-            <video
-              id="mediaPreviewVideo"
-              class="op-preview-media op-preview-video op-hidden"
-              controls
-              playsinline
-            ></video>
-            <div id="mediaPreviewEmpty" class="sub">No media selected.</div>
+          <div class="createPostFileBox">
+            <input id="mediaFile" type="file" accept="image/*,video/*" />
+            <div class="createPostFileMeta" id="mediaMeta">
+              Image or video · max 25MB
+            </div>
           </div>
         </div>
 
         <div class="btnRow">
           <button class="btn" id="publishBtn" type="button">Publish</button>
-          <a class="ghost op-hidden" id="cancelEditBtn" href="#">Cancel</a>
+          <a class="ghost op-hidden" id="cancelEditBtn" href="creator-dash.html">Cancel</a>
         </div>
 
         <div class="msg" id="msg"></div>
       </section>
+
+      <aside class="panel createPostPreviewPanel">
+        <div class="previewHeader">
+          <h2>Live preview</h2>
+          <p>Quick view of how the post will feel in-app.</p>
+        </div>
+
+        <div class="createPostPreview">
+          <article class="createPostPreviewCard">
+            <div class="createPostPreviewTop">
+              <div class="createPostPreviewMeta">
+                <span class="createPostPreviewPill" id="previewVisibilityPill">Public</span>
+                <span class="createPostPreviewType isFree" id="previewTypePill">🆓 FREE</span>
+              </div>
+            </div>
+
+            <h3 class="createPostPreviewTitle" id="previewTitleText">Your post title</h3>
+
+            <p class="createPostPreviewExcerpt" id="previewContentText">
+              Start writing to see your post preview here…
+            </p>
+
+            <div class="createPostPreviewLocked op-hidden" id="previewLockedBox">
+              <b>Locked preview</b>
+              <div id="previewTeaserText">
+                Short teaser shown when the premium post is locked.
+              </div>
+            </div>
+
+            <div class="createPostPreviewMediaWrap op-hidden" id="previewMediaWrap">
+              <div class="op-preview-panel">
+                <img
+                  id="previewImage"
+                  class="op-preview-media op-preview-image op-hidden"
+                  alt="Post media preview"
+                />
+                <video
+                  id="previewVideo"
+                  class="op-preview-media op-preview-video op-hidden"
+                  controls
+                  muted
+                  playsinline
+                ></video>
+              </div>
+            </div>
+
+            <div class="createPostPreviewEmpty" id="previewMediaEmpty">
+              No media selected yet.
+            </div>
+          </article>
+
+          <div class="createPostPreviewHint">
+            Premium posts should usually have a short teaser in the preview field.
+          </div>
+        </div>
+      </aside>
     </main>
 
     <div id="footer-placeholder"></div>
