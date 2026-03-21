@@ -14,7 +14,6 @@
   /js/paths.js
   /js/onlypawsClient.js
   /js/partials.js
-  /js/nav.js
 -->
 
 <!DOCTYPE html>
@@ -30,13 +29,15 @@
   <link rel="stylesheet" href="/css/marketing/email-confirmed.css" />
 </head>
 
-<body data-page="email-confirmed">
+<body>
   <div class="pageShell">
     <div class="wrap">
-      <div id="header-placeholder"></div>
+
+      <!-- HEADER RIMOSSO -->
 
       <main class="hero authLayout emailConfirmedWrap">
         <section class="panel emailConfirmedCard">
+
           <div class="emailConfirmedBrand">
             <img src="/assets/images/logo.png" alt="OnlyPaws logo" />
           </div>
@@ -63,17 +64,21 @@
           </div>
 
           <p id="redirectNote" class="note emailConfirmedStatus">
-            <strong>Walking you in</strong><span id="redirectDots" class="emailConfirmedDots">...</span>
+            <strong>Walking you in</strong>
+            <span id="redirectDots" class="emailConfirmedDots">...</span>
           </p>
 
           <p class="emailConfirmedHint">
             Don’t want to wait?
             <a href="/html/app/profile.html">Open your profile now</a>.
           </p>
+
         </section>
       </main>
 
+      <!-- FOOTER -->
       <div id="footer-placeholder"></div>
+
     </div>
   </div>
 
@@ -81,7 +86,6 @@
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
   <script src="/js/partials.js"></script>
-  <script src="/js/nav.js"></script>
 
   <script>
     (async function () {
@@ -90,22 +94,20 @@
       const role = (params.get("role") || "").trim().toLowerCase();
       const previewMode = params.has("preview");
 
-      if (window.OPPartials?.loadMarketingLayout) {
-        await window.OPPartials.loadMarketingLayout();
-      }
-
-      if (window.OPNav?.initNav) {
-        await window.OPNav.initNav();
+      // carica SOLO footer marketing
+      if (window.OPPartials?.loadPartial) {
+        await window.OPPartials.loadPartial(
+          "footer-placeholder",
+          PATHS?.components?.footerMarketing || "/components/footer-marketing.html"
+        );
       }
 
       const profileUrl =
         PATHS?.app?.profile ||
-        PATHS?.profile ||
         "/html/app/profile.html";
 
       const creatorsUrl =
         PATHS?.marketing?.creators ||
-        PATHS?.creators ||
         "/html/marketing/creators.html";
 
       const nextUrl =
