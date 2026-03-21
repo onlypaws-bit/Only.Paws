@@ -2,6 +2,12 @@
    OnlyPaws
    File: /js/marketing/creators.js
    Purpose: marketing creators page logic
+
+   Rules for this page:
+   - users entering from this page must end up with role = creator
+   - never create a fan profile here
+   - if a profile already exists as fan, upgrade it to creator
+
    Dependencies:
    - window.OP_PATHS
    - window.onlypawsClient
@@ -13,6 +19,8 @@
 (function () {
   const client = window.onlypawsClient;
   const PATHS = window.OP_PATHS || {};
+
+  const CREATOR_ROLE = "creator";
 
   const els = {
     form: document.getElementById("creator-auth-form"),
@@ -117,7 +125,7 @@
     return data?.session?.user || null;
   }
 
-  async function ensureProfileAndWallet() {
+  async function ensureCreatorProfileAndWallet() {
     const user = await getSessionUser();
     if (!user?.id) throw new Error("No user session");
 
@@ -139,7 +147,7 @@
         .from("profiles")
         .insert({
           user_id: uid,
-          role: "fan",
+          role: CREATOR_ROLE,
           updated_at: now,
         })
         .select()
@@ -147,6 +155,19 @@
 
       if (insertRes.error) throw insertRes.error;
       profile = insertRes.data;
+    } else if ((existingProfile.role || "").trim().toLowerCase() !== CREATOR_ROLE) {
+      const updateRes = await client
+        .from("profiles")
+        .update({
+          role: CREATOR_ROLE,
+          updated_at: now,
+        })
+        .eq("user_id", uid)
+        .select()
+        .maybeSingle();
+
+      if (updateRes.error) throw updateRes.error;
+      profile = updateRes.data;
     }
 
     const walletRes = await client
@@ -164,21 +185,6 @@
       profile,
       wallet: walletRes.data,
     };
-  }
-
-  async function promoteToCreator() {
-    const user = await getSessionUser();
-    if (!user?.id) throw new Error("No user session");
-
-    const { data, error } = await client
-      .from("profiles")
-      .update({ role: "creator" })
-      .eq("user_id", user.id)
-      .select()
-      .maybeSingle();
-
-    if (error) throw error;
-    return data;
   }
 
   async function initMarketingPage() {
@@ -262,7 +268,7 @@
         email,
         password,
         options: {
-          data: { role: "creator" },
+          data: { role: CREATOR_ROLE },
           emailRedirectTo,
         },
       });
@@ -273,13 +279,12 @@
       }
 
       if (data?.session) {
-        await ensureProfileAndWallet();
-        await promoteToCreator();
+        await ensureCreatorProfileAndWallet();
         window.location.href = path("profile") || "/html/app/profile.html";
         return;
       }
 
-      setMsg("✅ Account created. Check your email to confirm 🐾");
+      setMsg("✅ Creator account created. Check your email to confirm 🐾");
     } catch (err) {
       setMsg(`❌ ${err?.message || String(err)}`);
     } finally {
@@ -318,8 +323,8 @@
       }
 
       if (data?.session) {
-        await ensureProfileAndWallet();
-        window.location.href = path("feed") || "/html/app/feed.html";
+        await ensureCreatorProfileAndWallet();
+        window.location.href = getNextPath();
       }
     } catch (err) {
       setMsg(`❌ ${err?.message || String(err)}`);
@@ -362,10 +367,11 @@
 
   async function autoRedirectIfLoggedIn() {
     try {
-      const { data } = await client.auth.getSession();
-      if (data?.session) {
-        redirectAfterAuth();
-      }
+      const user = await getSessionUser();
+      if (!user) return;
+
+      await ensureCreatorProfileAndWallet();
+      redirectAfterAuth();
     } catch (error) {
       console.warn("auto-redirect skipped:", error);
     }
