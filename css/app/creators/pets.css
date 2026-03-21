@@ -1,11 +1,16 @@
 /* =========================================================
    OnlyPaws
-   File: css/app/creators/pets.css
+   File: /css/app/creators/pets.css
    Purpose: styles specific to the pets management page
    ========================================================= */
 
+.petsPage {
+  padding-top: 22px;
+  padding-bottom: 70px;
+}
+
 .petsGrid {
-  margin-top: 14px;
+  margin-top: 16px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
@@ -44,32 +49,38 @@
 }
 
 .petsInput,
-.petsTextarea {
+.petsTextarea,
+.petsRowInput,
+.petsRowTextarea {
   width: 100%;
   padding: 12px 14px;
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 14px;
   background: rgba(255,255,255,.12);
-  color: white;
+  color: var(--text);
   outline: none;
 }
 
 .petsInput::placeholder,
-.petsTextarea::placeholder {
+.petsTextarea::placeholder,
+.petsRowInput::placeholder,
+.petsRowTextarea::placeholder {
   color: rgba(255,255,255,.65);
 }
 
-.petsInputFile {
+.petsInputFile,
+.petsRowInputFile {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 14px;
   background: rgba(255,255,255,.12);
-  color: white;
+  color: var(--text);
   outline: none;
 }
 
-.petsTextarea {
+.petsTextarea,
+.petsRowTextarea {
   min-height: 90px;
   resize: vertical;
 }
@@ -86,24 +97,32 @@
   justify-content: space-between;
   gap: 12px;
   flex-wrap: wrap;
-  padding: 14px;
   border-radius: 18px;
-  border: 1px solid rgba(255,255,255,.16);
+  padding: 14px;
   background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.16);
 }
 
-.petsAvatarMini {
+.petsAvatarMini,
+.petsAvatarMiniFallback {
   width: 54px;
   height: 54px;
   border-radius: 18px;
-  object-fit: cover;
+  flex: 0 0 auto;
   border: 1px solid rgba(255,255,255,.16);
   background: rgba(0,0,0,.18);
+  overflow: hidden;
+}
+
+.petsAvatarMini {
+  object-fit: cover;
+}
+
+.petsAvatarMiniFallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  flex: 0 0 auto;
+  font-size: 22px;
 }
 
 .petsMeta {
@@ -111,43 +130,92 @@
   flex: 1;
 }
 
-.petsMetaName {
+.petsBadges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.petsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.16);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.petsNameLine {
   display: block;
   font-size: 1rem;
   margin-bottom: 4px;
+  font-weight: 900;
 }
 
-.petsMetaInline {
+.petsTopLine {
   opacity: .9;
   font-weight: 800;
 }
 
-.petsSmallText {
+.petsSmall {
+  color: rgba(255,255,255,.78);
   font-size: 13px;
   line-height: 1.45;
-  color: rgba(255,255,255,.78);
 }
 
 .petsDivider {
   height: 1px;
-  margin-top: 12px;
   background: rgba(255,255,255,.14);
+  margin-top: 12px;
 }
 
-.petsDangerBtn {
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.20);
+.petsEditorBlock {
+  margin-top: 10px;
 }
 
-.petsSmallLegal {
-  display: inline-block;
-  margin-top: 6px;
-  font-size: 12px;
-  opacity: .85;
+.petsEditorTitle {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 900;
+  color: rgba(255,255,255,.85);
+}
+
+.petsFormGrid {
+  display: grid;
+  gap: 8px;
 }
 
 @media (max-width: 920px) {
   .petsGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .petsPage {
+    padding-top: 16px;
+    padding-bottom: 52px;
+  }
+
+  .petsCard {
+    padding: 14px;
+  }
+
+  .petsRowCard {
+    padding: 12px;
+  }
+
+  .petsMeta {
+    min-width: 100%;
+  }
+
+  .petsBadges {
+    gap: 8px;
   }
 }
