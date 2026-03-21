@@ -179,15 +179,26 @@
   }
 
   function enableAction(element, enabled) {
-    if (!element) return;
+  if (!element) return;
 
-    if ("disabled" in element) {
-      element.disabled = !enabled;
-    }
-
-    element.setAttribute("aria-disabled", enabled ? "false" : "true");
-    element.classList.toggle("isDisabled", !enabled);
+  if ("disabled" in element) {
+    element.disabled = !enabled;
   }
+
+  if (enabled) {
+    element.removeAttribute("aria-disabled");
+    element.removeAttribute("tabindex");
+  } else {
+    element.setAttribute("aria-disabled", "true");
+
+    if (element.tagName === "A") {
+      element.setAttribute("tabindex", "-1");
+    }
+  }
+
+  element.classList.toggle("isDisabled", !enabled);
+  element.classList.toggle("dashboardIsDisabled", !enabled);
+}
 
   function setStateBox(title, text, extrasHtml = "") {
     if (!els.stateBox) return;
@@ -843,11 +854,11 @@
       }
 
       if (!state.creatorPlanActive) {
-        els.walletHint.textContent = "Monetization plan required to view balance.";
-        showWalletMsg(
-          "Monetization locked",
-          "Posting is available for creators, but monetization requires an active Creator Plan."
-        );
+        els.walletHint.textContent = "Creator Plan required to view balance.";
+showWalletMsg(
+  "Creator Plan required",
+  "Activate Creator Plan to unlock balance and monetization tools."
+);
         return;
       }
 
@@ -906,8 +917,8 @@
     if (!state.creatorPlanActive) {
       els.earningsHint.textContent = "Monetization plan required.";
       els.earningsTable.innerHTML = renderEmptyState(
-        "Monetization locked",
-        "Posting is available, but earnings are shown only when Creator Plan is active."
+        "Creator Plan required",
+        "Activate Creator Plan to start earning."
       );
       return;
     }
@@ -1139,7 +1150,7 @@
           buyCreatorPlanBtn,
           false,
           null,
-          "Unlock monetization — €10/month"
+          "Unlock Creator Plan — €10/month"
         );
         alert("❌ Checkout error: " + (error?.message || String(error)));
       }
@@ -1195,97 +1206,95 @@
   }
 
   function renderCreatorStatusNoPlan() {
-    const query = new URLSearchParams(window.location.search);
-    const cameFromStripe = (
-      query.has("session_id") ||
-      query.has("success") ||
-      query.has("checkout") ||
-      query.has("payment_intent") ||
-      query.has("redirect_status")
-    );
+  const query = new URLSearchParams(window.location.search);
+  const cameFromStripe = (
+    query.has("session_id") ||
+    query.has("success") ||
+    query.has("checkout") ||
+    query.has("payment_intent") ||
+    query.has("redirect_status")
+  );
 
-    const extrasHtml = `
-      <div class="btnRow" style="margin-top:12px;">
-        ${
-          cameFromStripe
-            ? `<button class="navBtn primary" type="button" disabled style="opacity:.65;cursor:not-allowed;">Monetization processing…</button>`
-            : `<button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Unlock monetization — €10/month</button>`
-        }
-        <button class="navBtn" type="button" id="refreshPlanBtn">Refresh</button>
-      </div>
-      <div class="hint" style="margin-top:10px;">
-        ${
-          cameFromStripe
-            ? "✅ Payment started — waiting for Stripe confirmation. Then press Refresh."
-            : "You can already create posts. Activate Creator Plan only if you want monetization tools."
-        }
-      </div>
-    `;
-
-    setStateBox(
-      "✅ Creator profile active",
+  const extrasHtml = `
+    <div class="btnRow" style="margin-top:12px;">
+      ${
+        cameFromStripe
+          ? `<button class="navBtn primary" type="button" disabled style="opacity:.65;cursor:not-allowed;">Creator Plan processing…</button>`
+          : `<button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Unlock Creator Plan — €10/month</button>`
+      }
+      <button class="navBtn" type="button" id="refreshPlanBtn">Refresh</button>
+    </div>
+    ${
       cameFromStripe
-        ? "Your creator profile is active and posting is available. Monetization will unlock after Stripe confirmation."
-        : "Your creator profile is active. You can create posts now. Creator Plan is optional and only needed for monetization.",
-      extrasHtml
-    );
+        ? `<div class="hint" style="margin-top:10px;">✅ Payment started — waiting for Stripe confirmation. Then press Refresh.</div>`
+        : `<div class="hint" style="margin-top:10px;">Posting is already available. Activate Creator Plan to unlock monetization.</div>`
+    }
+  `;
 
-    bindRefreshPlanButton();
-    bindBuyCreatorPlanButton();
-  }
+  setStateBox(
+    "🔒 Creator Plan not active",
+    cameFromStripe
+      ? "Your payment is processing. Creator Plan will unlock after Stripe confirmation."
+      : "Your creator account is ready. Creator Plan is optional and only needed to unlock monetization.",
+    extrasHtml
+  );
+
+  bindRefreshPlanButton();
+  bindBuyCreatorPlanButton();
+}
 
   function renderCreatorStatusPlanActive(planData) {
-    let extrasHtml = "";
+  let extrasHtml = "";
 
-    if (planData) {
-      const cpeIso = planData.current_period_end || null;
-      const cpeMs = cpeIso ? new Date(cpeIso).getTime() : 0;
-      const now = Date.now();
+  if (planData) {
+    const cpeIso = planData.current_period_end || null;
+    const cpeMs = cpeIso ? new Date(cpeIso).getTime() : 0;
+    const now = Date.now();
 
-      if (!!planData.cancel_at_period_end && cpeMs && cpeMs > now) {
-        const endLabel = new Date(cpeIso).toLocaleDateString();
-        extrasHtml = `
-          <div class="btnRow" style="margin-top:12px;">
-            <button class="ghost" type="button" id="resumePlanBtn">Resume Creator Plan</button>
-          </div>
-          <div class="hint" style="margin-top:8px;opacity:.9;">
-            ⏳ Monetization remains active until <b>${endLabel}</b>.
-          </div>
-        `;
-      } else {
-        extrasHtml = `
-          <div class="btnRow" style="margin-top:12px;">
-            <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel</button>
-          </div>
-          <div class="hint" style="margin-top:8px;opacity:.9;">
-            Cancels at the end of your current billing period.
-          </div>
-        `;
-      }
+    if (!!planData.cancel_at_period_end && cpeMs && cpeMs > now) {
+      const endLabel = new Date(cpeIso).toLocaleDateString();
+      extrasHtml = `
+        <div class="btnRow" style="margin-top:12px;">
+          <button class="ghost" type="button" id="resumePlanBtn">Resume Creator Plan</button>
+        </div>
+        <div class="hint" style="margin-top:8px;opacity:.9;">
+          ⏳ Active until <b>${endLabel}</b>.
+        </div>
+      `;
     } else {
       extrasHtml = `
         <div class="btnRow" style="margin-top:12px;">
-          <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel at period end</button>
+          <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel</button>
         </div>
         <div class="hint" style="margin-top:8px;opacity:.9;">
           Cancels at the end of your current billing period.
         </div>
       `;
     }
-
-    setStateBox(
-      (!!planData && !!planData.cancel_at_period_end)
-        ? "⚠️ Monetization plan ending"
-        : "💸 Monetization active",
-      (!!planData && !!planData.cancel_at_period_end)
-        ? "Your creator profile is active and posting stays available. Monetization will end at the end of the billing period."
-        : "Your creator profile is active. Posting is available, and monetization tools are enabled.",
-      extrasHtml
-    );
-
-    bindCancelPlanButton();
-    bindResumePlanButton();
+  } else {
+    extrasHtml = `
+      <div class="btnRow" style="margin-top:12px;">
+        <button class="ghost danger" type="button" id="cancelPlanBtn">Cancel at period end</button>
+      </div>
+      <div class="hint" style="margin-top:8px;opacity:.9;">
+        Cancels at the end of your current billing period.
+      </div>
+    `;
   }
+
+  setStateBox(
+    (!!planData && !!planData.cancel_at_period_end)
+      ? "⚠️ Creator Plan canceled"
+      : "✅ Creator Plan active",
+    (!!planData && !!planData.cancel_at_period_end)
+      ? "Your Creator Plan will end at the end of the billing period. Monetization stays active until then."
+      : "Creator Plan is active. Monetization is unlocked. Complete Stripe onboarding if needed.",
+    extrasHtml
+  );
+
+  bindCancelPlanButton();
+  bindResumePlanButton();
+}
 
   async function loadDashboard() {
     if (!client) {
