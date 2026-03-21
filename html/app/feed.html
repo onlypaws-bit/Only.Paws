@@ -60,6 +60,7 @@
           <button id="supportBtn" class="navBtn" type="button">Support OnlyPaws</button>
         </div>
 
+        <div id="supportMsg" class="hint" hidden></div>
         <div id="debug" class="debug" hidden></div>
       </section>
 
@@ -113,19 +114,9 @@
   <script>
     window.addEventListener("DOMContentLoaded", async () => {
       try {
-        if (window.OPPartials?.loadAppLayout) {
-          await window.OPPartials.loadAppLayout();
-        } else if (window.loadAppLayout) {
-          await window.loadAppLayout();
-        }
-
-        if (window.OPNav?.initNav) {
-          await window.OPNav.initNav();
-        } else if (window.initNav) {
-          await window.initNav();
-        }
-
-        if (window.OnlyPawsFeed?.initFeedPage) {
+        if (window.OPFeed?.initFeedPage) {
+          await window.OPFeed.initFeedPage();
+        } else if (window.OnlyPawsFeed?.initFeedPage) {
           await window.OnlyPawsFeed.initFeedPage();
         }
       } catch (err) {
