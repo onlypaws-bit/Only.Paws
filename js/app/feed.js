@@ -1,15 +1,6 @@
 /* =========================================================
    OnlyPaws
    File: /js/app/feed.js
-   Purpose: app feed page logic
-   Dependencies:
-   - window.onlypawsClient
-   - window.OP_PATHS
-   - window.OPRoutes
-   - window.OPPartials
-   - window.OPNav
-   - window.OnlyPawsPost
-   - window.onlypawsLikes
    ========================================================= */
 
 (function () {
@@ -330,7 +321,7 @@
             : (post.preview || post.content || ""),
           is_locked: locked,
           can_view: !locked,
-          liked: null,
+          liked: false,
         };
       };
 
@@ -348,10 +339,7 @@
           return;
         }
 
-        postsEl.innerHTML = enrichedLoggedOut
-          .map((post) => postRenderer.render(post))
-          .join("");
-
+        postsEl.innerHTML = enrichedLoggedOut.map((post) => postRenderer.render(post)).join("");
         hide(postsHint);
         await initLikesForContainer(postsEl);
         return;
@@ -440,22 +428,14 @@
         return;
       }
 
-      postsEl.innerHTML = enriched
-        .map((post) => postRenderer.render(post))
-        .join("");
-
+      postsEl.innerHTML = enriched.map((post) => postRenderer.render(post)).join("");
       hide(postsHint);
       await initLikesForContainer(postsEl);
     } catch (error) {
       console.error("[feed] failed to load latest posts", error);
       setText(postsHint, "Could not load posts.");
       show(postsHint);
-
-      const existingDebug = document.getElementById("debug")?.textContent || "";
-      setDebug(
-        `${existingDebug ? `${existingDebug}\n\n` : ""}Posts query failed:\n${error?.message || "Unknown error"}`
-      );
-
+      setDebug(`${document.getElementById("debug")?.textContent ? `${document.getElementById("debug").textContent}\n\n` : ""}Posts query failed:\n${error?.message || "Unknown error"}`);
       postsEl.innerHTML = "";
     }
   }
@@ -490,7 +470,7 @@
       }
 
       if (window.OPNav?.init) {
-        await window.OPNav.init();
+        window.OPNav.init();
       }
 
       setupSearch();
