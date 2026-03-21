@@ -1,42 +1,80 @@
-<div class="wrap">
-  <div id="header-placeholder"></div>
+<!--
+  OnlyPaws
+  File: /html/app/creators/payouts-setup.html
 
-  <main class="payoutsSetupMain">
-    <section class="panel">
-      <h1>Enable payouts</h1>
-      <p class="sub">
-        To withdraw earnings, you need to enable payouts through Stripe onboarding.
-        Once completed, your dashboard will unlock payout access.
-      </p>
+  CSS:
+  /css/styles.css
+  /css/app/creators/payouts-setup.css
 
-      <div class="payoutsBox">
-        <div class="payoutsStatusLine">
-          <div class="payoutsLockIcon" id="lockIcon">🔒</div>
+  JS:
+  /js/paths.js
+  /js/onlypawsClient.js
+  /js/auth-guard.js
+  /js/partials.js
+  /js/nav.js
+  /js/app/creators/payouts-setup.js
+-->
 
-          <div class="payoutsStatusContent">
-            <div class="payoutsStatusTitle" id="statusTitle">Payouts not enabled</div>
-            <div class="payoutsStatusText" id="statusText">Start setup to enable withdrawals.</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Enable payouts</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/creators/payouts-setup.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div id="header-placeholder"></div>
+
+    <main class="payoutsSetupMain">
+      <section class="panel">
+        <h1>Enable payouts</h1>
+        <p class="sub">
+          To withdraw earnings, you need to enable payouts through Stripe onboarding.
+          Once completed, your dashboard will unlock payout access.
+        </p>
+
+        <div class="payoutsBox">
+          <div class="payoutsStatusLine">
+            <div class="payoutsLockIcon" id="lockIcon">🔒</div>
+
+            <div class="payoutsStatusContent">
+              <div class="payoutsStatusTitle" id="statusTitle">Payouts not enabled</div>
+              <div class="payoutsStatusText" id="statusText">Start setup to enable withdrawals.</div>
+            </div>
+          </div>
+
+          <div class="btnRow">
+            <button class="btn" id="startBtn" type="button">Start payout setup</button>
+            <button class="ghost" id="refreshBtn" type="button">I've completed setup — Refresh</button>
+            <a class="ghost" id="backToDashboardBtn" href="/html/app/creators/creator-dash.html">Back to dashboard</a>
+          </div>
+
+          <div class="payoutsOkLine op-hidden" id="submittedLine">
+            <span>✅</span>
+            <span>Setup submitted. Press Refresh to re-check payout status.</span>
+          </div>
+
+          <div class="payoutsNote" id="note">
+            Tip: if Stripe needs verification, payouts may take a moment to become active.
+            Refresh again after about a minute.
           </div>
         </div>
+      </section>
+    </main>
 
-        <div class="btnRow">
-          <button class="btn" id="startBtn" type="button">Start payout setup</button>
-          <button class="ghost" id="refreshBtn" type="button">I've completed setup — Refresh</button>
-          <a class="ghost" id="backToDashboardBtn" href="/html/app/creators/creator-dash.html">Back to dashboard</a>
-        </div>
+    <div id="footer-placeholder"></div>
+  </div>
 
-        <div class="payoutsOkLine op-hidden" id="submittedLine">
-          <span>✅</span>
-          <span>Setup submitted. Press Refresh to re-check payout status.</span>
-        </div>
-
-        <div class="payoutsNote" id="note">
-          Tip: if Stripe needs verification, payouts may take a moment to become active.
-          Refresh again after about a minute.
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div id="footer-placeholder"></div>
-</div>
+  <script src="/js/paths.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/app/creators/payouts-setup.js"></script>
+</body>
+</html>
