@@ -1,3 +1,5 @@
+// create-creator-plan-checkout
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -29,16 +31,23 @@ async function stripePOST(path: string, params: Record<string, string>) {
     },
     body: toForm(params),
   });
+
   const j = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(j?.error?.message ?? JSON.stringify(j));
   return j;
 }
 
 Deno.serve(async (req) => {
-  // ✅ CORS preflight
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST")
-    return new Response("Method not allowed", { status: 405, headers: corsHeaders });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: corsHeaders,
+    });
+  }
 
   try {
     const auth = req.headers.get("Authorization") || "";
@@ -47,17 +56,27 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: auth } },
     });
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: corsHeaders,
+      });
+    }
 
     const origin =
       req.headers.get("origin") ??
       "https://onlypaws-psi.vercel.app";
 
-    const successUrl = `${origin}/creator-dash.html?success=1&session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${origin}/creator-dash.html?canceled=1`;
+    const successUrl =
+      `${origin}/html/app/creators/creator-dash.html?success=1&session_id={CHECKOUT_SESSION_ID}`;
 
-    // ✅ Se il trial è già configurato nel price su Stripe, NON serve aggiungerlo qui.
+    const cancelUrl =
+      `${origin}/html/app/creators/creator-dash.html?canceled=1`;
+
     const session = await stripePOST("checkout/sessions", {
       mode: "subscription",
       "line_items[0][price]": PRICE_ID,
@@ -65,15 +84,11 @@ Deno.serve(async (req) => {
       success_url: successUrl,
       cancel_url: cancelUrl,
 
-      // 🔥 fondamentale per sapere a chi assegnare entitlements
       "metadata[user_id]": user.id,
-
-      // ✅ robusto: garantisce metadata anche sulla subscription (customer.subscription.updated ecc.)
       "subscription_data[metadata][user_id]": user.id,
-"subscription_data[trial_period_days]": "14",
+      "subscription_data[trial_period_days]": "14",
+
       customer_email: user.email ?? "",
-      // opzionale: se vuoi forzare trial da qui invece che dal price:
-      // "subscription_data[trial_period_days]": "14",
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
