@@ -158,20 +158,7 @@
     window.location.replace(PATHS?.home || PATHS?.index || "/index.html");
   }
 
-  function loginHref() {
-    const current = window.location.pathname + window.location.search;
-
-    if (ROUTES?.href) {
-      return ROUTES.href("login", { redirect: current });
-    }
-
-    const base = PATHS?.login || "/html/login.html";
-    return `${base}?redirect=${encodeURIComponent(current)}`;
-  }
-
-  function goLogin() {
-    window.location.href = loginHref();
-  }
+  
 
   function subscriptionsHref(creatorId) {
     if (ROUTES?.href) {
@@ -180,7 +167,20 @@
     const base =
       PATHS?.app?.fans?.subscriptions || "/html/app/fans/subscriptions.html";
     return `${base}?creator=${encodeURIComponent(creatorId)}`;
+  function goFansAuth() {
+  const current = window.location.pathname + window.location.search;
+
+  if (ROUTES?.href) {
+    window.location.href = ROUTES.href("marketing.fans", {
+      auth: 1,
+      redirect: current,
+    });
+    return;
   }
+
+  window.location.href =
+    `/html/marketing/fans.html?auth=1&redirect=${encodeURIComponent(current)}`;
+  }}
 
   function creatorProfileHref(usernameOrId) {
     if (!usernameOrId) return "";
