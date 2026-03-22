@@ -26,7 +26,10 @@ function normalizeSiteUrl(raw: string) {
   return raw.replace(/\/+$/, "");
 }
 
-function safePath(p?: string, fallback = "/payouts-setup.html") {
+function safePath(
+  p?: string,
+  fallback = "/html/app/creators/payouts-setup.html",
+) {
   if (!p) return fallback;
   if (!p.startsWith("/")) return fallback;
   if (p.startsWith("//")) return fallback;
@@ -43,10 +46,15 @@ const PLATFORM_PRODUCT_DESCRIPTION =
   "OnlyPaws is a recurring digital subscription platform dedicated exclusively to pet-related content. Creators publish safe-for-work pet photography, pet lifestyle updates, and educational pet-related media. Products are digital subscriptions and tips for pet content. No adult content.";
 
 function platformBusinessUrl(siteUrl: string) {
-  return buildUrl(siteUrl, "/stripe.html");
+  return buildUrl(siteUrl, "/html/marketing/legal/stripe.html");
 }
 
-async function applyPlatformPrefill(stripe: Stripe, accountId: string, siteUrl: string, userId: string) {
+async function applyPlatformPrefill(
+  stripe: Stripe,
+  accountId: string,
+  siteUrl: string,
+  userId: string,
+) {
   await stripe.accounts.update(accountId, {
     business_profile: {
       url: platformBusinessUrl(siteUrl),
@@ -62,8 +70,13 @@ async function applyPlatformPrefill(stripe: Stripe, accountId: string, siteUrl: 
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { status: 200, headers: corsHeaders });
-  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { status: 200, headers: corsHeaders });
+  }
+
+  if (req.method !== "POST") {
+    return json(405, { error: "Method not allowed" });
+  }
 
   try {
     const STRIPE_SECRET_KEY =
@@ -72,23 +85,32 @@ Deno.serve(async (req) => {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    const SITE_URL_RAW = Deno.env.get("SITE_URL") || "https://onlypaws-psi.vercel.app";
+    const SITE_URL_RAW = Deno.env.get("SITE_URL") || "https://onlypawss.vercel.app";
     const SITE_URL = normalizeSiteUrl(SITE_URL_RAW);
 
-    if (!STRIPE_SECRET_KEY) return json(500, { error: "Missing Stripe secret key" });
-    if (!SUPABASE_URL) return json(500, { error: "Missing SUPABASE_URL" });
-    if (!SUPABASE_SERVICE_ROLE_KEY) return json(500, { error: "Missing SUPABASE_SERVICE_ROLE_KEY" });
+    if (!STRIPE_SECRET_KEY) {
+      return json(500, { error: "Missing Stripe secret key" });
+    }
+    if (!SUPABASE_URL) {
+      return json(500, { error: "Missing SUPABASE_URL" });
+    }
+    if (!SUPABASE_SERVICE_ROLE_KEY) {
+      return json(500, { error: "Missing SUPABASE_SERVICE_ROLE_KEY" });
+    }
 
     const token = getBearerToken(req);
-    if (!token) return json(401, { error: "Missing Authorization header" });
+    if (!token) {
+      return json(401, { error: "Missing Authorization header" });
+    }
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
       auth: { persistSession: false },
     });
 
-    // ✅ validate token + user
     const { data: userRes, error: userErr } = await supabaseAdmin.auth.getUser(token);
-    if (userErr || !userRes?.user) return json(401, { error: "Invalid session" });
+    if (userErr || !userRes?.user) {
+      return json(401, { error: "Invalid session" });
+    }
 
     const user = userRes.user;
     const userId = user.id;
@@ -101,16 +123,19 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
 
-    // ✅ only allow relative paths; always build from SITE_URL
-    const returnPath =
-      safePath(typeof body?.return_path === "string" ? body.return_path : undefined, "/payouts-setup.html?done=1");
-    const refreshPath =
-      safePath(typeof body?.refresh_path === "string" ? body.refresh_path : undefined, "/payouts-setup.html?retry=1");
+    const returnPath = safePath(
+      typeof body?.return_path === "string" ? body.return_path : undefined,
+      "/html/app/creators/payouts-setup.html?done=1",
+    );
+
+    const refreshPath = safePath(
+      typeof body?.refresh_path === "string" ? body.refresh_path : undefined,
+      "/html/app/creators/payouts-setup.html?retry=1",
+    );
 
     const return_url = buildUrl(SITE_URL, returnPath);
     const refresh_url = buildUrl(SITE_URL, refreshPath);
 
-    // 1) read profile
     const { data: profile, error: pErr } = await supabaseAdmin
       .from("profiles")
       .select("user_id, role, username, stripe_connect_account_id")
@@ -149,13 +174,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2) create account if missing (or if invalid)
     if (!accountId || !(await accountExists(accountId))) {
       const acct = await stripe.accounts.create({
         type: "express",
         email: userEmail,
-        metadata: { user_id: userId, platform: "OnlyPaws", content_category: "pet_sfw" },
-        // leaving capabilities requested is fine; direct charges logic lives elsewhere
+        metadata: {
+          user_id: userId,
+          platform: "OnlyPaws",
+          content_category: "pet_sfw",
+        },
         capabilities: {
           transfers: { requested: true },
           card_payments: { requested: true },
@@ -170,17 +197,14 @@ Deno.serve(async (req) => {
       accountId = acct.id;
       await saveConnectAccount(accountId);
     } else {
-      // ensure UI stays consistent but don't blindly overwrite verified states
       await supabaseAdmin
         .from("profiles")
         .update({ stripe_onboarding_status: "in_progress" })
         .eq("user_id", userId);
     }
 
-    // 3) force platform prefill before onboarding link
     await applyPlatformPrefill(stripe, accountId!, SITE_URL, userId);
 
-    // 4) create onboarding link
     const link = await stripe.accountLinks.create({
       account: accountId!,
       type: "account_onboarding",
