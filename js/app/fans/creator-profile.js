@@ -16,6 +16,8 @@
     return;
   }
 
+  console.log("[creator-profile] VERSION 2026-03-22-02");
+
   const els = {
     creatorName: document.getElementById("creatorName"),
     creatorHandle: document.getElementById("creatorHandle"),
@@ -214,8 +216,14 @@
   }
 
   function renderCreatorSocials(creator) {
-    const instagramUrl = normalizeSocialUrl(creator?.instagram_url || "", "instagram");
-    const tiktokUrl = normalizeSocialUrl(creator?.tiktok_url || "", "tiktok");
+    const instagramUrl = normalizeSocialUrl(
+      creator?.instagram_url || "",
+      "instagram"
+    );
+    const tiktokUrl = normalizeSocialUrl(
+      creator?.tiktok_url || "",
+      "tiktok"
+    );
 
     let hasSocials = false;
 
@@ -279,16 +287,17 @@
       return;
     }
 
-    els.petsList.innerHTML = list.map((pet) => {
-      const name = pet.name || "Pet";
-      const line = [pet.species, pet.breed].filter(Boolean).join(" • ");
-      const avatarUrl = resolveAvatarUrl(pet);
+    els.petsList.innerHTML = list
+      .map((pet) => {
+        const name = pet.name || "Pet";
+        const line = [pet.species, pet.breed].filter(Boolean).join(" • ");
+        const avatarUrl = resolveAvatarUrl(pet);
 
-      const av = avatarUrl
-        ? `<img src="${esc(avatarUrl)}" alt="${esc(name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-        : `<span aria-hidden="true">🐾</span>`;
+        const av = avatarUrl
+          ? `<img src="${esc(avatarUrl)}" alt="${esc(name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+          : `<span aria-hidden="true">🐾</span>`;
 
-      return `
+        return `
         <div class="petCard">
           <div class="petAvatar">${av}</div>
           <div>
@@ -297,7 +306,8 @@
           </div>
         </div>
       `;
-    }).join("");
+      })
+      .join("");
   }
 
   function enrichPostsForRenderer(posts) {
@@ -356,15 +366,17 @@
     }
 
     const enriched = enrichPostsForRenderer(posts);
-    els.posts.innerHTML = enriched.map((post) =>
-      postApi.buildPostCard(post, {
-        creatorUsername: post.creator_username,
-        creatorDisplayName: post.creator_name,
-        creatorAvatarUrl: post.creator_avatar_url,
-        canViewFull: post.can_view === true,
-        liked: post.liked === true,
-      })
-    ).join("");
+    els.posts.innerHTML = enriched
+      .map((post) =>
+        postApi.buildPostCard(post, {
+          creatorUsername: post.creator_username,
+          creatorDisplayName: post.creator_name,
+          creatorAvatarUrl: post.creator_avatar_url,
+          canViewFull: post.can_view === true,
+          liked: post.liked === true,
+        })
+      )
+      .join("");
 
     if (els.postsHint) els.postsHint.textContent = "";
 
@@ -389,7 +401,9 @@
   async function getSubscription(creatorId, fanId) {
     const { data, error } = await client
       .from("fan_subscriptions")
-      .select("id,status,current_period_end,cancel_at_period_end,provider_subscription_id")
+      .select(
+        "id,status,current_period_end,cancel_at_period_end,provider_subscription_id"
+      )
       .eq("creator_id", creatorId)
       .eq("fan_id", fanId)
       .maybeSingle();
@@ -403,7 +417,9 @@
 
     const { data, error } = await client
       .from("profiles")
-      .select("role,stripe_onboarding_status,charges_enabled,stripe_connect_account_id")
+      .select(
+        "role,stripe_onboarding_status,charges_enabled,stripe_connect_account_id"
+      )
       .eq("user_id", creatorId)
       .maybeSingle();
 
@@ -513,7 +529,10 @@
 
     const href = creatorProfileHref(shareKey);
     const absoluteUrl = new URL(href, window.location.origin).toString();
-    const title = state.creator.display_name || state.creator.username || "OnlyPaws creator";
+    const title =
+      state.creator.display_name ||
+      state.creator.username ||
+      "OnlyPaws creator";
     const text = `Check out ${title} on OnlyPaws 🐾`;
 
     if (navigator.share) {
@@ -527,7 +546,9 @@
   }
 
   async function bindFollow() {
-    if (!els.followBtn || !state.creator || state.isSelf || !state.viewerId) return;
+    if (!els.followBtn || !state.creator || state.isSelf || !state.viewerId) {
+      return;
+    }
 
     setFollowUI();
 
@@ -569,13 +590,19 @@
       } catch (error) {
         alert(error?.message || String(error));
       } finally {
-        setBtnBusy(els.followBtn, false, state.followRowId ? "Unfollow" : "Follow");
+        setBtnBusy(
+          els.followBtn,
+          false,
+          state.followRowId ? "Unfollow" : "Follow"
+        );
       }
     });
   }
 
   async function bindPremium() {
-    if (!els.premiumBtn || !state.creator || state.isSelf || !state.viewerId) return;
+    if (!els.premiumBtn || !state.creator || state.isSelf || !state.viewerId) {
+      return;
+    }
     if (els.premiumBtn.dataset.bound === "1") return;
     els.premiumBtn.dataset.bound = "1";
 
@@ -597,6 +624,10 @@
   }
 
   async function loadCreatorByParam(param) {
+    const cleaned = String(param || "").trim();
+
+    console.log("[creator-profile] lookup param:", cleaned, JSON.stringify(cleaned));
+
     const selectFields = [
       "user_id",
       "username",
@@ -611,23 +642,27 @@
 
     let result;
 
-    if (isUUID(param)) {
+    if (isUUID(cleaned)) {
       result = await client
         .from("public_creator_profile_preview")
         .select(selectFields)
-        .eq("user_id", param)
+        .eq("user_id", cleaned)
         .maybeSingle();
     } else {
       result = await client
         .from("public_creator_profile_preview")
         .select(selectFields)
-        .eq("username", param)
+        .or(`username.ilike.${cleaned},user_id.eq.${cleaned}`)
         .maybeSingle();
     }
 
+    console.log("[creator-profile] lookup result:", result);
+
     if (result.error) throw result.error;
     if (!result.data) throw new Error("Creator not found");
-    if (result.data.role !== "creator") throw new Error("This user is not a creator");
+    if (result.data.role !== "creator") {
+      throw new Error("This user is not a creator");
+    }
 
     return result.data;
   }
@@ -656,6 +691,11 @@
     }
 
     const { u } = getParams();
+
+    console.log("[creator-profile] href:", window.location.href);
+    console.log("[creator-profile] search:", window.location.search);
+    console.log("[creator-profile] u:", u, JSON.stringify(u));
+
     if (!u) {
       goHome();
       return;
@@ -687,7 +727,9 @@
       const tasks = [
         client
           .from("public_creator_posts_preview")
-          .select("id,creator_id,pet_id,title,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at")
+          .select(
+            "id,creator_id,pet_id,title,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at"
+          )
           .eq("creator_id", creator.user_id)
           .order("is_pinned", { ascending: false })
           .order("created_at", { ascending: false })
@@ -751,7 +793,11 @@
     }
 
     client.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+      if (
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "TOKEN_REFRESHED"
+      ) {
         boot().catch((err) => {
           console.error("creator profile re-boot error", err);
         });
