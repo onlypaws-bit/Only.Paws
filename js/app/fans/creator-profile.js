@@ -16,7 +16,7 @@
     return;
   }
 
-  console.log("[creator-profile] VERSION 2026-03-22-03");
+  console.log("[creator-profile] VERSION 2026-03-22-04");
 
   const els = {
     creatorName: document.getElementById("creatorName"),
@@ -624,52 +624,32 @@
   }
 
   async function loadCreatorByParam(param) {
-  const cleaned = String(param || "").trim();
+    const cleaned = String(param || "").trim();
 
-  console.log(
-    "[creator-profile] lookup param:",
-    cleaned,
-    JSON.stringify(cleaned)
-  );
+    console.log(
+      "[creator-profile] lookup param:",
+      cleaned,
+      JSON.stringify(cleaned)
+    );
 
-  const selectFields = [
-    "user_id",
-    "username",
-    "display_name",
-    "bio",
-    "avatar_url",
-    "role",
-    "instagram_url",
-    "tiktok_url",
-    "created_at",
-  ].join(",");
+    const { data, error } = await client.rpc(
+      "get_public_creator_profile_preview",
+      { p_u: cleaned }
+    );
 
-  let result;
+    console.log("[creator-profile] lookup data:", data);
+    console.log("[creator-profile] lookup error:", error);
 
-  if (isUUID(cleaned)) {
-    result = await client
-      .from("public_creator_profile_preview")
-      .select(selectFields)
-      .eq("user_id", cleaned)
-      .maybeSingle();
-  } else {
-    result = await client
-      .from("public_creator_profile_preview")
-      .select(selectFields)
-      .eq("username", cleaned)
-      .maybeSingle();
+    if (error) throw error;
+
+    const creator = Array.isArray(data) ? data[0] : data;
+    if (!creator) throw new Error("Creator not found");
+    if (creator.role !== "creator") {
+      throw new Error("This user is not a creator");
+    }
+
+    return creator;
   }
-
-  console.log("[creator-profile] lookup result:", result);
-
-  if (result.error) throw result.error;
-  if (!result.data) throw new Error("Creator not found");
-  if (result.data.role !== "creator") {
-    throw new Error("This user is not a creator");
-  }
-
-  return result.data;
-}
 
   async function boot() {
     const { data: sess } = await client.auth.getSession();
@@ -729,21 +709,13 @@
       }
 
       const tasks = [
-        client
-          .from("public_creator_posts_preview")
-          .select(
-            "id,creator_id,pet_id,title,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at"
-          )
-          .eq("creator_id", creator.user_id)
-          .order("is_pinned", { ascending: false })
-          .order("created_at", { ascending: false })
-          .limit(24),
+        client.rpc("get_public_creator_posts_preview", {
+          p_creator_id: creator.user_id,
+        }),
 
-        client
-          .from("public_creator_pets_preview")
-          .select("id,name,species,breed,avatar_url")
-          .eq("owner_id", creator.user_id)
-          .order("created_at", { ascending: false }),
+        client.rpc("get_public_creator_pets_preview", {
+          p_owner_id: creator.user_id,
+        }),
       ];
 
       if (state.viewerId && !state.isSelf) {
