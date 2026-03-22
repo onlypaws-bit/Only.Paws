@@ -84,7 +84,7 @@
   }
 
   /* =========================
-     🔥 REDIRECT FIX (CORE)
+     🔥 REDIRECT FIX CORE
      ========================= */
 
   function redirectAfterLogin() {
@@ -213,6 +213,11 @@
       const email = (els.email?.value || "").trim();
       const password = els.password?.value || "";
 
+      if (!email || !password) {
+        setMsg("Enter email and password.");
+        return;
+      }
+
       const { data, error } = await client.auth.signInWithPassword({
         email,
         password,
@@ -227,6 +232,8 @@
         await ensureProfileAndWallet();
         redirectAfterLogin();
       }
+    } catch (err) {
+      setMsg(`❌ ${err?.message || String(err)}`);
     } finally {
       setBusy(false);
     }
@@ -239,6 +246,11 @@
     try {
       const email = (els.email?.value || "").trim();
       const password = els.password?.value || "";
+
+      if (!email || password.length < 6) {
+        setMsg("Invalid email or password.");
+        return;
+      }
 
       const emailRedirectTo =
         `${window.location.origin}${path("emailConfirmed") || "/html/marketing/email-confirmed.html"}`;
@@ -263,10 +275,70 @@
       } else {
         setMsg("✅ Check your email to confirm 🐾");
       }
+    } catch (err) {
+      setMsg(`❌ ${err?.message || String(err)}`);
     } finally {
       setBusy(false);
     }
   }
 
   function bindUi() {
-    els
+    els.form?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      loginFlow();
+    });
+
+    els.signupBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      signupFlow();
+    });
+
+    els.forgotBtn?.addEventListener("click", () => {
+      showResetBox(true);
+      setMsg("");
+    });
+
+    els.cancelResetBtn?.addEventListener("click", () => {
+      showResetBox(false);
+      setMsg("");
+    });
+
+    els.sendResetBtn?.addEventListener("click", handlePasswordReset);
+  }
+
+  /* =========================
+     🔥 FIX AUTO REDIRECT
+     ========================= */
+
+  async function autoRedirectIfLoggedIn() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+
+      // 🚫 se siamo in auth flow → NON redirect
+      if (params.get("auth") === "1") return;
+
+      const { data } = await client.auth.getSession();
+
+      if (data?.session) {
+        redirectAfterLogin();
+      }
+    } catch (err) {
+      console.warn("auto redirect skipped", err);
+    }
+  }
+
+  /* ========================= */
+
+  async function boot() {
+    if (!client) {
+      console.error("onlypawsClient missing");
+      return;
+    }
+
+    await initMarketingPage();
+    bindUi();
+    await autoRedirectIfLoggedIn();
+  }
+
+  boot();
+})();
