@@ -323,9 +323,7 @@
         creator_username: state.creatorUsername,
         creator_name: state.creator?.display_name || state.creatorUsername,
         creator_avatar_url: state.creatorAvatarUrl,
-        excerpt: canView
-          ? (post.content || post.preview || "")
-          : (post.preview || "Locked content."),
+        excerpt: post.preview || (isPremium ? "Locked content." : ""),
         is_locked: !canView,
         can_view: canView,
         liked: false,
@@ -398,6 +396,19 @@
 
     if (error) throw error;
     return data || null;
+  }
+
+  async function getCreatorEligibility(creatorId) {
+    if (!creatorId) return false;
+
+    const { data, error } = await client
+      .from("profiles")
+      .select("role,stripe_onboarding_status,charges_enabled,stripe_connect_account_id")
+      .eq("user_id", creatorId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return creatorEligible(data);
   }
 
   function updateActionRow() {
@@ -593,24 +604,22 @@
       "bio",
       "avatar_url",
       "role",
-      "stripe_onboarding_status",
-      "charges_enabled",
-      "stripe_connect_account_id",
       "instagram_url",
       "tiktok_url",
+      "created_at",
     ].join(",");
 
     let result;
 
     if (isUUID(param)) {
       result = await client
-        .from("profiles")
+        .from("public_creator_profile_preview")
         .select(selectFields)
         .eq("user_id", param)
         .maybeSingle();
     } else {
       result = await client
-        .from("profiles")
+        .from("public_creator_profile_preview")
         .select(selectFields)
         .eq("username", param)
         .maybeSingle();
@@ -633,6 +642,7 @@
     state.followRowId = null;
     state.subRow = null;
     state.isSelf = false;
+    state.creatorEligible = false;
 
     if (state.viewerId) {
       const { data: vp } = await client
@@ -655,29 +665,36 @@
       const creator = await loadCreatorByParam(u);
 
       state.creator = creator;
-      state.creatorEligible = creatorEligible(creator);
       state.isSelf = !!state.viewerId && creator.user_id === state.viewerId;
 
       renderCreator(creator);
       updateActionRow();
 
       if (state.viewerId && !state.isSelf) {
+        try {
+          state.creatorEligible = await getCreatorEligibility(creator.user_id);
+        } catch (error) {
+          console.warn("creator eligibility lookup failed", error);
+          state.creatorEligible = false;
+        }
+
         state.subRow = await getSubscription(creator.user_id, state.viewerId);
       } else {
         state.subRow = null;
+        state.creatorEligible = false;
       }
 
       const tasks = [
         client
-          .from("posts")
-          .select("id,creator_id,pet_id,title,content,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at")
+          .from("public_creator_posts_preview")
+          .select("id,creator_id,pet_id,title,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at")
           .eq("creator_id", creator.user_id)
           .order("is_pinned", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(24),
 
         client
-          .from("pets")
+          .from("public_creator_pets_preview")
           .select("id,name,species,breed,avatar_url")
           .eq("owner_id", creator.user_id)
           .order("created_at", { ascending: false }),
