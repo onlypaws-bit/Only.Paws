@@ -138,7 +138,7 @@
       title: (els.title?.value || "").trim(),
       content: (els.content?.value || "").trim(),
       preview: (els.preview?.value || "").trim(),
-      is_paid: state.creatorPlanActive ? els.isPaid?.value === "true" : false,
+      is_paid: els.isPaid?.value === "true",
       is_public: !isDraft,
     };
   }
@@ -326,7 +326,7 @@
     const rawMessage = error?.message || String(error || "");
 
     if (/failed to fetch/i.test(rawMessage)) {
-      return "Network error while publishing. Most likely form submit/navigation interrupted the request, or Supabase/Storage is unreachable.";
+      return "Network error while publishing. Check Supabase, Storage, or interrupted requests.";
     }
 
     return rawMessage || "Something went wrong.";
@@ -355,8 +355,12 @@
       return false;
     }
 
+    if (!window.OPCreatorPlan) {
+      throw new Error("Creator Plan module not loaded.");
+    }
+
     const entitlement = await window.OPCreatorPlan.getCreatorPlanEntitlement(state.user.id);
-    state.creatorPlanActive = window.OPCreatorPlan.isCreatorPlanActive(entitlement);
+    state.creatorPlanActive = window.OPCreatorPlan.hasCreatorPlanAccess(entitlement);
 
     setEditorEnabled(true);
     updatePlanUI();
