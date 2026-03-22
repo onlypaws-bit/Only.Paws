@@ -158,38 +158,6 @@
     window.location.replace(PATHS?.home || PATHS?.index || "/index.html");
   }
 
-    if (ROUTES?.href) {
-      return ROUTES.href("marketing.fans", {
-        auth: 1,
-        redirect: current,
-      });
-    }
-
-    const base = PATHS?.marketing?.fans || "/html/marketing/fans.html";
-    return `${base}?auth=1&redirect=${encodeURIComponent(current)}`;
-  }
-
-  function goFansAuth() {
-  const current =
-    window.location.pathname + window.location.search;
-
-  try {
-    sessionStorage.setItem("op_redirect_after_auth", current);
-  } catch {}
-
-  const base = PATHS?.marketing?.fans || "/html/marketing/fans.html";
-  window.location.href = `${base}?auth=1`;
-}
-
-  function subscriptionsHref(creatorId) {
-    if (ROUTES?.href) {
-      return ROUTES.href("app.fans.subscriptions", { creator: creatorId });
-    }
-    const base =
-      PATHS?.app?.fans?.subscriptions || "/html/app/fans/subscriptions.html";
-    return `${base}?creator=${encodeURIComponent(creatorId)}`;
-  }
-
   function creatorProfileHref(usernameOrId) {
     if (!usernameOrId) return "";
 
@@ -200,6 +168,40 @@
     const base =
       PATHS?.app?.fans?.creatorProfile || "/html/app/fans/creator-profile.html";
     return `${base}?u=${encodeURIComponent(usernameOrId)}`;
+  }
+
+  function fansAuthHref() {
+    const shareKey =
+      state.creatorUsername ||
+      state.creator?.username ||
+      state.creator?.user_id;
+
+    const redirectTarget =
+      creatorProfileHref(shareKey) ||
+      (window.location.pathname + window.location.search);
+
+    if (ROUTES?.href) {
+      return ROUTES.href("marketing.fans", {
+        auth: 1,
+        redirect: redirectTarget,
+      });
+    }
+
+    const base = PATHS?.marketing?.fans || "/html/marketing/fans.html";
+    return `${base}?auth=1&redirect=${encodeURIComponent(redirectTarget)}`;
+  }
+
+  function goFansAuth() {
+    window.location.href = fansAuthHref();
+  }
+
+  function subscriptionsHref(creatorId) {
+    if (ROUTES?.href) {
+      return ROUTES.href("app.fans.subscriptions", { creator: creatorId });
+    }
+    const base =
+      PATHS?.app?.fans?.subscriptions || "/html/app/fans/subscriptions.html";
+    return `${base}?creator=${encodeURIComponent(creatorId)}`;
   }
 
   function computePostHref(postId) {
