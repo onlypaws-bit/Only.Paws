@@ -83,35 +83,87 @@
     });
   }
 
+  function getSearchParams() {
+    return new URLSearchParams(window.location.search);
+  }
+
+  function normalizeRedirect(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+
+    try {
+      const url = new URL(raw, window.location.origin);
+
+      if (url.origin !== window.location.origin) return "";
+
+      const blocked =
+        path("feed") ||
+        PATHS?.app?.feed ||
+        "/html/app/feed.html";
+
+      if (url.pathname === window.location.pathname) {
+        return "";
+      }
+
+      return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      return "";
+    }
+  }
+
+  function readRedirectFromUrl() {
+    const params = getSearchParams();
+    return normalizeRedirect(params.get("redirect"));
+  }
+
+  function saveRedirectFromUrl() {
+    try {
+      const redirect = readRedirectFromUrl();
+      if (redirect) {
+        sessionStorage.setItem("op_redirect_after_auth", redirect);
+      }
+    } catch {}
+  }
+
+  function getStoredRedirect() {
+    try {
+      return normalizeRedirect(sessionStorage.getItem("op_redirect_after_auth"));
+    } catch {
+      return "";
+    }
+  }
+
+  function clearStoredRedirect() {
+    try {
+      sessionStorage.removeItem("op_redirect_after_auth");
+    } catch {}
+  }
+
   /* =========================
-     🔥 REDIRECT FIX CORE
+     REDIRECT FIX CORE
      ========================= */
 
   function redirectAfterLogin() {
-    try {
-      const redirect = sessionStorage.getItem("op_redirect_after_auth");
+    const redirect = getStoredRedirect();
 
-      if (redirect) {
-        sessionStorage.removeItem("op_redirect_after_auth");
-        window.location.href = redirect;
-        return;
-      }
-    } catch {}
+    if (redirect) {
+      clearStoredRedirect();
+      window.location.href = redirect;
+      return;
+    }
 
     window.location.href =
       path("feed") || "/html/app/feed.html";
   }
 
   function redirectAfterSignup() {
-    try {
-      const redirect = sessionStorage.getItem("op_redirect_after_auth");
+    const redirect = getStoredRedirect();
 
-      if (redirect) {
-        sessionStorage.removeItem("op_redirect_after_auth");
-        window.location.href = redirect;
-        return;
-      }
-    } catch {}
+    if (redirect) {
+      clearStoredRedirect();
+      window.location.href = redirect;
+      return;
+    }
 
     window.location.href =
       path("profile") || "/html/app/profile.html";
@@ -307,15 +359,17 @@
   }
 
   /* =========================
-     🔥 FIX AUTO REDIRECT
+     AUTO REDIRECT
      ========================= */
 
   async function autoRedirectIfLoggedIn() {
     try {
-      const params = new URLSearchParams(window.location.search);
+      const params = getSearchParams();
 
-      // 🚫 se siamo in auth flow → NON redirect
+      saveRedirectFromUrl();
+
       if (params.get("auth") === "1") return;
+      if (params.get("support") === "1") return;
 
       const { data } = await client.auth.getSession();
 
@@ -335,6 +389,7 @@
       return;
     }
 
+    saveRedirectFromUrl();
     await initMarketingPage();
     bindUi();
     await autoRedirectIfLoggedIn();
