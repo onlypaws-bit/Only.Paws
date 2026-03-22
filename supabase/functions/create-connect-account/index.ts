@@ -17,19 +17,19 @@ function json(status: number, data: unknown) {
 }
 
 type Body = {
-  return_path?: string;  // MUST be relative path like "/profile.html"
-  refresh_path?: string; // MUST be relative path like "/profile.html"
+  return_path?: string;
+  refresh_path?: string;
 };
 
 function normalizeSiteUrl(raw: string) {
   return raw.replace(/\/+$/, "");
 }
 
-function safePath(p?: string, fallback = "/profile.html") {
+function safePath(p?: string, fallback = "/html/app/creators/payouts-setup.html") {
   if (!p) return fallback;
   if (!p.startsWith("/")) return fallback;
   if (p.startsWith("//")) return fallback;
-  if (p.includes(":")) return fallback; // blocks "https:", "javascript:", etc.
+  if (p.includes(":")) return fallback;
   return p;
 }
 
@@ -45,16 +45,18 @@ function stripeErrToString(e: any) {
   return `${msg}${type}${code}${status}`.trim();
 }
 
-// Keep this aligned with stripe.html content
 const PLATFORM_PRODUCT_DESCRIPTION =
   "OnlyPaws is a recurring digital subscription platform dedicated exclusively to pet-related content. Creators publish safe-for-work pet photography, pet lifestyle updates, and educational pet-related media. Products are digital subscriptions and tips for pet content. No adult content.";
 
 function platformBusinessUrl(siteUrl: string) {
-  // ✅ canonical Stripe business page
-  return buildUrl(siteUrl, "/stripe.html");
+  return buildUrl(siteUrl, "/html/marketing/legal/stripe.html");
 }
 
-async function applyPlatformPrefill(stripe: Stripe, accountId: string, siteUrl: string) {
+async function applyPlatformPrefill(
+  stripe: Stripe,
+  accountId: string,
+  siteUrl: string,
+) {
   const url = platformBusinessUrl(siteUrl);
 
   await stripe.accounts.update(accountId, {
@@ -71,8 +73,12 @@ async function applyPlatformPrefill(stripe: Stripe, accountId: string, siteUrl: 
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json(405, { error: "Method not allowed" });
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+  if (req.method !== "POST") {
+    return json(405, { error: "Method not allowed" });
+  }
 
   try {
     const STRIPE_SECRET_KEY =
@@ -85,16 +91,24 @@ Deno.serve(async (req) => {
     const SITE_URL_RAW = Deno.env.get("SITE_URL") || "http://localhost:3000";
     const SITE_URL = normalizeSiteUrl(SITE_URL_RAW);
 
-    if (!STRIPE_SECRET_KEY) return json(500, { error: "Missing Stripe secret key" });
+    if (!STRIPE_SECRET_KEY) {
+      return json(500, { error: "Missing Stripe secret key" });
+    }
+
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
       return json(500, { error: "Missing Supabase env vars" });
     }
 
-    // Body is optional
     const body = (await req.json().catch(() => ({}))) as Body;
 
-    const returnPath = safePath(body.return_path, "/profile.html");
-    const refreshPath = safePath(body.refresh_path, "/profile.html");
+    const returnPath = safePath(
+      body.return_path,
+      "/html/app/creators/payouts-setup.html",
+    );
+    const refreshPath = safePath(
+      body.refresh_path,
+      "/html/app/creators/payouts-setup.html",
+    );
 
     const returnUrl = buildUrl(SITE_URL, returnPath);
     const refreshUrl = buildUrl(SITE_URL, refreshPath);
@@ -105,7 +119,9 @@ Deno.serve(async (req) => {
     });
 
     const { data: userData, error: userErr } = await supaUser.auth.getUser();
-    if (userErr || !userData?.user) return json(401, { error: "Not authenticated" });
+    if (userErr || !userData?.user) {
+      return json(401, { error: "Not authenticated" });
+    }
 
     const creatorId = userData.user.id;
     const creatorEmail = userData.user.email ?? undefined;
@@ -118,7 +134,9 @@ Deno.serve(async (req) => {
       .eq("user_id", creatorId)
       .single();
 
-    if (profErr || !prof) return json(400, { error: "Profile not found" });
+    if (profErr || !prof) {
+      return json(400, { error: "Profile not found" });
+    }
 
     const stripe = new Stripe(STRIPE_SECRET_KEY, {
       apiVersion: "2023-10-16",
@@ -127,7 +145,6 @@ Deno.serve(async (req) => {
 
     let acctId = (prof as any).stripe_connect_account_id as string | null;
 
-    // 1) Create Connect account if missing (Express)
     if (!acctId) {
       const pretty =
         (prof as any).display_name ||
@@ -143,10 +160,9 @@ Deno.serve(async (req) => {
           content_category: "pet_sfw",
         },
         business_profile: {
-          // Account is the creator’s Stripe account, but we keep the platform business context consistent
           name: pretty,
           product_description: PLATFORM_PRODUCT_DESCRIPTION,
-          url: platformBusinessUrl(SITE_URL), // ✅ stripe.html
+          url: platformBusinessUrl(SITE_URL),
           mcc: "5968",
         },
         capabilities: {
@@ -174,10 +190,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // 2) Force platform prefill before generating onboarding link (important)
     await applyPlatformPrefill(stripe, acctId!, SITE_URL);
 
-    // 3) Create Account Link (onboarding)
     const link = await stripe.accountLinks.create({
       account: acctId!,
       type: "account_onboarding",
