@@ -35,9 +35,11 @@
     creatorPlanActive: false,
     editingPost: null,
     currentPreviewUrl: null,
+    isSubmitting: false,
   };
 
   const els = {
+    form: document.getElementById("createPostForm") || document.querySelector("form"),
     msg: document.getElementById("msg"),
     publishBtn: document.getElementById("publishBtn"),
 
@@ -320,6 +322,16 @@
     }
   }
 
+  function normalizeErrorMessage(error) {
+    const rawMessage = error?.message || String(error || "");
+
+    if (/failed to fetch/i.test(rawMessage)) {
+      return "Network error while publishing. Most likely form submit/navigation interrupted the request, or Supabase/Storage is unreachable.";
+    }
+
+    return rawMessage || "Something went wrong.";
+  }
+
   async function getSessionOrRedirect() {
     const session = await window.OPAuth.getSession();
 
@@ -518,6 +530,10 @@
   }
 
   function validateBeforeSubmit(values) {
+    if (!client) {
+      throw new Error("Supabase client not available.");
+    }
+
     if (!state.user || !state.profile || state.profile.role !== "creator") {
       throw new Error("Not allowed.");
     }
@@ -539,7 +555,15 @@
     }
   }
 
-  async function publishOrUpdate() {
+  async function publishOrUpdate(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    if (state.isSubmitting) return;
+    state.isSubmitting = true;
+
     if (els.publishBtn) {
       els.publishBtn.disabled = true;
     }
@@ -552,6 +576,15 @@
     try {
       const values = getFormValues();
       validateBeforeSubmit(values);
+
+      console.log("[create-post] submit", {
+        editId,
+        isEditing,
+        values,
+        hasFile: !!els.mediaFile?.files?.[0],
+        creatorPlanActive: state.creatorPlanActive,
+        userId: state.user?.id || null,
+      });
 
       if (editId) {
         await updatePost(editId, values);
@@ -578,9 +611,11 @@
 
       window.location.href = feedHref();
     } catch (error) {
-      console.warn(error);
-      setMessage(error?.message || String(error));
+      console.error("[create-post] publish failed", error);
+      setMessage(normalizeErrorMessage(error));
     } finally {
+      state.isSubmitting = false;
+
       if (els.publishBtn) {
         els.publishBtn.disabled = false;
       }
@@ -634,12 +669,22 @@
     await window.OPPartials.loadLayout();
     await window.OPNav.initNav();
 
+    if (!client) {
+      setMessage("Supabase client not available.");
+      setEditorEnabled(false);
+      return;
+    }
+
     if (els.unlockBtn) {
       els.unlockBtn.href = CREATOR_PLAN_URL;
     }
 
     if (els.cancelEditBtn) {
       els.cancelEditBtn.href = creatorDashHref();
+    }
+
+    if (els.form) {
+      els.form.addEventListener("submit", publishOrUpdate);
     }
 
     if (els.publishBtn) {
