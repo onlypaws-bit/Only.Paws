@@ -624,52 +624,52 @@
   }
 
   async function loadCreatorByParam(param) {
-    const cleaned = String(param || "").trim();
+  const cleaned = String(param || "").trim();
 
-    console.log(
-      "[creator-profile] lookup param:",
-      cleaned,
-      JSON.stringify(cleaned)
-    );
+  console.log(
+    "[creator-profile] lookup param:",
+    cleaned,
+    JSON.stringify(cleaned)
+  );
 
-    const selectFields = [
-      "user_id",
-      "username",
-      "display_name",
-      "bio",
-      "avatar_url",
-      "role",
-      "instagram_url",
-      "tiktok_url",
-      "created_at",
-    ].join(",");
+  const selectFields = [
+    "user_id",
+    "username",
+    "display_name",
+    "bio",
+    "avatar_url",
+    "role",
+    "instagram_url",
+    "tiktok_url",
+    "created_at",
+  ].join(",");
 
-    let result;
+  let result;
 
-    if (isUUID(cleaned)) {
-      result = await client
-        .from("public_creator_profile_preview")
-        .select(selectFields)
-        .eq("user_id", cleaned)
-        .maybeSingle();
-    } else {
-      result = await client
-        .from("public_creator_profile_preview")
-        .select(selectFields)
-        .ilike("username", cleaned)
-        .maybeSingle();
-    }
-
-    console.log("[creator-profile] lookup result:", result);
-
-    if (result.error) throw result.error;
-    if (!result.data) throw new Error("Creator not found");
-    if (result.data.role !== "creator") {
-      throw new Error("This user is not a creator");
-    }
-
-    return result.data;
+  if (isUUID(cleaned)) {
+    result = await client
+      .from("public_creator_profile_preview")
+      .select(selectFields)
+      .eq("user_id", cleaned)
+      .maybeSingle();
+  } else {
+    result = await client
+      .from("public_creator_profile_preview")
+      .select(selectFields)
+      .eq("username", cleaned)
+      .maybeSingle();
   }
+
+  console.log("[creator-profile] lookup result:", result);
+
+  if (result.error) throw result.error;
+  if (!result.data) throw new Error("Creator not found");
+  if (result.data.role !== "creator") {
+    throw new Error("This user is not a creator");
+  }
+
+  return result.data;
+}
 
   async function boot() {
     const { data: sess } = await client.auth.getSession();
