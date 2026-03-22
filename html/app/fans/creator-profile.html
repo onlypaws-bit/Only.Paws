@@ -11,7 +11,6 @@
   - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
   - /js/paths.js
   - /js/onlypawsClient.js
-  - /js/auth-guard.js
   - /js/nav.js
   - /js/partials.js
   - /js/app/likes.js
@@ -113,35 +112,10 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/auth-guard.js"></script>
   <script src="/js/nav.js"></script>
   <script src="/js/partials.js"></script>
   <script src="/js/app/likes.js"></script>
   <script src="/js/app/post.js"></script>
   <script src="/js/app/fans/creator-profile.js"></script>
-
-  <script>
-    window.addEventListener("DOMContentLoaded", async () => {
-      try {
-        if (window.OPPartials?.loadAppLayout) {
-          await window.OPPartials.loadAppLayout();
-        } else if (window.loadAppLayout) {
-          await window.loadAppLayout();
-        }
-
-        if (window.OPNav?.initNav) {
-          await window.OPNav.initNav();
-        } else if (window.initNav) {
-          await window.initNav();
-        }
-
-        if (window.OnlyPawsCreatorProfile?.initCreatorProfilePage) {
-          await window.OnlyPawsCreatorProfile.initCreatorProfilePage();
-        }
-      } catch (err) {
-        console.error("Creator profile init failed:", err);
-      }
-    });
-  </script>
 </body>
 </html>
