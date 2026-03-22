@@ -101,20 +101,45 @@
     return data?.session?.user || null;
   }
 
-  async function ensureCreatorProfileAndWallet() {
+  async function getExistingProfile(uid) {
+    const { data, error } = await client
+      .from("profiles")
+      .select("user_id, role")
+      .eq("user_id", uid)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data || null;
+  }
+
+  async function ensureWalletOnly() {
+    const user = await getSessionUser();
+    if (!user?.id) throw new Error("No user session");
+
+    const uid = user.id;
+
+    const walletRes = await client
+      .from("wallets")
+      .upsert(
+        { profile_id: uid },
+        { onConflict: "profile_id" }
+      )
+      .select()
+      .maybeSingle();
+
+    if (walletRes.error) throw walletRes.error;
+
+    return walletRes.data;
+  }
+
+  async function ensureCreatorProfileAndWalletForSignup() {
     const user = await getSessionUser();
     if (!user?.id) throw new Error("No user session");
 
     const uid = user.id;
     const now = new Date().toISOString();
 
-    const { data: existingProfile, error: profileReadError } = await client
-      .from("profiles")
-      .select("user_id, role")
-      .eq("user_id", uid)
-      .maybeSingle();
-
-    if (profileReadError) throw profileReadError;
+    const existingProfile = await getExistingProfile(uid);
 
     let profile = existingProfile;
 
@@ -146,20 +171,11 @@
       profile = updateRes.data;
     }
 
-    const walletRes = await client
-      .from("wallets")
-      .upsert(
-        { profile_id: uid },
-        { onConflict: "profile_id" }
-      )
-      .select()
-      .maybeSingle();
-
-    if (walletRes.error) throw walletRes.error;
+    const wallet = await ensureWalletOnly();
 
     return {
       profile,
-      wallet: walletRes.data,
+      wallet,
     };
   }
 
@@ -258,7 +274,7 @@
       }
 
       if (data?.session) {
-        await ensureCreatorProfileAndWallet();
+        await ensureCreatorProfileAndWalletForSignup();
         window.location.href = path("profile") || "/html/app/profile.html";
         return;
       }
@@ -302,7 +318,7 @@
       }
 
       if (data?.session) {
-        await ensureCreatorProfileAndWallet();
+        await ensureWalletOnly();
         window.location.href = getNextPath();
       }
     } catch (err) {
@@ -349,7 +365,7 @@
       const user = await getSessionUser();
       if (!user) return;
 
-      await ensureCreatorProfileAndWallet();
+      await ensureWalletOnly();
       redirectAfterAuth();
     } catch (error) {
       console.warn("auto-redirect skipped:", error);
