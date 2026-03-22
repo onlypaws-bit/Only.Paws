@@ -34,9 +34,9 @@
   <div class="wrap creatorProfileWrap">
     <div id="header-placeholder"></div>
 
-    <main>
-      <section class="creatorProfileGrid">
-        <div class="panel creatorHeroPanel">
+    <main class="creatorProfileMain">
+      <section class="creatorProfileGrid" aria-label="Creator profile overview">
+        <section class="panel creatorHeroPanel" aria-labelledby="creatorName">
           <div class="pill">Creator</div>
 
           <div class="heroRow">
@@ -45,6 +45,8 @@
                 id="creatorAvatarImg"
                 src="/assets/images/logo.png"
                 alt="Creator avatar"
+                loading="eager"
+                decoding="async"
               />
             </div>
 
@@ -56,9 +58,9 @@
 
           <p class="creatorBio" id="creatorBio"></p>
 
-          <div class="creatorSocials" id="creatorSocials" hidden>
-            <a id="creatorInstagram" class="socialChip" hidden>Instagram</a>
-            <a id="creatorTikTok" class="socialChip" hidden>TikTok</a>
+          <div class="creatorSocials" id="creatorSocials" hidden aria-label="Creator social links">
+            <a id="creatorInstagram" class="socialChip" hidden target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a id="creatorTikTok" class="socialChip" hidden target="_blank" rel="noopener noreferrer">TikTok</a>
           </div>
 
           <div class="btnRow" id="actionRow">
@@ -67,34 +69,41 @@
             <button class="ghost" id="shareProfileBtn" type="button">Share</button>
           </div>
 
-          <div class="hint" id="creatorHint"></div>
-        </div>
+          <p class="hint" id="creatorHint" aria-live="polite"></p>
+        </section>
 
-        <section class="panel creatorPetsPanel">
+        <section class="panel creatorPetsPanel" aria-labelledby="petsTitle">
           <div class="pill">Pets</div>
+          <h2 id="petsTitle" class="sr-only">Pets</h2>
+
           <div class="petsList" id="petsList"></div>
-          <div id="petsHint">Loading…</div>
+          <p class="hint" id="petsHint" aria-live="polite">Loading…</p>
         </section>
       </section>
 
-      <section class="panel creatorPostsPanel">
+      <section class="panel creatorPostsPanel" aria-labelledby="postsTitle">
         <div class="postsHeader">
-          <h2>Posts</h2>
-          <div class="hint postsLegend">FREE is visible • PREMIUM is locked (unless subscribed)</div>
+          <h2 id="postsTitle">Posts</h2>
+          <div class="hint postsLegend">FREE is visible • PREMIUM is locked unless subscribed</div>
         </div>
 
         <div class="posts creatorPosts" id="posts"></div>
-        <div class="hint" id="postsHint">Loading posts…</div>
+        <p class="hint" id="postsHint" aria-live="polite">Loading posts…</p>
       </section>
     </main>
 
     <div id="footer-placeholder"></div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
 
   <div id="mediaModal" class="mediaModal" aria-hidden="true">
-    <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
+    <div
+      class="mediaModalInner"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Media preview"
+    >
       <button
         id="mediaModalClose"
         class="mediaModalClose"
