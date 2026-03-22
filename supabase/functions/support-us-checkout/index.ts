@@ -1,3 +1,5 @@
+// support-us-checkout
+
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.25.0?target=denonext";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -17,6 +19,18 @@ const stripe = new Stripe(stripeSecretKey, {
   httpClient: Stripe.createFetchHttpClient(),
 });
 
+function normalizeSiteUrl(raw: string) {
+  return raw.replace(/\/+$/, "");
+}
+
+function safePath(p?: string, fallback = "/index.html") {
+  if (!p) return fallback;
+  if (!p.startsWith("/")) return fallback;
+  if (p.startsWith("//")) return fallback;
+  if (p.includes(":")) return fallback;
+  return p;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -34,17 +48,22 @@ serve(async (req) => {
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supportPriceId = Deno.env.get("STRIPE_SUPPORT_US_PRICE_ID")!;
-    const siteUrl = Deno.env.get("SITE_URL")!;
+    const siteUrlRaw = Deno.env.get("SITE_URL")!;
+    const siteUrl = normalizeSiteUrl(siteUrlRaw);
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
 
     const body = await req.json().catch(() => ({}));
 
-    const successPath =
-      typeof body?.successPath === "string" ? body.successPath : "/thank-you";
+    const successPath = safePath(
+      typeof body?.successPath === "string" ? body.successPath : undefined,
+      "/html/thanks/thanks-support-us.html",
+    );
 
-    const cancelPath =
-      typeof body?.cancelPath === "string" ? body.cancelPath : "/";
+    const cancelPath = safePath(
+      typeof body?.cancelPath === "string" ? body.cancelPath : undefined,
+      "/index.html",
+    );
 
     const authHeader = req.headers.get("Authorization");
 
