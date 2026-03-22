@@ -1,217 +1,130 @@
 <!--
   OnlyPaws
-  File: /html/app/profile.html
+  File: /html/app/fans/creator-profile.html
 
   CSS:
   - /css/styles.css
-  - /css/app/profile.css
+  - /css/app/post.css
+  - /css/app/fans/creator-profile.css
 
   JS:
   - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
   - /js/paths.js
   - /js/onlypawsClient.js
-  - /js/partials.js
   - /js/nav.js
-  - /js/app/profile.js
+  - /js/partials.js
+  - /js/app/likes.js
+  - /js/app/post.js
+  - /js/app/fans/creator-profile.js
 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OnlyPaws — Profile</title>
+  <title>OnlyPaws — Creator Profile</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="stylesheet" href="/css/app/profile.css" />
+  <link rel="stylesheet" href="/css/app/post.css" />
+  <link rel="stylesheet" href="/css/app/fans/creator-profile.css" />
 </head>
 
-<body class="profilePage">
-  <div class="wrap">
+<body class="creatorProfilePage">
+  <div class="wrap creatorProfileWrap">
     <div id="header-placeholder"></div>
 
-    <main class="profileMain">
-      <div class="profileWrap profileLayout">
-        <section class="panel profilePanel">
-          <div class="profileHero">
-            <div>
-              <div class="pill" id="emailPill">…</div>
-              <h1>Your profile</h1>
-              <p class="sub">Set your basics, socials, and avatar.</p>
-            </div>
+    <main class="creatorProfileMain">
+      <section class="creatorProfileGrid" aria-label="Creator profile overview">
+        <section class="panel creatorHeroPanel" aria-labelledby="creatorName">
+          <div class="pill">Creator</div>
 
-            <div class="profileHeroActions">
-              <button class="navBtn" id="logoutBtn" type="button">Log out</button>
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email" readonly />
-          </div>
-
-          <section class="avatarBox">
-            <img id="avatarImg" class="avatarImg" alt="Avatar preview" />
-
-            <div class="avatarControls">
-              <div class="field">
-                <label for="avatarFile">Avatar image</label>
-                <input id="avatarFile" type="file" accept="image/*" />
-              </div>
-
-              <div class="btnRow">
-                <button class="ghost" id="uploadAvatarBtn" type="button">Upload</button>
-                <button class="ghost" id="removeAvatarBtn" type="button">Remove</button>
-              </div>
-
-              <div class="uploadHint" id="avatarHint"></div>
-            </div>
-          </section>
-
-          <div class="field">
-            <label for="display_name">Display name</label>
-            <input id="display_name" autocomplete="name" />
-          </div>
-
-          <div class="field">
-            <label for="username">Username</label>
-            <input id="username" autocomplete="off" />
-            <div class="hint" id="usernameHint"></div>
-          </div>
-
-          <div class="field">
-            <label for="bio">Bio</label>
-            <textarea id="bio"></textarea>
-          </div>
-
-          <section class="socialSection" id="socialSection">
-            <h2 class="sectionTitle">Social links</h2>
-
-            <div class="field">
-              <label for="instagram_url">Instagram</label>
-              <input
-                id="instagram_url"
-                type="text"
-                inputmode="url"
-                placeholder="https://instagram.com/username or username"
+          <div class="heroRow">
+            <div class="avatar" id="creatorAvatar">
+              <img
+                id="creatorAvatarImg"
+                src="/assets/images/logo.png"
+                alt="Creator avatar"
+                loading="eager"
+                decoding="async"
               />
             </div>
 
-            <div class="field">
-              <label for="tiktok_url">TikTok</label>
-              <input
-                id="tiktok_url"
-                type="text"
-                inputmode="url"
-                placeholder="https://tiktok.com/@username or @username"
-              />
+            <div class="meta">
+              <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
+              <span id="creatorHandle">@username</span>
             </div>
-          </section>
-
-          <div class="btnRow">
-            <button class="btn" id="saveBtn" type="button">Save profile</button>
           </div>
 
-          <div class="msg" id="msg"></div>
+          <p class="creatorBio" id="creatorBio"></p>
 
-          <section class="dangerZone">
-            <b>Danger zone</b>
+          <div class="creatorSocials" id="creatorSocials" hidden aria-label="Creator social links">
+            <a id="creatorInstagram" class="socialChip" hidden target="_blank" rel="noopener noreferrer">Instagram</a>
+            <a id="creatorTikTok" class="socialChip" hidden target="_blank" rel="noopener noreferrer">TikTok</a>
+          </div>
 
-            <div class="btnRow">
-              <button class="ghost dangerBtn" id="deleteBtn" type="button">
-                Delete account
-              </button>
-            </div>
+          <div class="btnRow" id="actionRow">
+            <button class="ghost" id="followBtn" type="button">Follow</button>
+            <button class="btn" id="premiumBtn" type="button">Subscribe</button>
+            <button class="ghost" id="shareProfileBtn" type="button">Share</button>
+          </div>
 
-            <div class="msg" id="deleteMsg"></div>
-          </section>
+          <p class="hint" id="creatorHint" aria-live="polite"></p>
         </section>
 
-        <aside class="panel previewPanel">
-          <div class="previewHeader">
-            <div class="pill" id="userPill">…</div>
-            <h2>Public profile preview</h2>
-            <p class="sub" id="previewHeaderSub">
-              Quick live preview of how your creator profile can look.
-            </p>
-          </div>
+        <section class="panel creatorPetsPanel" aria-labelledby="petsTitle">
+          <div class="pill">Pets</div>
+          <h2 id="petsTitle" class="sr-only">Pets</h2>
 
-          <div class="profilePreview" id="profilePreview">
-            <div class="profilePreviewCard">
-              <div class="profilePreviewTop">
-                <img
-                  id="previewAvatar"
-                  class="profilePreviewAvatar"
-                  src="/assets/images/logo.png"
-                  alt="Profile preview avatar"
-                />
-              </div>
+          <div class="petsList" id="petsList"></div>
+          <p class="hint" id="petsHint" aria-live="polite">Loading…</p>
+        </section>
+      </section>
 
-              <div class="profilePreviewBody">
-                <h3 id="previewName">Your name</h3>
-                <div class="profilePreviewHandle" id="previewHandle">@username</div>
+      <section class="panel creatorPostsPanel" aria-labelledby="postsTitle">
+        <div class="postsHeader">
+          <h2 id="postsTitle">Posts</h2>
+          <div class="hint postsLegend">FREE is visible • PREMIUM is locked unless subscribed</div>
+        </div>
 
-                <p class="profilePreviewBio" id="previewBio">
-                  Your bio preview will appear here.
-                </p>
-
-                <div class="profilePreviewSocials" id="previewSocials" hidden>
-                  <a
-                    id="previewInstagram"
-                    class="socialChip"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    hidden
-                  >
-                    Instagram
-                  </a>
-
-                  <a
-                    id="previewTikTok"
-                    class="socialChip"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    hidden
-                  >
-                    TikTok
-                  </a>
-                </div>
-
-                <div class="hint previewHint" id="previewHint"></div>
-
-                <div class="btnRow previewActions" id="previewActions" hidden>
-                  <a
-                    id="previewOpenBtn"
-                    class="ghost"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    hidden
-                  >
-                    Open public preview
-                  </a>
-
-                  <button id="previewCopyBtn" class="ghost" type="button" hidden>
-                    Copy public link
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </aside>
-      </div>
+        <div class="posts creatorPosts" id="posts"></div>
+        <p class="hint" id="postsHint" aria-live="polite">Loading posts…</p>
+      </section>
     </main>
 
     <div id="footer-placeholder"></div>
   </div>
 
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+
+  <div id="mediaModal" class="mediaModal" aria-hidden="true">
+    <div
+      class="mediaModalInner"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Media preview"
+    >
+      <button
+        id="mediaModalClose"
+        class="mediaModalClose"
+        type="button"
+        aria-label="Close preview"
+      >
+        ✕
+      </button>
+
+      <img id="mediaModalImg" class="isHidden" alt="Preview" />
+      <video id="mediaModalVid" class="isHidden" controls playsinline></video>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/partials.js"></script>
   <script src="/js/nav.js"></script>
-  <script src="/js/app/profile.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/app/likes.js"></script>
+  <script src="/js/app/post.js"></script>
+  <script src="/js/app/fans/creator-profile.js"></script>
 </body>
 </html>
