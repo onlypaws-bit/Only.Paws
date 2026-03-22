@@ -158,9 +158,6 @@
     window.location.replace(PATHS?.home || PATHS?.index || "/index.html");
   }
 
-  function fansAuthHref() {
-    const current = window.location.pathname + window.location.search;
-
     if (ROUTES?.href) {
       return ROUTES.href("marketing.fans", {
         auth: 1,
@@ -173,8 +170,16 @@
   }
 
   function goFansAuth() {
-    window.location.href = fansAuthHref();
-  }
+  const current =
+    window.location.pathname + window.location.search;
+
+  try {
+    sessionStorage.setItem("op_redirect_after_auth", current);
+  } catch {}
+
+  const base = PATHS?.marketing?.fans || "/html/marketing/fans.html";
+  window.location.href = `${base}?auth=1`;
+}
 
   function subscriptionsHref(creatorId) {
     if (ROUTES?.href) {
