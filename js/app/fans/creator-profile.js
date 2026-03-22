@@ -16,7 +16,7 @@
     return;
   }
 
-  console.log("[creator-profile] VERSION 2026-03-22-02");
+  console.log("[creator-profile] VERSION 2026-03-22-03");
 
   const els = {
     creatorName: document.getElementById("creatorName"),
@@ -626,7 +626,11 @@
   async function loadCreatorByParam(param) {
     const cleaned = String(param || "").trim();
 
-    console.log("[creator-profile] lookup param:", cleaned, JSON.stringify(cleaned));
+    console.log(
+      "[creator-profile] lookup param:",
+      cleaned,
+      JSON.stringify(cleaned)
+    );
 
     const selectFields = [
       "user_id",
@@ -652,7 +656,7 @@
       result = await client
         .from("public_creator_profile_preview")
         .select(selectFields)
-        .or(`username.ilike.${cleaned},user_id.eq.${cleaned}`)
+        .ilike("username", cleaned)
         .maybeSingle();
     }
 
