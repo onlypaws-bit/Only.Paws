@@ -1,6 +1,9 @@
 /* =========================================================
    OnlyPaws
    File: /js/app/fans/creator-profile.js
+   Purpose:
+   - public/shareable creator profile preview
+   - optional logged-in actions for follow / subscribe
    ========================================================= */
 
 (function () {
@@ -302,10 +305,13 @@
 
     return posts.map((post) => {
       const isPremium = post.is_paid === true;
+      const isPrivate = post.is_public === false;
 
       let canView = false;
 
-      if (!isPremium) {
+      if (isPrivate) {
+        canView = state.isSelf;
+      } else if (!isPremium) {
         canView = true;
       } else {
         canView = state.isSelf || access.hasAccess;
@@ -330,15 +336,7 @@
   function renderPosts(posts) {
     if (!els.posts) return;
 
-    const visiblePosts = (posts || []).filter((post) => {
-      const isDraft = post.is_public === false;
-      if (isDraft && !state.isSelf) {
-        return false;
-      }
-      return true;
-    });
-
-    if (!visiblePosts.length) {
+    if (!posts.length) {
       els.posts.innerHTML = `
         <div class="postCard">
           <h3>No posts yet</h3>
@@ -359,8 +357,7 @@
       return;
     }
 
-    const enriched = enrichPostsForRenderer(visiblePosts);
-
+    const enriched = enrichPostsForRenderer(posts);
     els.posts.innerHTML = enriched.map((post) =>
       postApi.buildPostCard(post, {
         creatorUsername: post.creator_username,
@@ -374,7 +371,7 @@
     if (els.postsHint) els.postsHint.textContent = "";
 
     const likesApi = window.onlypawsLikes || null;
-    if (likesApi?.initLikeButtons) {
+    if (likesApi?.initLikeButtons && state.viewerId) {
       likesApi.initLikeButtons(els.posts).catch(() => {});
     }
   }
@@ -403,9 +400,51 @@
     return data || null;
   }
 
+  function updateActionRow() {
+    const isGuest = !state.viewerId;
+    const isSelf = !!state.isSelf;
+
+    if (els.actionRow) {
+      els.actionRow.hidden = false;
+    }
+
+    if (els.followBtn) {
+      els.followBtn.hidden = isGuest || isSelf;
+    }
+
+    if (els.premiumBtn) {
+      els.premiumBtn.hidden = isGuest || isSelf;
+    }
+
+    if (els.shareProfileBtn) {
+      els.shareProfileBtn.hidden = false;
+    }
+
+    if (isGuest) {
+      setHint("Public profile preview. Log in to follow or subscribe.");
+      return;
+    }
+
+    if (isSelf) {
+      setHint("");
+      return;
+    }
+
+    setHint("");
+  }
+
+  function setFollowUI() {
+    if (!els.followBtn) return;
+    els.followBtn.textContent = state.followRowId ? "Unfollow" : "Follow";
+  }
+
   function setPremiumUI() {
     const btn = els.premiumBtn;
     if (!btn) return;
+
+    if (!state.viewerId || state.isSelf) {
+      return;
+    }
 
     if (state.viewerIsCreator) {
       btn.textContent = "Coming soon";
@@ -477,19 +516,17 @@
   }
 
   async function bindFollow() {
-    if (!els.followBtn || !state.creator || state.isSelf) return;
+    if (!els.followBtn || !state.creator || state.isSelf || !state.viewerId) return;
 
-    function setFollowUi() {
-      els.followBtn.textContent = state.followRowId ? "Unfollow" : "Follow";
-    }
-
-    setFollowUi();
+    setFollowUI();
 
     if (els.followBtn.dataset.bound === "1") return;
     els.followBtn.dataset.bound = "1";
 
     els.followBtn.addEventListener("click", async () => {
       try {
+        if (!state.viewerId) return;
+
         if (state.followRowId) {
           setBtnBusy(els.followBtn, true, "Unfollowing…");
 
@@ -506,7 +543,10 @@
 
           const { data, error } = await client
             .from("followers")
-            .insert({ creator_id: state.creator.user_id, fan_id: state.viewerId })
+            .insert({
+              creator_id: state.creator.user_id,
+              fan_id: state.viewerId,
+            })
             .select("id")
             .maybeSingle();
 
@@ -514,7 +554,7 @@
           state.followRowId = data?.id || null;
         }
 
-        setFollowUi();
+        setFollowUI();
       } catch (error) {
         alert(error?.message || String(error));
       } finally {
@@ -524,11 +564,13 @@
   }
 
   async function bindPremium() {
-    if (!els.premiumBtn || !state.creator || state.isSelf) return;
+    if (!els.premiumBtn || !state.creator || state.isSelf || !state.viewerId) return;
     if (els.premiumBtn.dataset.bound === "1") return;
     els.premiumBtn.dataset.bound = "1";
 
     els.premiumBtn.addEventListener("click", async () => {
+      if (!state.viewerId) return;
+
       if (state.viewerIsCreator) {
         setHint("⏳ Creator → creator subscriptions are coming later.");
         return;
@@ -583,23 +625,25 @@
 
   async function boot() {
     const { data: sess } = await client.auth.getSession();
-    const session = sess?.session;
+    const session = sess?.session || null;
 
-    if (!session) {
-      goHome();
-      return;
+    state.viewerId = session?.user?.id || null;
+    state.viewerRole = "";
+    state.viewerIsCreator = false;
+    state.followRowId = null;
+    state.subRow = null;
+    state.isSelf = false;
+
+    if (state.viewerId) {
+      const { data: vp } = await client
+        .from("profiles")
+        .select("role")
+        .eq("user_id", state.viewerId)
+        .maybeSingle();
+
+      state.viewerRole = vp?.role || "";
+      state.viewerIsCreator = state.viewerRole === "creator";
     }
-
-    state.viewerId = session.user.id;
-
-    const { data: vp } = await client
-      .from("profiles")
-      .select("role")
-      .eq("user_id", state.viewerId)
-      .maybeSingle();
-
-    state.viewerRole = vp?.role || "";
-    state.viewerIsCreator = state.viewerRole === "creator";
 
     const { u } = getParams();
     if (!u) {
@@ -612,18 +656,18 @@
 
       state.creator = creator;
       state.creatorEligible = creatorEligible(creator);
-      state.isSelf = creator.user_id === state.viewerId;
+      state.isSelf = !!state.viewerId && creator.user_id === state.viewerId;
 
       renderCreator(creator);
+      updateActionRow();
 
-      if (els.actionRow) {
-        els.actionRow.hidden = !!state.isSelf;
+      if (state.viewerId && !state.isSelf) {
+        state.subRow = await getSubscription(creator.user_id, state.viewerId);
+      } else {
+        state.subRow = null;
       }
 
-      state.subRow = await getSubscription(creator.user_id, state.viewerId);
-
-      const [followRowId, postsRes, petsRes] = await Promise.all([
-        getFollowRowId(state.viewerId, creator.user_id),
+      const tasks = [
         client
           .from("posts")
           .select("id,creator_id,pet_id,title,content,preview,slug,media_url,media_type,is_public,is_paid,is_pinned,likes_count,created_at,updated_at")
@@ -631,12 +675,21 @@
           .order("is_pinned", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(24),
+
         client
           .from("pets")
           .select("id,name,species,breed,avatar_url")
           .eq("owner_id", creator.user_id)
           .order("created_at", { ascending: false }),
-      ]);
+      ];
+
+      if (state.viewerId && !state.isSelf) {
+        tasks.unshift(getFollowRowId(state.viewerId, creator.user_id));
+      } else {
+        tasks.unshift(Promise.resolve(null));
+      }
+
+      const [followRowId, postsRes, petsRes] = await Promise.all(tasks);
 
       if (postsRes.error) throw postsRes.error;
       if (petsRes.error) throw petsRes.error;
@@ -650,9 +703,14 @@
       }
 
       renderPosts(state.posts);
+      updateActionRow();
+      setFollowUI();
       setPremiumUI();
-      await bindFollow();
-      await bindPremium();
+
+      if (state.viewerId && !state.isSelf) {
+        await bindFollow();
+        await bindPremium();
+      }
 
       if (els.shareProfileBtn && els.shareProfileBtn.dataset.bound !== "1") {
         els.shareProfileBtn.dataset.bound = "1";
@@ -676,8 +734,10 @@
     }
 
     client.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        goHome();
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "TOKEN_REFRESHED") {
+        boot().catch((err) => {
+          console.error("creator profile re-boot error", err);
+        });
       }
     });
 
