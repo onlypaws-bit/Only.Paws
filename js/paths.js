@@ -13,7 +13,6 @@
    - Logical aliases:
      - OP_PATHS.index = canonical home entry for navigation
      - OP_PATHS.home  = canonical home entry for navigation
-     - OP_PATHS.login = canonical auth entry for navigation
    - Physical marketing entries remain available under OP_PATHS.marketing.
    - Exposed globally as:
      - window.OP_PATHS
@@ -29,7 +28,6 @@
     // Logical navigation aliases
     index: `${ROOT}/index.html`,
     home: `${ROOT}/index.html`,
-    login: `${ROOT}/index.html?auth=1`,
 
     static: {
       root: `${ROOT}/`,
