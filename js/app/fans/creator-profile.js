@@ -159,14 +159,10 @@
   }
 
   function loginHref() {
-    const current = window.location.pathname + window.location.search;
-
     if (ROUTES?.href) {
-      return ROUTES.href("login", { redirect: current });
+      return ROUTES.href("login");
     }
-
-    const base = PATHS?.login || "/html/login.html";
-    return `${base}?redirect=${encodeURIComponent(current)}`;
+    return PATHS?.login || "/html/login.html";
   }
 
   function goLogin() {
