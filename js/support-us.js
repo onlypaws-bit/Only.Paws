@@ -83,9 +83,22 @@
       currentAction = action;
     }
 
+    function openExternal(url) {
+      if (!url) return false;
+
+      const newWindow = window.open(url, "_blank", "noopener,noreferrer");
+
+      if (newWindow) {
+        return true;
+      }
+
+      setMsg("❌ Popup blocked. Please allow popups and try again.");
+      return false;
+    }
+
     async function goCheckout() {
       setButton(btn.textContent || supportLabel, true);
-      setMsg("Redirecting to Stripe...");
+      setMsg("Opening Stripe in a new tab...");
 
       try {
         const { data, error } = await client.functions.invoke("support-us-checkout", {
@@ -103,7 +116,14 @@
         }
 
         if (data?.url) {
-          window.location.href = data.url;
+          const opened = openExternal(data.url);
+
+          if (opened) {
+            setMsg("Stripe opened in a new tab.");
+          } else {
+            setButton(supportLabel, false);
+            setAction(goCheckout);
+          }
           return;
         }
 
