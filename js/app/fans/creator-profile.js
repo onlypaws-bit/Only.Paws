@@ -16,8 +16,6 @@
     return;
   }
 
-  console.log("[creator-profile] VERSION 2026-03-22-04");
-
   const els = {
     creatorName: document.getElementById("creatorName"),
     creatorHandle: document.getElementById("creatorHandle"),
@@ -158,6 +156,21 @@
       return;
     }
     window.location.replace(PATHS?.home || PATHS?.index || "/index.html");
+  }
+
+  function loginHref() {
+    const current = window.location.pathname + window.location.search;
+
+    if (ROUTES?.href) {
+      return ROUTES.href("login", { redirect: current });
+    }
+
+    const base = PATHS?.login || "/html/login.html";
+    return `${base}?redirect=${encodeURIComponent(current)}`;
+  }
+
+  function goLogin() {
+    window.location.href = loginHref();
   }
 
   function subscriptionsHref(creatorId) {
@@ -436,11 +449,11 @@
     }
 
     if (els.followBtn) {
-      els.followBtn.hidden = isGuest || isSelf;
+      els.followBtn.hidden = isSelf;
     }
 
     if (els.premiumBtn) {
-      els.premiumBtn.hidden = isGuest || isSelf;
+      els.premiumBtn.hidden = isSelf;
     }
 
     if (els.shareProfileBtn) {
@@ -462,6 +475,12 @@
 
   function setFollowUI() {
     if (!els.followBtn) return;
+
+    if (!state.viewerId) {
+      els.followBtn.textContent = "Follow";
+      return;
+    }
+
     els.followBtn.textContent = state.followRowId ? "Unfollow" : "Follow";
   }
 
@@ -469,7 +488,13 @@
     const btn = els.premiumBtn;
     if (!btn) return;
 
-    if (!state.viewerId || state.isSelf) {
+    if (state.isSelf) {
+      return;
+    }
+
+    if (!state.viewerId) {
+      btn.textContent = "Subscribe";
+      btn.disabled = false;
       return;
     }
 
@@ -546,19 +571,19 @@
   }
 
   async function bindFollow() {
-    if (!els.followBtn || !state.creator || state.isSelf || !state.viewerId) {
-      return;
-    }
-
-    setFollowUI();
-
+    if (!els.followBtn || !state.creator || state.isSelf) return;
     if (els.followBtn.dataset.bound === "1") return;
     els.followBtn.dataset.bound = "1";
 
-    els.followBtn.addEventListener("click", async () => {
-      try {
-        if (!state.viewerId) return;
+    setFollowUI();
 
+    els.followBtn.addEventListener("click", async () => {
+      if (!state.viewerId) {
+        goLogin();
+        return;
+      }
+
+      try {
         if (state.followRowId) {
           setBtnBusy(els.followBtn, true, "Unfollowing…");
 
@@ -600,14 +625,15 @@
   }
 
   async function bindPremium() {
-    if (!els.premiumBtn || !state.creator || state.isSelf || !state.viewerId) {
-      return;
-    }
+    if (!els.premiumBtn || !state.creator || state.isSelf) return;
     if (els.premiumBtn.dataset.bound === "1") return;
     els.premiumBtn.dataset.bound = "1";
 
     els.premiumBtn.addEventListener("click", async () => {
-      if (!state.viewerId) return;
+      if (!state.viewerId) {
+        goLogin();
+        return;
+      }
 
       if (state.viewerIsCreator) {
         setHint("⏳ Creator → creator subscriptions are coming later.");
@@ -626,19 +652,10 @@
   async function loadCreatorByParam(param) {
     const cleaned = String(param || "").trim();
 
-    console.log(
-      "[creator-profile] lookup param:",
-      cleaned,
-      JSON.stringify(cleaned)
-    );
-
     const { data, error } = await client.rpc(
       "get_public_creator_profile_preview",
       { p_u: cleaned }
     );
-
-    console.log("[creator-profile] lookup data:", data);
-    console.log("[creator-profile] lookup error:", error);
 
     if (error) throw error;
 
@@ -675,11 +692,6 @@
     }
 
     const { u } = getParams();
-
-    console.log("[creator-profile] href:", window.location.href);
-    console.log("[creator-profile] search:", window.location.search);
-    console.log("[creator-profile] u:", u, JSON.stringify(u));
-
     if (!u) {
       goHome();
       return;
@@ -742,10 +754,8 @@
       setFollowUI();
       setPremiumUI();
 
-      if (state.viewerId && !state.isSelf) {
-        await bindFollow();
-        await bindPremium();
-      }
+      await bindFollow();
+      await bindPremium();
 
       if (els.shareProfileBtn && els.shareProfileBtn.dataset.bound !== "1") {
         els.shareProfileBtn.dataset.bound = "1";
