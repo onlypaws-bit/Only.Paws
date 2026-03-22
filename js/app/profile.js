@@ -88,6 +88,20 @@
     if (els.previewHint) els.previewHint.textContent = text || "";
   }
 
+  function normalizeRole(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function isCreatorRole(value) {
+    return normalizeRole(value) === "creator";
+  }
+
+  function setShown(el, shown, displayValue = "") {
+    if (!el) return;
+    el.hidden = !shown;
+    el.style.display = shown ? displayValue : "none";
+  }
+
   function normalizeUsername(value) {
     return String(value || "").trim().toLowerCase();
   }
@@ -250,11 +264,9 @@
   }
 
   function applyRoleUI() {
-    const isCreator = state.role === "creator";
+    const isCreator = isCreatorRole(state.role);
 
-    if (els.socialSection) {
-      els.socialSection.hidden = !isCreator;
-    }
+    setShown(els.socialSection, isCreator, "block");
 
     if (els.previewHeaderSub) {
       els.previewHeaderSub.textContent = isCreator
@@ -263,17 +275,16 @@
     }
 
     if (!isCreator) {
-      if (els.previewSocials) els.previewSocials.hidden = true;
-      if (els.previewInstagram) els.previewInstagram.hidden = true;
-      if (els.previewTikTok) els.previewTikTok.hidden = true;
+      setShown(els.previewSocials, false);
+      setShown(els.previewInstagram, false);
+      setShown(els.previewTikTok, false);
+      setShown(els.previewActions, false);
 
-      if (els.previewActions) els.previewActions.hidden = true;
       if (els.previewOpenBtn) {
-        els.previewOpenBtn.hidden = true;
         els.previewOpenBtn.removeAttribute("href");
       }
+
       if (els.previewCopyBtn) {
-        els.previewCopyBtn.hidden = true;
         els.previewCopyBtn.disabled = true;
         delete els.previewCopyBtn.dataset.href;
       }
@@ -372,7 +383,7 @@
   }
 
   function updatePreview() {
-    const isCreator = state.role === "creator";
+    const isCreator = isCreatorRole(state.role);
 
     const displayName = (els.displayName?.value || "").trim();
     const username = normalizeUsername(els.username?.value || "");
@@ -407,10 +418,11 @@
       if (isCreator && instagramUrl) {
         els.previewInstagram.href = instagramUrl;
         els.previewInstagram.textContent = displaySocialLabel(instagramUrl, "Instagram");
-        els.previewInstagram.hidden = false;
+        setShown(els.previewInstagram, true, "inline-flex");
         hasSocials = true;
       } else {
-        els.previewInstagram.hidden = true;
+        els.previewInstagram.removeAttribute("href");
+        setShown(els.previewInstagram, false);
       }
     }
 
@@ -418,42 +430,42 @@
       if (isCreator && tiktokUrl) {
         els.previewTikTok.href = tiktokUrl;
         els.previewTikTok.textContent = displaySocialLabel(tiktokUrl, "TikTok");
-        els.previewTikTok.hidden = false;
+        setShown(els.previewTikTok, true, "inline-flex");
         hasSocials = true;
       } else {
-        els.previewTikTok.hidden = true;
+        els.previewTikTok.removeAttribute("href");
+        setShown(els.previewTikTok, false);
       }
     }
 
-    if (els.previewSocials) {
-      els.previewSocials.hidden = !isCreator || !hasSocials;
-    }
+    setShown(els.previewSocials, isCreator && hasSocials, "flex");
 
     const canOpenPublicPreview = isCreator && !!username;
     const publicPath = canOpenPublicPreview
       ? getPublicPreviewPath(username || state.userId)
       : "";
 
-    if (els.previewActions) {
-      els.previewActions.hidden = !canOpenPublicPreview;
-    }
+    setShown(els.previewActions, canOpenPublicPreview, "flex");
 
     if (els.previewOpenBtn) {
-      els.previewOpenBtn.hidden = !canOpenPublicPreview;
       if (canOpenPublicPreview) {
         els.previewOpenBtn.href = publicPath;
+        setShown(els.previewOpenBtn, true, "inline-flex");
       } else {
         els.previewOpenBtn.removeAttribute("href");
+        setShown(els.previewOpenBtn, false);
       }
     }
 
     if (els.previewCopyBtn) {
-      els.previewCopyBtn.hidden = !canOpenPublicPreview;
       els.previewCopyBtn.disabled = !canOpenPublicPreview;
+
       if (canOpenPublicPreview) {
         els.previewCopyBtn.dataset.href = publicPath;
+        setShown(els.previewCopyBtn, true, "inline-flex");
       } else {
         delete els.previewCopyBtn.dataset.href;
+        setShown(els.previewCopyBtn, false);
       }
     }
 
@@ -483,7 +495,7 @@
     try {
       const profile = await ensureProfileExists(user.id);
 
-      state.role = profile?.role || "fan";
+      state.role = normalizeRole(profile?.role || "fan");
 
       hydrateUserPillFromProfile(profile, state.email);
 
@@ -492,11 +504,11 @@
       if (els.bio) els.bio.value = profile?.bio || "";
 
       if (els.instagram) {
-        els.instagram.value = state.role === "creator" ? (profile?.instagram_url || "") : "";
+        els.instagram.value = isCreatorRole(state.role) ? (profile?.instagram_url || "") : "";
       }
 
       if (els.tiktok) {
-        els.tiktok.value = state.role === "creator" ? (profile?.tiktok_url || "") : "";
+        els.tiktok.value = isCreatorRole(state.role) ? (profile?.tiktok_url || "") : "";
       }
 
       const avatarUrl = (profile?.avatar_url || "").trim();
@@ -541,7 +553,7 @@
     setMsg("Saving…");
 
     try {
-      const isCreator = state.role === "creator";
+      const isCreator = isCreatorRole(state.role);
 
       const payload = {
         user_id: user.id,
