@@ -32,6 +32,8 @@
     instagram: document.getElementById("instagram_url"),
     tiktok: document.getElementById("tiktok_url"),
 
+    socialSection: document.getElementById("socialSection"),
+
     saveBtn: document.getElementById("saveBtn"),
 
     avatarImg: document.getElementById("avatarImg"),
@@ -54,6 +56,8 @@
     previewInstagram: document.getElementById("previewInstagram"),
     previewTikTok: document.getElementById("previewTikTok"),
     previewHint: document.getElementById("previewHint"),
+    previewHeaderSub: document.getElementById("previewHeaderSub"),
+    previewActions: document.getElementById("previewActions"),
     previewOpenBtn: document.getElementById("previewOpenBtn"),
     previewCopyBtn: document.getElementById("previewCopyBtn"),
   };
@@ -101,12 +105,14 @@
     if (platform === "instagram") {
       cleaned = cleaned.replace(/^instagram\.com\//i, "");
       cleaned = cleaned.replace(/^www\.instagram\.com\//i, "");
+      cleaned = cleaned.replace(/^@+/, "");
       return `https://instagram.com/${cleaned}`;
     }
 
     if (platform === "tiktok") {
       cleaned = cleaned.replace(/^tiktok\.com\//i, "");
       cleaned = cleaned.replace(/^www\.tiktok\.com\//i, "");
+      cleaned = cleaned.replace(/^@+/, "");
       if (!cleaned.startsWith("@")) {
         cleaned = `@${cleaned}`;
       }
@@ -243,6 +249,37 @@
     window.location.replace(getHomePath());
   }
 
+  function applyRoleUI() {
+    const isCreator = state.role === "creator";
+
+    if (els.socialSection) {
+      els.socialSection.hidden = !isCreator;
+    }
+
+    if (els.previewHeaderSub) {
+      els.previewHeaderSub.textContent = isCreator
+        ? "Quick live preview of how your creator profile can look."
+        : "Basic preview of your profile. Public creator profile is available for creator accounts.";
+    }
+
+    if (!isCreator) {
+      if (els.previewSocials) els.previewSocials.hidden = true;
+      if (els.previewInstagram) els.previewInstagram.hidden = true;
+      if (els.previewTikTok) els.previewTikTok.hidden = true;
+
+      if (els.previewActions) els.previewActions.hidden = true;
+      if (els.previewOpenBtn) {
+        els.previewOpenBtn.hidden = true;
+        els.previewOpenBtn.removeAttribute("href");
+      }
+      if (els.previewCopyBtn) {
+        els.previewCopyBtn.hidden = true;
+        els.previewCopyBtn.disabled = true;
+        delete els.previewCopyBtn.dataset.href;
+      }
+    }
+  }
+
   async function guardAuthOrRedirect() {
     try {
       const { data: sessData } = await client.auth.getSession();
@@ -335,11 +372,17 @@
   }
 
   function updatePreview() {
+    const isCreator = state.role === "creator";
+
     const displayName = (els.displayName?.value || "").trim();
     const username = normalizeUsername(els.username?.value || "");
     const bio = (els.bio?.value || "").trim();
-    const instagramUrl = normalizeSocialUrl(els.instagram?.value || "", "instagram");
-    const tiktokUrl = normalizeSocialUrl(els.tiktok?.value || "", "tiktok");
+    const instagramUrl = isCreator
+      ? normalizeSocialUrl(els.instagram?.value || "", "instagram")
+      : "";
+    const tiktokUrl = isCreator
+      ? normalizeSocialUrl(els.tiktok?.value || "", "tiktok")
+      : "";
     const avatarUrl = (els.avatarImg?.src || "").trim();
 
     if (els.previewAvatar) {
@@ -361,7 +404,7 @@
     let hasSocials = false;
 
     if (els.previewInstagram) {
-      if (instagramUrl) {
+      if (isCreator && instagramUrl) {
         els.previewInstagram.href = instagramUrl;
         els.previewInstagram.textContent = displaySocialLabel(instagramUrl, "Instagram");
         els.previewInstagram.hidden = false;
@@ -372,7 +415,7 @@
     }
 
     if (els.previewTikTok) {
-      if (tiktokUrl) {
+      if (isCreator && tiktokUrl) {
         els.previewTikTok.href = tiktokUrl;
         els.previewTikTok.textContent = displaySocialLabel(tiktokUrl, "TikTok");
         els.previewTikTok.hidden = false;
@@ -383,13 +426,17 @@
     }
 
     if (els.previewSocials) {
-      els.previewSocials.hidden = !hasSocials;
+      els.previewSocials.hidden = !isCreator || !hasSocials;
     }
 
-    const canOpenPublicPreview = state.role === "creator" && !!username;
+    const canOpenPublicPreview = isCreator && !!username;
     const publicPath = canOpenPublicPreview
       ? getPublicPreviewPath(username || state.userId)
       : "";
+
+    if (els.previewActions) {
+      els.previewActions.hidden = !canOpenPublicPreview;
+    }
 
     if (els.previewOpenBtn) {
       els.previewOpenBtn.hidden = !canOpenPublicPreview;
@@ -410,14 +457,14 @@
       }
     }
 
-    if (state.role === "creator") {
+    if (isCreator) {
       if (username) {
         setPreviewHint("This is a quick preview of your public creator profile.");
       } else {
         setPreviewHint("Set a valid username to enable public profile preview.");
       }
     } else {
-      setPreviewHint("Preview is ready. Public creator preview becomes available for creator accounts.");
+      setPreviewHint("Public profile sharing and social links are available for creator accounts.");
     }
   }
 
@@ -443,14 +490,21 @@
       if (els.displayName) els.displayName.value = profile?.display_name || "";
       if (els.username) els.username.value = profile?.username || "";
       if (els.bio) els.bio.value = profile?.bio || "";
-      if (els.instagram) els.instagram.value = profile?.instagram_url || "";
-      if (els.tiktok) els.tiktok.value = profile?.tiktok_url || "";
+
+      if (els.instagram) {
+        els.instagram.value = state.role === "creator" ? (profile?.instagram_url || "") : "";
+      }
+
+      if (els.tiktok) {
+        els.tiktok.value = state.role === "creator" ? (profile?.tiktok_url || "") : "";
+      }
 
       const avatarUrl = (profile?.avatar_url || "").trim();
       if (els.avatarImg) {
         els.avatarImg.src = avatarUrl || getLogoPath();
       }
 
+      applyRoleUI();
       setHint("Upload an image to change your avatar.");
       refreshUsernameUI();
       updatePreview();
@@ -487,13 +541,19 @@
     setMsg("Saving…");
 
     try {
+      const isCreator = state.role === "creator";
+
       const payload = {
         user_id: user.id,
         display_name: (els.displayName?.value || "").trim(),
         username: validation.value,
         bio: (els.bio?.value || "").trim(),
-        instagram_url: normalizeSocialUrl(els.instagram?.value || "", "instagram") || null,
-        tiktok_url: normalizeSocialUrl(els.tiktok?.value || "", "tiktok") || null,
+        instagram_url: isCreator
+          ? normalizeSocialUrl(els.instagram?.value || "", "instagram") || null
+          : null,
+        tiktok_url: isCreator
+          ? normalizeSocialUrl(els.tiktok?.value || "", "tiktok") || null
+          : null,
       };
 
       const { error } = await client
