@@ -5,7 +5,7 @@
 
    Creator access model:
    - role = creator => can create posts
-   - Creator Plan => monetization only
+   - Creator Plan OR early creator trial => monetization
    - Stripe onboarding => payout / Stripe tools access
 
    Dependencies:
@@ -16,6 +16,7 @@
    - window.OPNav
    - window.OnlyPawsPost
    - window.OnlyPawsPostCard
+   - window.OPCreatorPlan
    ========================================================= */
 
 (function () {
@@ -28,8 +29,13 @@
     profileUserId: null,
     isCreator: false,
     canPost: false,
+
     creatorPlanActive: false,
     creatorPlanCanceling: false,
+    creatorTrialActive: false,
+    creatorTrialDaysLeft: 0,
+    creatorMonetizationActive: false,
+
     payoutEnabled: false,
   };
 
@@ -243,42 +249,6 @@
     if (!element || element.dataset[key] === "1") return;
     element.dataset[key] = "1";
     element.addEventListener(eventName, handler);
-  }
-
-  async function hasActiveCreatorPlan(userId) {
-    try {
-      const { data, error } = await client
-        .from("entitlements")
-        .select("status, current_period_end, cancel_at_period_end")
-        .eq("user_id", userId)
-        .eq("key", "creator_plan")
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data) {
-        state.creatorPlanCanceling = false;
-        return false;
-      }
-
-      const status = String(data.status || "").toLowerCase();
-      const currentPeriodEndMs = data.current_period_end
-        ? new Date(data.current_period_end).getTime()
-        : 0;
-      const now = Date.now();
-
-      state.creatorPlanCanceling = !!data.cancel_at_period_end;
-
-      if (["active", "trialing", "past_due"].includes(status)) return true;
-      if (status === "canceled" && currentPeriodEndMs && currentPeriodEndMs > now) {
-        return true;
-      }
-
-      return false;
-    } catch (error) {
-      console.warn("hasActiveCreatorPlan error:", error);
-      state.creatorPlanCanceling = false;
-      return false;
-    }
   }
 
   async function getCreatorPlanStatus(userId) {
@@ -853,11 +823,11 @@
         return;
       }
 
-      if (!state.creatorPlanActive) {
-        els.walletHint.textContent = "Creator Plan required to view balance.";
+      if (!state.creatorMonetizationActive) {
+        els.walletHint.textContent = "Creator Plan or trial required to view balance.";
         showWalletMsg(
-          "Creator Plan required",
-          "Activate Creator Plan to unlock balance and monetization tools."
+          "Monetization required",
+          "Activate Creator Plan or use an active early creator trial to unlock balance and monetization tools."
         );
         return;
       }
@@ -866,7 +836,9 @@
         els.walletHint.textContent = "Stripe setup required to show balance.";
         showWalletMsg(
           "Stripe onboarding required",
-          "Creator Plan is active. Complete Stripe onboarding to view your balance and payouts."
+          state.creatorTrialActive
+            ? "Your early creator trial is active. Complete Stripe onboarding to view your balance and payouts."
+            : "Creator Plan is active. Complete Stripe onboarding to view your balance and payouts."
         );
 
         els.enablePayoutBtn.textContent = "Complete onboarding (Stripe)";
@@ -892,7 +864,7 @@
     } catch (error) {
       els.walletHint.textContent = "Couldn’t load balance";
       showWalletMsg("Balance error", extractInvokeErrorDetails(error));
-      els.enablePayoutBtn.hidden = !(state.isCreator && state.creatorPlanActive);
+      els.enablePayoutBtn.hidden = !(state.isCreator && state.creatorMonetizationActive);
     }
   }
 
@@ -914,11 +886,11 @@
       return;
     }
 
-    if (!state.creatorPlanActive) {
-      els.earningsHint.textContent = "Creator Plan required.";
+    if (!state.creatorMonetizationActive) {
+      els.earningsHint.textContent = "Creator Plan or trial required.";
       els.earningsTable.innerHTML = renderEmptyState(
-        "Creator Plan required",
-        "Activate Creator Plan to start earning."
+        "Monetization not active",
+        "Activate Creator Plan or use an active early creator trial to start earning."
       );
       return;
     }
@@ -1243,6 +1215,33 @@
     bindBuyCreatorPlanButton();
   }
 
+  function renderCreatorStatusTrialActive() {
+    const days = Number(state.creatorTrialDaysLeft || 0);
+
+    const extrasHtml = `
+      <div class="btnRow" style="margin-top:12px;">
+        <button class="navBtn" type="button" id="refreshPlanBtn">Refresh</button>
+        <button class="navBtn primary" type="button" id="buyCreatorPlanBtn">Unlock Creator Plan — €10/month</button>
+      </div>
+      <div class="hint" style="margin-top:10px;">
+        ${
+          days > 0
+            ? `🎉 Early creator trial active — <b>${days}</b> day${days === 1 ? "" : "s"} left.`
+            : `🎉 Early creator trial active.`
+        }
+      </div>
+    `;
+
+    setStateBox(
+      "✨ Early creator trial active",
+      "Monetization is unlocked during your trial. Complete Stripe onboarding if needed, or activate Creator Plan any time to keep monetization running after the trial ends.",
+      extrasHtml
+    );
+
+    bindRefreshPlanButton();
+    bindBuyCreatorPlanButton();
+  }
+
   function renderCreatorStatusPlanActive(planData) {
     let extrasHtml = "";
 
@@ -1323,6 +1322,9 @@
 
     state.creatorPlanActive = false;
     state.creatorPlanCanceling = false;
+    state.creatorTrialActive = false;
+    state.creatorTrialDaysLeft = 0;
+    state.creatorMonetizationActive = false;
     state.payoutEnabled = false;
     state.profileUserId = null;
     state.creatorUsername = "";
@@ -1411,15 +1413,32 @@
     enableAction(els.createPostBtn, !!state.canPost);
     enableAction(els.managePetsBtn, true);
 
-    const activePlan = await hasActiveCreatorPlan(session.user.id);
-    state.creatorPlanActive = !!activePlan;
+    if (!window.OPCreatorPlan) {
+      setStateBox("Creator Plan module missing", "Load /js/app/creators/creator-plan.js before this file.");
+      await loadWallet();
+      await loadEarnings();
+      await loadPets(session);
+      await loadSubscribers(session);
+      await loadMyPosts(session);
+      return;
+    }
+
+    const access = await window.OPCreatorPlan.getCreatorAccessState(session.user.id);
+
+    state.creatorPlanActive = !!access.hasCreatorPlan;
+    state.creatorTrialActive = !!access.hasActiveTrial;
+    state.creatorTrialDaysLeft = Number(access.trialDaysLeft || 0);
+    state.creatorMonetizationActive = !!access.canUseCreatorFeatures;
+    state.creatorPlanCanceling = !!access.isCanceling;
+
     state.payoutEnabled = !!(
       profile?.stripe_onboarded ||
       (profile?.payouts_enabled && profile?.charges_enabled)
     );
 
-    if (!state.creatorPlanActive) {
-      renderCreatorStatusNoPlan();
+    if (state.creatorPlanActive) {
+      const planData = await getCreatorPlanStatus(session.user.id);
+      renderCreatorStatusPlanActive(planData);
 
       await loadWallet();
       await loadEarnings();
@@ -1429,8 +1448,18 @@
       return;
     }
 
-    const planData = await getCreatorPlanStatus(session.user.id);
-    renderCreatorStatusPlanActive(planData);
+    if (state.creatorTrialActive) {
+      renderCreatorStatusTrialActive();
+
+      await loadWallet();
+      await loadEarnings();
+      await loadPets(session);
+      await loadSubscribers(session);
+      await loadMyPosts(session);
+      return;
+    }
+
+    renderCreatorStatusNoPlan();
 
     await loadWallet();
     await loadEarnings();
