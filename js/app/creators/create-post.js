@@ -33,6 +33,9 @@
     user: null,
     profile: null,
     creatorPlanActive: false,
+    creatorTrialActive: false,
+    creatorTrialDaysLeft: 0,
+    creatorMonetizationActive: false,
     editingPost: null,
     currentPreviewUrl: null,
     isSubmitting: false,
@@ -145,7 +148,7 @@
 
   function setEditorEnabled(enabled) {
     if (els.isPublic) els.isPublic.disabled = !enabled;
-    if (els.isPaid) els.isPaid.disabled = !enabled || !state.creatorPlanActive;
+    if (els.isPaid) els.isPaid.disabled = !enabled || !state.creatorMonetizationActive;
     if (els.title) els.title.disabled = !enabled;
     if (els.content) els.content.disabled = !enabled;
     if (els.preview) els.preview.disabled = !enabled;
@@ -153,15 +156,31 @@
     if (els.publishBtn) els.publishBtn.disabled = !enabled;
   }
 
+  function getCreatorAccessMessage() {
+    if (state.creatorTrialActive) {
+      const days = state.creatorTrialDaysLeft;
+      if (days > 0) {
+        return `Your early creator trial is active — ${days} day${days === 1 ? "" : "s"} left.`;
+      }
+      return "Your early creator trial is active.";
+    }
+
+    if (!state.creatorMonetizationActive) {
+      return "You can publish free posts already. Creator Plan unlocks premium posts and monetization.";
+    }
+
+    return "";
+  }
+
   function updatePlanUI() {
-    const hasPlan = !!state.creatorPlanActive;
+    const hasMonetization = !!state.creatorMonetizationActive;
 
     if (els.creatorLockBox) {
-      setHidden(els.creatorLockBox, hasPlan);
+      setHidden(els.creatorLockBox, hasMonetization);
     }
 
     if (els.isPaid) {
-      if (hasPlan) {
+      if (hasMonetization) {
         els.isPaid.disabled = false;
       } else {
         els.isPaid.value = "false";
@@ -359,17 +378,16 @@
       throw new Error("Creator Plan module not loaded.");
     }
 
-    const entitlement = await window.OPCreatorPlan.getCreatorPlanEntitlement(state.user.id);
-    state.creatorPlanActive = window.OPCreatorPlan.hasCreatorPlanAccess(entitlement);
+    const access = await window.OPCreatorPlan.getCreatorAccessState(state.user.id);
+
+    state.creatorPlanActive = !!access.hasCreatorPlan;
+    state.creatorTrialActive = !!access.hasActiveTrial;
+    state.creatorTrialDaysLeft = Number(access.trialDaysLeft || 0);
+    state.creatorMonetizationActive = !!access.canUseCreatorFeatures;
 
     setEditorEnabled(true);
     updatePlanUI();
-
-    if (!state.creatorPlanActive) {
-      setMessage("You can publish free posts already. Creator Plan unlocks premium posts and monetization.");
-    } else {
-      setMessage("");
-    }
+    setMessage(getCreatorAccessMessage());
 
     return true;
   }
@@ -413,7 +431,7 @@
     if (els.preview) els.preview.value = data.preview || "";
 
     if (els.isPaid) {
-      if (state.creatorPlanActive) {
+      if (state.creatorMonetizationActive) {
         els.isPaid.value = data.is_paid ? "true" : "false";
       } else {
         els.isPaid.value = "false";
@@ -550,8 +568,8 @@
       throw new Error("Content is required.");
     }
 
-    if (values.is_paid && !state.creatorPlanActive) {
-      throw new Error("Creator Plan required for premium posts.");
+    if (values.is_paid && !state.creatorMonetizationActive) {
+      throw new Error("Creator Plan or active trial required for premium posts.");
     }
 
     if (editId && !state.editingPost) {
@@ -587,6 +605,9 @@
         values,
         hasFile: !!els.mediaFile?.files?.[0],
         creatorPlanActive: state.creatorPlanActive,
+        creatorTrialActive: state.creatorTrialActive,
+        creatorTrialDaysLeft: state.creatorTrialDaysLeft,
+        creatorMonetizationActive: state.creatorMonetizationActive,
         userId: state.user?.id || null,
       });
 
@@ -645,19 +666,17 @@
 
         if (isDraftSelected()) {
           setMessage("Draft mode: this post should only be visible to you.");
-        } else if (!state.creatorPlanActive) {
-          setMessage("You can publish free posts already. Creator Plan unlocks premium posts and monetization.");
         } else {
-          setMessage("");
+          setMessage(getCreatorAccessMessage());
         }
       });
     }
 
     if (els.isPaid) {
       els.isPaid.addEventListener("change", () => {
-        if (!state.creatorPlanActive && els.isPaid.value === "true") {
+        if (!state.creatorMonetizationActive && els.isPaid.value === "true") {
           els.isPaid.value = "false";
-          setMessage("Creator Plan required for premium posts.");
+          setMessage("Creator Plan or active trial required for premium posts.");
         }
 
         syncPostPreview();
