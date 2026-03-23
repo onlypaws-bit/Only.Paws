@@ -38,6 +38,26 @@
     return data || null;
   }
 
+  async function getEarlyCreatorTrial(userId) {
+    if (!userId) return null;
+
+    const supabase = getClient();
+
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(`
+        id,
+        is_early_creator,
+        trial_expires_at,
+        trial_used
+      `)
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data || null;
+  }
+
   function isCreatorPlanActive(entitlement) {
     if (!entitlement) return false;
 
@@ -66,11 +86,88 @@
     return periodEndMs > Date.now();
   }
 
+  function isEarlyCreator(trialProfile) {
+    return trialProfile?.is_early_creator === true;
+  }
+
+  function getTrialPeriodEndMs(trialProfile) {
+    if (!trialProfile?.trial_expires_at) return 0;
+
+    const time = new Date(trialProfile.trial_expires_at).getTime();
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  function hasActiveTrialAccess(trialProfile) {
+    if (!isEarlyCreator(trialProfile)) return false;
+
+    const trialEndMs = getTrialPeriodEndMs(trialProfile);
+    if (!trialEndMs) return false;
+
+    return trialEndMs > Date.now();
+  }
+
+  function getTrialDaysLeft(trialProfile) {
+    const trialEndMs = getTrialPeriodEndMs(trialProfile);
+    if (!trialEndMs) return 0;
+
+    const diff = trialEndMs - Date.now();
+    if (diff <= 0) return 0;
+
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  }
+
+  function hasCreatorMonetizationAccess(entitlement, trialProfile) {
+    return hasCreatorPlanAccess(entitlement) || hasActiveTrialAccess(trialProfile);
+  }
+
+  async function getCreatorAccessState(userId) {
+    if (!userId) {
+      return {
+        entitlement: null,
+        trialProfile: null,
+        hasCreatorPlan: false,
+        hasActiveTrial: false,
+        canUseCreatorFeatures: false,
+        isCanceling: false,
+        creatorPlanPeriodEndMs: 0,
+        trialPeriodEndMs: 0,
+        trialDaysLeft: 0,
+      };
+    }
+
+    const [entitlement, trialProfile] = await Promise.all([
+      getCreatorPlanEntitlement(userId),
+      getEarlyCreatorTrial(userId),
+    ]);
+
+    const hasCreatorPlan = hasCreatorPlanAccess(entitlement);
+    const hasActiveTrial = hasActiveTrialAccess(trialProfile);
+
+    return {
+      entitlement,
+      trialProfile,
+      hasCreatorPlan,
+      hasActiveTrial,
+      canUseCreatorFeatures: hasCreatorPlan || hasActiveTrial,
+      isCanceling: isCreatorPlanCanceling(entitlement),
+      creatorPlanPeriodEndMs: getCreatorPlanPeriodEndMs(entitlement),
+      trialPeriodEndMs: getTrialPeriodEndMs(trialProfile),
+      trialDaysLeft: getTrialDaysLeft(trialProfile),
+    };
+  }
+
   window.OPCreatorPlan = {
     getCreatorPlanEntitlement,
+    getEarlyCreatorTrial,
     isCreatorPlanActive,
     isCreatorPlanCanceling,
     getCreatorPlanPeriodEndMs,
     hasCreatorPlanAccess,
+    isEarlyCreator,
+    getTrialPeriodEndMs,
+    hasActiveTrialAccess,
+    getTrialDaysLeft,
+    hasCreatorMonetizationAccess,
+    getCreatorAccessState,
   };
 })();
