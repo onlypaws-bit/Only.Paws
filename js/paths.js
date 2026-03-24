@@ -142,6 +142,7 @@
         root: `${ROOT}/js/app`,
 
         authCallback: `${ROOT}/js/app/auth-callback.js`,
+        comments: `${ROOT}/js/app/comments.js`,
         feed: `${ROOT}/js/app/feed.js`,
         likes: `${ROOT}/js/app/likes.js`,
         post: `${ROOT}/js/app/post.js`,
