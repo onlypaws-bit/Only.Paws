@@ -108,6 +108,7 @@
             creatorAvatarUrl: post.creator_avatar_url,
             canViewFull: post.can_view === true,
             liked: post.liked === true,
+            viewerCanComment: true,
           });
         },
       };
@@ -129,6 +130,27 @@
     } catch (error) {
       console.warn("[feed] likes init failed", error);
     }
+  }
+
+  function initPostCardsForContainer(container) {
+    if (!container) return;
+
+    const postApi = window.OnlyPawsPost || null;
+    if (!postApi) return;
+
+    try {
+      if (typeof postApi.initPostCards === "function") {
+        postApi.initPostCards(container);
+      }
+    } catch (error) {
+      console.warn("[feed] post cards init failed", error);
+    }
+  }
+
+  async function initRenderedPosts(container) {
+    if (!container) return;
+    initPostCardsForContainer(container);
+    await initLikesForContainer(container);
   }
 
   async function fetchFeaturedCreators(limit = 6) {
@@ -322,6 +344,7 @@
           is_locked: locked,
           can_view: !locked,
           liked: false,
+          comments_count: Number(post.comments_count || 0),
         };
       };
 
@@ -341,7 +364,7 @@
 
         postsEl.innerHTML = enrichedLoggedOut.map((post) => postRenderer.render(post)).join("");
         hide(postsHint);
-        await initLikesForContainer(postsEl);
+        await initRenderedPosts(postsEl);
         return;
       }
 
@@ -430,7 +453,7 @@
 
       postsEl.innerHTML = enriched.map((post) => postRenderer.render(post)).join("");
       hide(postsHint);
-      await initLikesForContainer(postsEl);
+      await initRenderedPosts(postsEl);
     } catch (error) {
       console.error("[feed] failed to load latest posts", error);
       setText(postsHint, "Could not load posts.");
