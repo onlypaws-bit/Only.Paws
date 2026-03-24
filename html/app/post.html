@@ -5,15 +5,17 @@
   CSS:
   - /css/styles.css
   - /css/app/post.css
+  - /css/app/comments.css
 
   JS:
   - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
   - /js/paths.js
   - /js/onlypawsClient.js
   - /js/auth-guard.js
-  - /js/partials.js
   - /js/nav.js
+  - /js/partials.js
   - /js/app/likes.js
+  - /js/app/comments.js
   - /js/app/post.js
 -->
 
@@ -26,6 +28,7 @@
 
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/app/post.css" />
+  <link rel="stylesheet" href="/css/app/comments.css" />
 </head>
 
 <body class="postPage singlePostPage">
@@ -46,17 +49,24 @@
               id="author"
               class="singlePostAuthor"
               href="/html/app/fans/creator-profile.html?u=creator"
+              aria-label="Open creator profile"
             >
               <span class="singlePostAuthorAvatar">
                 <img
                   id="authorAvatarImg"
                   src="/assets/images/logo.png"
                   alt="Creator avatar"
+                  loading="lazy"
+                  decoding="async"
+                  referrerpolicy="no-referrer"
                 />
               </span>
 
               <span class="singlePostAuthorMeta">
-                <span class="singlePostAuthorUsername" id="authorUsername">@creator</span>
+                <span
+                  class="singlePostAuthorUsername"
+                  id="authorUsername"
+                >@creator</span>
               </span>
             </a>
 
@@ -101,6 +111,42 @@
         <div class="singlePostHint" id="hintBox">Loading…</div>
         <div class="singlePostError is-hidden" id="errBox"></div>
       </section>
+
+      <section id="commentsMount" class="op-commentsSection panel">
+        <div class="op-commentsHeader">
+          <h2>Comments</h2>
+          <span id="commentsCount" class="op-commentsCount">0</span>
+        </div>
+
+        <form id="commentForm" class="op-commentForm">
+          <textarea
+            id="commentInput"
+            rows="3"
+            maxlength="300"
+            placeholder="Write a comment..."
+          ></textarea>
+
+          <div class="op-commentFormBottom">
+            <p id="commentHint" class="op-commentHint"></p>
+            <button id="commentSubmit" class="op-commentSubmit" type="submit">
+              Post
+            </button>
+          </div>
+        </form>
+
+        <p id="commentsError" class="op-commentsError is-hidden"></p>
+        <p id="commentsEmpty" class="op-commentsEmpty is-hidden"></p>
+
+        <div id="commentsList" class="op-commentsList"></div>
+
+        <button
+          id="commentsLoadMore"
+          class="op-commentsLoadMore is-hidden"
+          type="button"
+        >
+          Load more
+        </button>
+      </section>
     </main>
 
     <div id="footer-placeholder"></div>
@@ -110,9 +156,10 @@
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
   <script src="/js/auth-guard.js"></script>
-  <script src="/js/partials.js"></script>
   <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
   <script src="/js/app/likes.js"></script>
+  <script src="/js/app/comments.js"></script>
   <script src="/js/app/post.js"></script>
 
   <script>
@@ -133,6 +180,13 @@
         }
       } catch (err) {
         console.error("Post page init failed:", err);
+
+        const errBox = document.getElementById("errBox");
+        if (errBox) {
+          errBox.textContent = err?.message || String(err);
+          errBox.classList.remove("is-hidden");
+          errBox.classList.remove("isHidden");
+        }
       }
     });
   </script>
