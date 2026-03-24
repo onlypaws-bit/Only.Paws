@@ -1,0 +1,386 @@
+/* =========================================================
+   OnlyPaws
+   File: /css/app/comments.css
+   Purpose:
+   - comments section
+   - comment form
+   - comments list
+   - comment cards
+   ========================================================= */
+
+
+
+/* =========================================================
+   COMMENTS SECTION
+   ========================================================= */
+
+.op-commentsSection{
+  margin-top:24px;
+  padding:18px;
+  border:1px solid var(--stroke);
+  border-radius:22px;
+  background:rgba(0,0,0,.14);
+  box-shadow:0 12px 30px rgba(0,0,0,.16);
+  backdrop-filter:blur(10px);
+}
+
+.op-commentsHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.op-commentsHeader h2{
+  margin:0;
+  font-size:18px;
+  line-height:1.2;
+  font-weight:900;
+}
+
+#commentsCount,
+.op-commentsCount{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:34px;
+  height:34px;
+  padding:0 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  font-size:13px;
+  font-weight:800;
+  line-height:1;
+}
+
+
+
+/* =========================================================
+   COMMENT FORM
+   ========================================================= */
+
+.op-commentForm{
+  display:grid;
+  gap:10px;
+  margin-bottom:16px;
+}
+
+.op-commentForm textarea,
+#commentInput{
+  width:100%;
+  min-height:96px;
+  resize:vertical;
+  border:1px solid var(--stroke);
+  border-radius:18px;
+  padding:14px 15px;
+  background:rgba(255,255,255,.08);
+  color:var(--text);
+  font:inherit;
+  line-height:1.45;
+  outline:none;
+  box-shadow:none;
+}
+
+.op-commentForm textarea::placeholder,
+#commentInput::placeholder{
+  color:rgba(255,255,255,.62);
+}
+
+.op-commentForm textarea:focus,
+#commentInput:focus{
+  border-color:rgba(255,255,255,.28);
+  background:rgba(255,255,255,.11);
+}
+
+.op-commentForm textarea:disabled,
+#commentInput:disabled{
+  opacity:.72;
+  cursor:not-allowed;
+}
+
+.op-commentFormBottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.op-commentHint,
+#commentHint{
+  margin:0;
+  min-height:18px;
+  color:rgba(255,255,255,.76);
+  font-size:13px;
+  line-height:1.35;
+  flex:1 1 220px;
+}
+
+#commentSubmit,
+.op-commentSubmit,
+.op-commentsLoadMore{
+  appearance:none;
+  border:0;
+  border-radius:999px;
+  padding:11px 16px;
+  background:var(--btn);
+  color:var(--btnText);
+  font:inherit;
+  font-size:14px;
+  font-weight:900;
+  line-height:1;
+  cursor:pointer;
+  transition:transform .14s ease, opacity .14s ease, box-shadow .14s ease;
+  box-shadow:0 10px 24px rgba(0,0,0,.14);
+}
+
+#commentSubmit:hover,
+.op-commentSubmit:hover,
+.op-commentsLoadMore:hover{
+  transform:translateY(-1px);
+}
+
+#commentSubmit:disabled,
+.op-commentSubmit:disabled,
+.op-commentsLoadMore:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+
+
+/* =========================================================
+   STATES / MESSAGES
+   ========================================================= */
+
+.op-commentsError,
+#commentsError{
+  margin:0 0 14px;
+  padding:12px 14px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.08);
+  color:#ffd6d6;
+  font-size:13px;
+  line-height:1.4;
+}
+
+.op-commentsEmpty,
+#commentsEmpty{
+  margin:0;
+  padding:12px 0 4px;
+  color:rgba(255,255,255,.72);
+  font-size:14px;
+  line-height:1.4;
+}
+
+.is-hidden,
+.isHidden{
+  display:none !important;
+}
+
+
+
+/* =========================================================
+   COMMENTS LIST
+   ========================================================= */
+
+.op-commentsList{
+  display:grid;
+  gap:12px;
+}
+
+.op-commentCard{
+  display:grid;
+  grid-template-columns:44px minmax(0, 1fr);
+  gap:12px;
+  align-items:flex-start;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  background:rgba(255,255,255,.06);
+}
+
+.op-commentAvatar{
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  overflow:hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.12);
+  font-size:18px;
+  line-height:1;
+  flex-shrink:0;
+}
+
+.op-commentAvatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.op-commentMain{
+  min-width:0;
+  display:grid;
+  gap:8px;
+}
+
+.op-commentTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.op-commentMeta{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.op-commentUser{
+  min-width:0;
+  max-width:100%;
+  color:var(--text);
+  font-size:14px;
+  font-weight:900;
+  line-height:1.2;
+  word-break:break-word;
+}
+
+.op-commentBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:22px;
+  padding:0 9px;
+  border-radius:999px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.12);
+  color:var(--text);
+  font-size:11px;
+  font-weight:800;
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+}
+
+.op-commentDot{
+  color:rgba(255,255,255,.48);
+  font-size:12px;
+  line-height:1;
+}
+
+.op-commentDate{
+  color:rgba(255,255,255,.66);
+  font-size:12px;
+  line-height:1.2;
+}
+
+.op-commentDeleteBtn{
+  appearance:none;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:rgba(255,255,255,.86);
+  border-radius:999px;
+  padding:7px 11px;
+  font:inherit;
+  font-size:12px;
+  font-weight:800;
+  line-height:1;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:transform .14s ease, opacity .14s ease, background .14s ease;
+}
+
+.op-commentDeleteBtn:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.10);
+}
+
+.op-commentDeleteBtn:disabled{
+  opacity:.65;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.op-commentText{
+  margin:0;
+  color:var(--text);
+  font-size:14px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+
+
+/* =========================================================
+   LOAD MORE
+   ========================================================= */
+
+#commentsLoadMore,
+.op-commentsLoadMore{
+  margin-top:14px;
+}
+
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 640px){
+  .op-commentsSection{
+    padding:15px;
+    border-radius:18px;
+  }
+
+  .op-commentsHeader h2{
+    font-size:17px;
+  }
+
+  .op-commentCard{
+    grid-template-columns:38px minmax(0, 1fr);
+    gap:10px;
+    padding:12px;
+    border-radius:16px;
+  }
+
+  .op-commentAvatar{
+    width:38px;
+    height:38px;
+    font-size:16px;
+  }
+
+  .op-commentTop{
+    gap:8px;
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .op-commentDeleteBtn{
+    align-self:flex-start;
+  }
+
+  .op-commentFormBottom{
+    align-items:stretch;
+  }
+
+  #commentSubmit,
+  .op-commentSubmit,
+  .op-commentsLoadMore{
+    width:100%;
+    justify-content:center;
+  }
+}
