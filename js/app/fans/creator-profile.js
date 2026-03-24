@@ -137,10 +137,6 @@
     return raw;
   }
 
-  function isUUID(v) {
-    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v || "");
-  }
-
   function getParams() {
     const p = new URLSearchParams(window.location.search);
     return {
@@ -774,7 +770,6 @@
         client.rpc("get_public_creator_posts_preview", {
           p_creator_id: creator.user_id,
         }),
-
         client.rpc("get_public_creator_pets_preview", {
           p_owner_id: creator.user_id,
         }),
