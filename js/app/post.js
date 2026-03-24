@@ -162,7 +162,9 @@
   }
 
   function getInlineCommentsCountEls(postId) {
-    return document.querySelectorAll(`[data-inline-comments-count][data-post-id="${CSS.escape(String(postId || ""))}"]`);
+    return document.querySelectorAll(
+      `[data-inline-comments-count][data-post-id="${CSS.escape(String(postId || ""))}"]`
+    );
   }
 
   function setInlineCommentsError(card, message = "") {
@@ -281,6 +283,7 @@
         media_url,
         media_type,
         likes_count,
+        comments_count,
         created_at,
         is_paid
       `)
@@ -750,7 +753,10 @@
       state.items.unshift(newComment);
 
       if (!state.loaded) state.loaded = true;
-      state.items = state.items.slice(0, Math.max(state.offset || INLINE_COMMENTS_LIMIT, INLINE_COMMENTS_LIMIT));
+      state.items = state.items.slice(
+        0,
+        Math.max(state.offset || INLINE_COMMENTS_LIMIT, INLINE_COMMENTS_LIMIT)
+      );
 
       if (state.offset < INLINE_COMMENTS_LIMIT) {
         state.offset = state.items.length;
