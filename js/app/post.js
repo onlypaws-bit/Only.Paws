@@ -5,14 +5,23 @@
    - shared post helpers
    - shared post card rendering
    - single post page rendering
+   - inline comments for post cards
 
    Dependencies:
    - window.OP_PATHS
    - window.onlypawsClient
+   - optional: window.OnlyPawsComments
    ========================================================= */
 
 (function () {
   const PATHS = window.OP_PATHS || {};
+
+  const INLINE_COMMENTS_LIMIT = 3;
+  const MAX_COMMENT_LENGTH = 300;
+
+  const inlineCommentsState = new Map();
+  let sessionUserPromise = null;
+  let inlineCommentsBound = false;
 
   function $(id) {
     return document.getElementById(id);
@@ -57,6 +66,10 @@
   function getClient() {
     if (window.onlypawsClient) return window.onlypawsClient;
     throw new Error("Missing onlypawsClient.");
+  }
+
+  function getCommentsApi() {
+    return window.OnlyPawsComments || null;
   }
 
   function getPostPagePath() {
@@ -110,6 +123,148 @@
     if (!viewerId) return false;
     if (post.creator_id === viewerId) return true;
     return !!post.has_access;
+  }
+
+  function getInlineCommentsSection(card) {
+    return card?.querySelector("[data-inline-comments-section]") || null;
+  }
+
+  function getInlineCommentsList(card) {
+    return card?.querySelector("[data-inline-comments-list]") || null;
+  }
+
+  function getInlineCommentsEmpty(card) {
+    return card?.querySelector("[data-inline-comments-empty]") || null;
+  }
+
+  function getInlineCommentsError(card) {
+    return card?.querySelector("[data-inline-comments-error]") || null;
+  }
+
+  function getInlineCommentsLoadMore(card) {
+    return card?.querySelector("[data-inline-comments-load-more]") || null;
+  }
+
+  function getInlineCommentsInput(card) {
+    return card?.querySelector("[data-inline-comment-input]") || null;
+  }
+
+  function getInlineCommentsSubmit(card) {
+    return card?.querySelector("[data-inline-comment-submit]") || null;
+  }
+
+  function getInlineCommentsHint(card) {
+    return card?.querySelector("[data-inline-comment-hint]") || null;
+  }
+
+  function getInlineCommentsToggle(card) {
+    return card?.querySelector("[data-inline-comments-toggle]") || null;
+  }
+
+  function getInlineCommentsCountEls(postId) {
+    return document.querySelectorAll(`[data-inline-comments-count][data-post-id="${CSS.escape(String(postId || ""))}"]`);
+  }
+
+  function setInlineCommentsError(card, message = "") {
+    const el = getInlineCommentsError(card);
+    if (!el) return;
+    el.textContent = String(message || "");
+    show(el, !!message);
+  }
+
+  function setInlineCommentsHint(card, message = "") {
+    const el = getInlineCommentsHint(card);
+    if (!el) return;
+    el.textContent = String(message || "");
+  }
+
+  function setInlineCommentsLoadMoreVisible(card, yes) {
+    const el = getInlineCommentsLoadMore(card);
+    if (!el) return;
+    show(el, !!yes);
+  }
+
+  function setInlineCommentsSubmitting(card, isSubmitting) {
+    const input = getInlineCommentsInput(card);
+    const submit = getInlineCommentsSubmit(card);
+
+    if (input) input.disabled = !!isSubmitting;
+
+    if (submit) {
+      submit.disabled = !!isSubmitting;
+      submit.textContent = isSubmitting ? "Posting..." : "Post";
+    }
+  }
+
+  function setInlineCommentsLoadingMore(card, isLoading) {
+    const btn = getInlineCommentsLoadMore(card);
+    if (!btn) return;
+
+    btn.disabled = !!isLoading;
+    btn.textContent = isLoading ? "Loading..." : "Load more";
+  }
+
+  function setInlineCommentsOpen(card, isOpen) {
+    const section = getInlineCommentsSection(card);
+    const btn = getInlineCommentsToggle(card);
+
+    if (section) show(section, !!isOpen);
+
+    if (btn) {
+      btn.dataset.open = isOpen ? "true" : "false";
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      btn.classList.toggle("is-open", !!isOpen);
+    }
+  }
+
+  function updateInlineCommentsCount(postId, count) {
+    const safeCount = Number(count || 0);
+
+    getInlineCommentsCountEls(postId).forEach((el) => {
+      el.textContent = String(safeCount);
+    });
+  }
+
+  async function getSessionUser() {
+    if (sessionUserPromise) return sessionUserPromise;
+
+    sessionUserPromise = (async () => {
+      try {
+        const db = getClient();
+        const { data, error } = await db.auth.getSession();
+        if (error) throw error;
+        return data?.session?.user || null;
+      } catch (_) {
+        return null;
+      }
+    })();
+
+    return sessionUserPromise;
+  }
+
+  function getInlineState(postId, postCreatorId = "") {
+    const key = String(postId || "").trim();
+    if (!key) return null;
+
+    if (!inlineCommentsState.has(key)) {
+      inlineCommentsState.set(key, {
+        postId: key,
+        postCreatorId: String(postCreatorId || "").trim(),
+        items: [],
+        totalCount: 0,
+        offset: 0,
+        loaded: false,
+        loading: false,
+      });
+    }
+
+    const state = inlineCommentsState.get(key);
+
+    if (postCreatorId && !state.postCreatorId) {
+      state.postCreatorId = String(postCreatorId || "").trim();
+    }
+
+    return state;
   }
 
   async function fetchPostById(postId) {
@@ -208,6 +363,61 @@
     `;
   }
 
+  function buildInlineCommentsHtml(post, options = {}) {
+    const commentsCount = Number(post?.comments_count || 0);
+    const postHref = postUrl(post?.id || "");
+    const viewerCanComment = options.viewerCanComment !== false;
+
+    return `
+      <div
+        class="op-inlineComments is-hidden"
+        data-inline-comments-section
+        data-post-id="${esc(post?.id || "")}"
+      >
+        <form class="op-commentForm op-inlineCommentForm" data-inline-comment-form>
+          <textarea
+            data-inline-comment-input
+            rows="2"
+            maxlength="${MAX_COMMENT_LENGTH}"
+            placeholder="${viewerCanComment ? "Write a comment..." : "Log in to comment"}"
+            ${viewerCanComment ? "" : "disabled"}
+          ></textarea>
+
+          <div class="op-commentFormBottom">
+            <p class="op-commentHint" data-inline-comment-hint></p>
+            <button
+              class="op-commentSubmit"
+              data-inline-comment-submit
+              type="submit"
+              ${viewerCanComment ? "" : "disabled"}
+            >
+              Post
+            </button>
+          </div>
+        </form>
+
+        <p class="op-commentsError is-hidden" data-inline-comments-error></p>
+        <p class="op-commentsEmpty is-hidden" data-inline-comments-empty></p>
+
+        <div class="op-commentsList" data-inline-comments-list></div>
+
+        <div class="op-inlineCommentsFooter">
+          <button
+            class="op-commentsLoadMore is-hidden"
+            data-inline-comments-load-more
+            type="button"
+          >
+            Load more
+          </button>
+
+          <a class="ghost op-inlineCommentsOpenPost" href="${esc(postHref)}">
+            Open post
+          </a>
+        </div>
+      </div>
+    `;
+  }
+
   function buildPostCard(post, options = {}) {
     const {
       creatorUsername = "creator",
@@ -215,6 +425,7 @@
       canViewFull = false,
       liked = false,
       variant = "",
+      viewerCanComment = true,
     } = options;
 
     const id = post?.id || "";
@@ -230,6 +441,7 @@
 
     const creatorHref = creatorProfileUrl(creatorUsername);
     const postHref = postUrl(id);
+    const commentsCount = Number(post?.comments_count || 0);
 
     const badgeHtml = post?.is_paid
       ? (canViewFull
@@ -263,7 +475,11 @@
     const variantClass = variant ? ` op-postCard--${esc(variant)}` : "";
 
     return `
-      <article class="op-postCard${variantClass}" data-post-id="${esc(id)}">
+      <article
+        class="op-postCard${variantClass}"
+        data-post-id="${esc(id)}"
+        data-post-creator-id="${esc(post?.creator_id || "")}"
+      >
         <div class="op-postMain">
           <div class="op-postHeader">
             <div class="op-postCreator">
@@ -307,9 +523,342 @@
             <span class="op-likeLabel" data-like-label>Like</span>
             <span class="op-likeCount" data-like-count-inline>${Number(post?.likes_count || 0)}</span>
           </button>
+
+          <button
+            class="op-commentToggleBtn"
+            type="button"
+            data-inline-comments-toggle
+            data-post-id="${esc(id)}"
+            aria-expanded="false"
+          >
+            <span class="op-commentToggleLabel">Comments</span>
+            <span
+              class="op-commentToggleCount"
+              data-inline-comments-count
+              data-post-id="${esc(id)}"
+            >${commentsCount}</span>
+          </button>
         </div>
+
+        ${buildInlineCommentsHtml(post, { viewerCanComment })}
       </article>
     `;
+  }
+
+  function renderInlineCommentsList(card, items, viewerId, postCreatorId) {
+    const listEl = getInlineCommentsList(card);
+    const emptyEl = getInlineCommentsEmpty(card);
+    const commentsApi = getCommentsApi();
+
+    if (!listEl) return;
+
+    if (!Array.isArray(items) || !items.length) {
+      listEl.innerHTML = "";
+      if (emptyEl) {
+        emptyEl.textContent = "No comments yet. Be the first 🐾";
+        show(emptyEl, true);
+      }
+      return;
+    }
+
+    if (emptyEl) {
+      emptyEl.textContent = "";
+      show(emptyEl, false);
+    }
+
+    if (commentsApi?.buildCommentItem) {
+      listEl.innerHTML = items
+        .map((comment) => commentsApi.buildCommentItem(comment, {
+          viewerId,
+          postCreatorId,
+        }))
+        .join("");
+      return;
+    }
+
+    listEl.innerHTML = items
+      .map((comment) => {
+        const username = comment?.profiles?.username || "user";
+        return `
+          <article class="op-commentCard" data-comment-id="${esc(comment?.id || "")}">
+            <div class="op-commentMain">
+              <div class="op-commentTop">
+                <div class="op-commentMeta">
+                  <span class="op-commentUser">@${esc(username)}</span>
+                  <span class="op-commentDot">•</span>
+                  <time class="op-commentDate">${esc(fmtDate(comment?.created_at))}</time>
+                </div>
+              </div>
+              <p class="op-commentText">${esc(comment?.content || "")}</p>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  async function ensureInlineCommentsLoaded(card, forceReload = false) {
+    const commentsApi = getCommentsApi();
+    if (!commentsApi?.fetchComments || !commentsApi?.fetchCommentsCount) {
+      setInlineCommentsError(card, "Comments are not available right now.");
+      return;
+    }
+
+    const postId = String(card?.dataset?.postId || "").trim();
+    const postCreatorId = String(card?.dataset?.postCreatorId || "").trim();
+    const state = getInlineState(postId, postCreatorId);
+    if (!state) return;
+
+    if (state.loading) return;
+    if (state.loaded && !forceReload) return;
+
+    state.loading = true;
+    setInlineCommentsError(card, "");
+    setInlineCommentsHint(card, "Loading comments...");
+
+    try {
+      const sessionUser = await getSessionUser();
+      const viewerId = String(sessionUser?.id || "").trim();
+
+      const [items, totalCount] = await Promise.all([
+        commentsApi.fetchComments(postId, {
+          limit: INLINE_COMMENTS_LIMIT,
+          offset: 0,
+        }),
+        commentsApi.fetchCommentsCount(postId),
+      ]);
+
+      state.items = Array.isArray(items) ? items : [];
+      state.totalCount = Number(totalCount || 0);
+      state.offset = state.items.length;
+      state.loaded = true;
+
+      renderInlineCommentsList(card, state.items, viewerId, state.postCreatorId);
+      updateInlineCommentsCount(postId, state.totalCount);
+      setInlineCommentsLoadMoreVisible(card, state.offset < state.totalCount);
+      setInlineCommentsHint(card, "");
+    } catch (err) {
+      setInlineCommentsError(card, err?.message || String(err));
+      setInlineCommentsHint(card, "");
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  async function loadMoreInlineComments(card) {
+    const commentsApi = getCommentsApi();
+    if (!commentsApi?.fetchComments) return;
+
+    const postId = String(card?.dataset?.postId || "").trim();
+    const postCreatorId = String(card?.dataset?.postCreatorId || "").trim();
+    const state = getInlineState(postId, postCreatorId);
+    if (!state || state.loading) return;
+
+    if (state.offset >= state.totalCount) {
+      setInlineCommentsLoadMoreVisible(card, false);
+      return;
+    }
+
+    state.loading = true;
+    setInlineCommentsError(card, "");
+    setInlineCommentsLoadingMore(card, true);
+
+    try {
+      const sessionUser = await getSessionUser();
+      const viewerId = String(sessionUser?.id || "").trim();
+
+      const more = await commentsApi.fetchComments(postId, {
+        limit: INLINE_COMMENTS_LIMIT,
+        offset: state.offset,
+      });
+
+      if (!Array.isArray(more) || !more.length) {
+        setInlineCommentsLoadMoreVisible(card, false);
+        return;
+      }
+
+      state.items = state.items.concat(more);
+      state.offset += more.length;
+
+      renderInlineCommentsList(card, state.items, viewerId, state.postCreatorId);
+      setInlineCommentsLoadMoreVisible(card, state.offset < state.totalCount);
+    } catch (err) {
+      setInlineCommentsError(card, err?.message || String(err));
+    } finally {
+      state.loading = false;
+      setInlineCommentsLoadingMore(card, false);
+    }
+  }
+
+  async function toggleInlineComments(card) {
+    const section = getInlineCommentsSection(card);
+    if (!section) return;
+
+    const isOpen = !section.classList.contains("is-hidden") && !section.classList.contains("isHidden");
+
+    if (isOpen) {
+      setInlineCommentsOpen(card, false);
+      return;
+    }
+
+    setInlineCommentsOpen(card, true);
+    await ensureInlineCommentsLoaded(card, false);
+  }
+
+  async function submitInlineComment(card, form) {
+    const commentsApi = getCommentsApi();
+    if (!commentsApi?.createComment) {
+      setInlineCommentsError(card, "Comments are not available right now.");
+      return;
+    }
+
+    const sessionUser = await getSessionUser();
+    const viewerId = String(sessionUser?.id || "").trim();
+    if (!viewerId) {
+      setInlineCommentsHint(card, "Log in to comment.");
+      return;
+    }
+
+    const input = getInlineCommentsInput(card);
+    if (!input) return;
+
+    const content = String(input.value || "").trim();
+    if (!content) {
+      setInlineCommentsHint(card, "Write something first.");
+      return;
+    }
+
+    if (content.length > MAX_COMMENT_LENGTH) {
+      setInlineCommentsHint(card, `Max ${MAX_COMMENT_LENGTH} characters.`);
+      return;
+    }
+
+    const postId = String(card?.dataset?.postId || "").trim();
+    const postCreatorId = String(card?.dataset?.postCreatorId || "").trim();
+    const state = getInlineState(postId, postCreatorId);
+    if (!state) return;
+
+    setInlineCommentsHint(card, "");
+    setInlineCommentsError(card, "");
+    setInlineCommentsSubmitting(card, true);
+
+    try {
+      const newComment = await commentsApi.createComment(postId, viewerId, content);
+
+      input.value = "";
+      state.totalCount += 1;
+      state.items.unshift(newComment);
+
+      if (!state.loaded) state.loaded = true;
+      state.items = state.items.slice(0, Math.max(state.offset || INLINE_COMMENTS_LIMIT, INLINE_COMMENTS_LIMIT));
+
+      if (state.offset < INLINE_COMMENTS_LIMIT) {
+        state.offset = state.items.length;
+      }
+
+      renderInlineCommentsList(card, state.items, viewerId, state.postCreatorId);
+      updateInlineCommentsCount(postId, state.totalCount);
+      setInlineCommentsLoadMoreVisible(card, state.items.length < state.totalCount);
+    } catch (err) {
+      setInlineCommentsError(card, err?.message || String(err));
+    } finally {
+      setInlineCommentsSubmitting(card, false);
+      if (form) form.reset?.();
+    }
+  }
+
+  async function deleteInlineComment(card, button) {
+    const commentsApi = getCommentsApi();
+    if (!commentsApi?.deleteComment) {
+      setInlineCommentsError(card, "Comments are not available right now.");
+      return;
+    }
+
+    const commentId = String(button?.dataset?.commentId || "").trim();
+    if (!commentId) return;
+
+    const postId = String(card?.dataset?.postId || "").trim();
+    const postCreatorId = String(card?.dataset?.postCreatorId || "").trim();
+    const state = getInlineState(postId, postCreatorId);
+    if (!state) return;
+
+    button.disabled = true;
+    button.textContent = "Deleting...";
+
+    try {
+      await commentsApi.deleteComment(commentId);
+
+      state.items = state.items.filter((item) => String(item.id) !== commentId);
+      state.totalCount = Math.max(0, Number(state.totalCount || 0) - 1);
+      state.offset = Math.max(0, Math.min(state.offset, state.totalCount));
+
+      const sessionUser = await getSessionUser();
+      const viewerId = String(sessionUser?.id || "").trim();
+
+      renderInlineCommentsList(card, state.items, viewerId, state.postCreatorId);
+      updateInlineCommentsCount(postId, state.totalCount);
+      setInlineCommentsLoadMoreVisible(card, state.items.length < state.totalCount);
+    } catch (err) {
+      setInlineCommentsError(card, err?.message || String(err));
+      button.disabled = false;
+      button.textContent = "Delete";
+    }
+  }
+
+  function bindInlineCommentsDelegation() {
+    if (inlineCommentsBound) return;
+    inlineCommentsBound = true;
+
+    document.addEventListener("click", async (event) => {
+      const toggleBtn = event.target.closest("[data-inline-comments-toggle]");
+      if (toggleBtn) {
+        const card = toggleBtn.closest(".op-postCard");
+        if (!card) return;
+        event.preventDefault();
+        await toggleInlineComments(card);
+        return;
+      }
+
+      const loadMoreBtn = event.target.closest("[data-inline-comments-load-more]");
+      if (loadMoreBtn) {
+        const card = loadMoreBtn.closest(".op-postCard");
+        if (!card) return;
+        event.preventDefault();
+        await loadMoreInlineComments(card);
+        return;
+      }
+
+      const deleteBtn = event.target.closest("[data-comment-delete]");
+      if (deleteBtn) {
+        const card = deleteBtn.closest(".op-postCard");
+        if (!card) return;
+        event.preventDefault();
+        await deleteInlineComment(card, deleteBtn);
+      }
+    });
+
+    document.addEventListener("submit", async (event) => {
+      const form = event.target.closest("[data-inline-comment-form]");
+      if (!form) return;
+
+      const card = form.closest(".op-postCard");
+      if (!card) return;
+
+      event.preventDefault();
+      await submitInlineComment(card, form);
+    });
+  }
+
+  function initPostCards(root = document) {
+    const cards = Array.from(root.querySelectorAll(".op-postCard[data-post-id]"));
+    cards.forEach((card) => {
+      const postId = String(card.dataset.postId || "").trim();
+      const postCreatorId = String(card.dataset.postCreatorId || "").trim();
+      getInlineState(postId, postCreatorId);
+    });
+
+    bindInlineCommentsDelegation();
+    return cards;
   }
 
   async function renderSinglePost(post, userId) {
@@ -455,7 +1004,7 @@
         await likesApi.initLikeButtons(document);
       }
 
-      const commentsApi = window.OnlyPawsComments || null;
+      const commentsApi = getCommentsApi();
       if (commentsApi?.initComments) {
         await commentsApi.initComments({
           postId: post.id,
@@ -499,6 +1048,8 @@
     }
   }
 
+  bindInlineCommentsDelegation();
+
   window.OnlyPawsPost = {
     esc,
     show,
@@ -510,6 +1061,7 @@
     canViewFullPost,
     buildLockedMediaHtml,
     buildPostCard,
+    initPostCards,
     fetchPostById,
     fetchCreatorProfile,
     checkPostAccess,
