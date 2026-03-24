@@ -6,6 +6,7 @@
    - comment form
    - comments list
    - comment cards
+   - inline comments inside post cards
    ========================================================= */
 
 
@@ -337,6 +338,122 @@
 
 
 /* =========================================================
+   INLINE COMMENTS INSIDE POST CARDS
+   ========================================================= */
+
+.op-inlineComments{
+  margin-top:14px;
+  padding:14px 0 0;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+
+.op-inlineCommentForm{
+  margin:0 0 12px;
+}
+
+.op-inlineCommentForm textarea{
+  min-height:78px;
+  border-radius:16px;
+  padding:12px 14px;
+  background:rgba(255,255,255,.06);
+}
+
+.op-inlineCommentForm .op-commentFormBottom{
+  gap:10px;
+}
+
+.op-inlineComments .op-commentsError{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:14px;
+  font-size:12px;
+}
+
+.op-inlineComments .op-commentsEmpty{
+  padding:4px 0 0;
+  font-size:13px;
+}
+
+.op-inlineComments .op-commentsList{
+  gap:10px;
+}
+
+.op-inlineComments .op-commentCard{
+  padding:12px;
+  border-radius:16px;
+  background:rgba(255,255,255,.045);
+  border-color:rgba(255,255,255,.10);
+  box-shadow:none;
+}
+
+.op-inlineComments .op-commentAvatar{
+  width:38px;
+  height:38px;
+  font-size:16px;
+}
+
+.op-inlineComments .op-commentUser{
+  font-size:13px;
+}
+
+.op-inlineComments .op-commentBadge{
+  min-height:20px;
+  padding:0 8px;
+  font-size:10px;
+}
+
+.op-inlineComments .op-commentDate{
+  font-size:11px;
+}
+
+.op-inlineComments .op-commentDeleteBtn{
+  padding:6px 10px;
+  font-size:11px;
+}
+
+.op-inlineComments .op-commentText{
+  font-size:13px;
+  line-height:1.45;
+}
+
+.op-inlineCommentsFooter{
+  margin-top:12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.op-inlineCommentsFooter .op-commentsLoadMore{
+  margin-top:0;
+}
+
+.op-inlineCommentsOpenPost{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  text-decoration:none;
+  font-size:13px;
+  font-weight:800;
+  line-height:1;
+  transition:transform .14s ease, opacity .14s ease, background .14s ease;
+}
+
+.op-inlineCommentsOpenPost:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.10);
+}
+
+
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 
@@ -380,6 +497,21 @@
   #commentSubmit,
   .op-commentSubmit,
   .op-commentsLoadMore{
+    width:100%;
+    justify-content:center;
+  }
+
+  .op-inlineComments{
+    margin-top:12px;
+    padding-top:12px;
+  }
+
+  .op-inlineCommentsFooter{
+    align-items:stretch;
+  }
+
+  .op-inlineCommentsFooter .op-commentsLoadMore,
+  .op-inlineCommentsOpenPost{
     width:100%;
     justify-content:center;
   }
