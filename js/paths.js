@@ -89,6 +89,7 @@
       app: {
         root: `${ROOT}/css/app`,
 
+        comments: `${ROOT}/css/app/comments.css`,
         feed: `${ROOT}/css/app/feed.css`,
         post: `${ROOT}/css/app/post.css`,
         profile: `${ROOT}/css/app/profile.css`,
