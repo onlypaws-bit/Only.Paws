@@ -455,6 +455,15 @@
         await likesApi.initLikeButtons(document);
       }
 
+      const commentsApi = window.OnlyPawsComments || null;
+      if (commentsApi?.initComments) {
+        await commentsApi.initComments({
+          postId: post.id,
+          viewerId: userId,
+          postCreatorId: post.creator_id,
+        });
+      }
+
       if (backBtn) {
         backBtn.href = getFeedPath();
       }
