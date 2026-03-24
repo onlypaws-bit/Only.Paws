@@ -205,6 +205,10 @@
   }
 
   function computePostHref(postId) {
+    if (ROUTES?.href) {
+      return ROUTES.href("app.post", { id: postId });
+    }
+
     const base = PATHS?.app?.post || "/html/app/post.html";
     return `${base}?id=${encodeURIComponent(postId)}`;
   }
@@ -360,11 +364,48 @@
         is_locked: !canView,
         can_view: canView,
         liked: false,
+        comments_count: Number(post.comments_count || 0),
       };
     });
   }
 
-  function renderPosts(posts) {
+  function initPostCardsForContainer(container) {
+    if (!container) return;
+
+    const postApi = window.OnlyPawsPost || null;
+    if (!postApi) return;
+
+    try {
+      if (typeof postApi.initPostCards === "function") {
+        postApi.initPostCards(container);
+      }
+    } catch (error) {
+      console.warn("creator profile post cards init failed", error);
+    }
+  }
+
+  async function initLikesForContainer(container) {
+    if (!container || !state.viewerId) return;
+
+    const likesApi = window.onlypawsLikes || null;
+    if (!likesApi) return;
+
+    try {
+      if (typeof likesApi.initLikeButtons === "function") {
+        await likesApi.initLikeButtons(container);
+      }
+    } catch (error) {
+      console.warn("creator profile likes init failed", error);
+    }
+  }
+
+  async function initRenderedPosts(container) {
+    if (!container) return;
+    initPostCardsForContainer(container);
+    await initLikesForContainer(container);
+  }
+
+  async function renderPosts(posts) {
     if (!els.posts) return;
 
     if (!posts.length) {
@@ -389,6 +430,7 @@
     }
 
     const enriched = enrichPostsForRenderer(posts);
+
     els.posts.innerHTML = enriched
       .map((post) =>
         postApi.buildPostCard(post, {
@@ -397,16 +439,14 @@
           creatorAvatarUrl: post.creator_avatar_url,
           canViewFull: post.can_view === true,
           liked: post.liked === true,
+          viewerCanComment: true,
         })
       )
       .join("");
 
     if (els.postsHint) els.postsHint.textContent = "";
 
-    const likesApi = window.onlypawsLikes || null;
-    if (likesApi?.initLikeButtons && state.viewerId) {
-      likesApi.initLikeButtons(els.posts).catch(() => {});
-    }
+    await initRenderedPosts(els.posts);
   }
 
   async function getFollowRowId(fanId, creatorId) {
@@ -759,7 +799,7 @@
         els.petsHint.textContent = petsRes.data?.length ? "" : "No pets yet.";
       }
 
-      renderPosts(state.posts);
+      await renderPosts(state.posts);
       updateActionRow();
       setFollowUI();
       setPremiumUI();
