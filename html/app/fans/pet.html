@@ -17,12 +17,7 @@
     <main class="page">
       <section class="panel petDetails">
         <div class="petHeader">
-          <img
-            class="petAvatar"
-            src="/assets/images/default_pet.png"
-            alt="Pet photo"
-            id="petAvatar"
-          />
+          <img class="petAvatar" src="/assets/images/default_pet.png" alt="Pet photo" id="petAvatar" />
           <div class="petInfo">
             <h1 id="petName">Pet Name</h1>
             <p id="petSpeciesBreed">Species / Breed</p>
@@ -59,12 +54,20 @@
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
   <script>
+    // Inizializza OP.client prima di caricare i partials
     window.OP = window.OP || {};
     window.OP.client = window.onlypawsClient;
     window.OP_PATHS = window.OP_PATHS || {};
   </script>
   <script src="/js/nav.js"></script>
-  <script src="/js/partials.js"></script>
+  <script>
+    // Monta partials solo dopo DOM ready
+    window.addEventListener("DOMContentLoaded", async () => {
+      if (window.OPPartials?.loadLayout) {
+        await window.OPPartials.loadLayout();
+      }
+    });
+  </script>
   <script src="/js/app/fans/pet.js"></script>
 </body>
 </html>
