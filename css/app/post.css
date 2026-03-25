@@ -953,7 +953,7 @@
   .singlePostActions .ghost,
   .singlePostActions .btn,
   .singlePostLikeBtn{
-    width:100%;
+    width:auto;
     justify-content:center;
   }
 }
