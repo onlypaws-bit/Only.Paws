@@ -3,41 +3,64 @@
    File: /js/app/fans/pet.js
    Purpose:
    - Load and render a pet's data for fan view
-   - Uses OP.client (Supabase) and OP_PATHS structure
+   - Uses window.onlypawsClient (Supabase) and OP_PATHS structure
    ========================================================= */
 
 (async function () {
-  const urlParams = new URLSearchParams(window.location.search);
-  const petId = urlParams.get("id");
+  const PATHS  = window.OP_PATHS  || {};
+  const client = window.onlypawsClient;
+
+  const fallbackHint = document.getElementById("petFallbackHint");
+
+  function showError(msg) {
+    if (fallbackHint) {
+      fallbackHint.textContent = msg;
+      fallbackHint.hidden = false;
+    }
+  }
+
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  }
+
+  // ── Guard: client must be ready ──────────────────────────
+  if (!client) {
+    console.error("[pet.js] onlypawsClient not available.");
+    showError("Could not connect. Please try again later.");
+    return;
+  }
+
+  // ── Guard: ?id= required ─────────────────────────────────
+  const petId = new URLSearchParams(window.location.search).get("id")?.trim();
 
   if (!petId) {
-    console.error("No pet ID provided in URL");
-    const detailsEl = document.querySelector(".petDetails");
-    if (detailsEl) detailsEl.textContent = "Pet not found";
+    console.error("[pet.js] No pet ID in URL.");
+    showError("Pet not found.");
     return;
   }
 
   try {
-    // Fetch pet from Supabase
-    const { data: pet, error } = await OP.client
+    // ── Fetch ────────────────────────────────────────────────
+    const { data: pet, error } = await client
       .from("pets")
       .select("*")
       .eq("id", petId)
-      .single();
+      .maybeSingle();                       // maybeSingle: no throw on 0 rows
 
-    if (error || !pet) {
-      console.error("Pet fetch error:", error);
-      const detailsEl = document.querySelector(".petDetails");
-      if (detailsEl) detailsEl.textContent = "Pet not found";
+    if (error) throw error;
+
+    if (!pet) {
+      showError("Pet not found.");
       return;
     }
 
-    // Populate main info
-    const avatarUrl = pet.avatar_url || OP_PATHS.assets.images.defaultPet || "/assets/images/default_pet.png";
-    const petName = pet.name || "Unnamed Pet";
-    const species = pet.species || "Unknown";
-    const breed = pet.breed || "Unknown";
-    const age = pet.age_years || "";
+    // ── Avatar ───────────────────────────────────────────────
+    const defaultPetImg =
+      PATHS?.assets?.images?.defaultPet || "/assets/images/default_pet.png";
+
+    const avatarUrl = pet.avatar_url?.trim() || defaultPetImg;
+    const petName   = pet.name?.trim()       || "Unnamed Pet";
 
     const petAvatarEl = document.getElementById("petAvatar");
     if (petAvatarEl) {
@@ -45,42 +68,39 @@
       petAvatarEl.alt = `${petName} avatar`;
     }
 
-    const petNameEl = document.getElementById("petName");
-    if (petNameEl) petNameEl.textContent = petName;
+    // ── Main info ────────────────────────────────────────────
+    const species = pet.species?.trim() || "Unknown";
+    const breed   = pet.breed?.trim()   || "Unknown";
+    const age     = Number(pet.age_years) || 0;
 
-    const speciesBreedEl = document.getElementById("petSpeciesBreed");
-    if (speciesBreedEl) speciesBreedEl.textContent = `${species} / ${breed}`;
+    setText("petName",        petName);
+    setText("petSpeciesBreed", `${species} / ${breed}`);
+    setText("petAge",          age ? `${age} years old` : "");
 
-    const petAgeEl = document.getElementById("petAge");
-    if (petAgeEl) petAgeEl.textContent = age ? `${age} years old` : "";
+    // ── Bio & notes ──────────────────────────────────────────
+    setText("petBio",          pet.bio?.trim()           || "No bio available.");
+    setText("petHealthNotes",  pet.health_notes?.trim()  || "");
+    setText("petSpecialMarks", pet.special_marks?.trim() || "");
 
-    // Populate bio and notes
-    const bioEl = document.getElementById("petBio");
-    if (bioEl) bioEl.textContent = pet.bio || "No bio available.";
-
-    const healthEl = document.getElementById("petHealthNotes");
-    if (healthEl) healthEl.textContent = pet.health_notes || "";
-
-    const marksEl = document.getElementById("petSpecialMarks");
-    if (marksEl) marksEl.textContent = pet.special_marks || "";
-
-    // Populate gallery (using avatar only for now)
+    // ── Gallery ──────────────────────────────────────────────
     const galleryEl = document.getElementById("petGallery");
     if (galleryEl) {
       galleryEl.innerHTML = "";
 
-      if (pet.avatar_url) {
+      if (pet.avatar_url?.trim()) {
         const img = document.createElement("img");
-        img.src = pet.avatar_url;
-        img.alt = petName;
+        img.src     = pet.avatar_url.trim();
+        img.alt     = petName;
+        img.loading = "lazy";
+        img.decoding = "async";
         galleryEl.appendChild(img);
       } else {
         galleryEl.textContent = "No images available.";
       }
     }
+
   } catch (err) {
-    console.error("Unexpected error loading pet:", err);
-    const detailsEl = document.querySelector(".petDetails");
-    if (detailsEl) detailsEl.textContent = "Error loading pet.";
+    console.error("[pet.js] Error loading pet:", err);
+    showError("Error loading pet. Please try again.");
   }
 })();
