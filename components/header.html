@@ -12,3 +12,17 @@
     <a class="navBtn" id="navDashboard" hidden>Dashboard</a>
   </div>
 </div>
+
+<script>
+  // Simuliamo l'utente corrente
+  const user = {
+    username: "Livia",
+    role: "creator" // oppure "fan"
+  };
+
+  const userPill = document.getElementById("userPill");
+  if (userPill && user.username) {
+    const emoji = user.role === "creator" ? "🐾" : "💜";
+    userPill.textContent = `${emoji} ${user.username}`;
+  }
+</script>
