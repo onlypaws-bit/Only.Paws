@@ -528,15 +528,15 @@
           </button>
 
           <button
-            class="op-commentToggleBtn"
+            class="op-commentsBtn"
             type="button"
             data-inline-comments-toggle
             data-post-id="${esc(id)}"
             aria-expanded="false"
           >
-            <span class="op-commentToggleLabel">Comments</span>
+            <span class="op-commentsBtnIcon">💬</span>
             <span
-              class="op-commentToggleCount"
+              class="op-commentsBtnCount"
               data-inline-comments-count
               data-post-id="${esc(id)}"
             >${commentsCount}</span>
