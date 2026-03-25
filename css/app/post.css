@@ -97,6 +97,10 @@
   outline:none;
 }
 
+.op-postMain *{
+  text-decoration:none;
+}
+
 .op-postMain:focus-visible{
   outline:2px solid rgba(255,255,255,.45);
   outline-offset:-2px;
