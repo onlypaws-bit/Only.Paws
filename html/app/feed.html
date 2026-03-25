@@ -20,6 +20,20 @@
   - /js/app/comments.js
   - /js/app/post.js
   - /js/app/feed.js
+
+  POST CARD ACTIONS (rendered by post.js — .op-postBottom):
+  Use these classes so the Comments button matches the Like button styling:
+
+    <div class="op-postBottom">
+      <button class="op-likeBtn" type="button" data-post-id="...">
+        <span class="op-likeIcon">🤍</span>
+        <span class="op-likeCount">0</span>
+      </button>
+      <button class="op-commentsBtn" type="button" data-post-id="...">
+        <span class="op-commentsBtnIcon">💬</span>
+        <span class="op-commentsBtnCount">0</span>
+      </button>
+    </div>
 -->
 
 <!DOCTYPE html>
