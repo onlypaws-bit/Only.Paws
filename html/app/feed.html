@@ -40,7 +40,6 @@
     <div id="header-placeholder"></div>
 
     <main class="feedMain">
-      <!-- FEED HEADER -->
       <section class="panel">
         <div class="feedHeader">
           <div>
@@ -68,101 +67,19 @@
         <div id="debug" class="debug" hidden></div>
       </section>
 
-      <!-- FEATURED CREATORS -->
       <section class="panel panelSpaced">
         <div class="pill">Featured creators</div>
         <div class="creatorList" id="creatorList"></div>
         <div class="hint" id="creatorHint">Loading creators…</div>
       </section>
 
-      <!-- POSTS FEED -->
       <section class="panel panelSpaced feedPostsSection">
         <div class="postsHeader">
           <h2>Latest posts</h2>
           <div class="postsHeaderHint">Visible posts (premium appears after purchase)</div>
         </div>
 
-        <div class="posts feedPosts" id="posts">
-          <!-- Example Post -->
-          <article class="postCard" data-post-id="POST123">
-            <div class="postContent">
-              <div class="postHeader">
-                <div class="postUser">
-                  <div class="postAvatar">
-                    <img src="/assets/sample-avatar.jpg" alt="User Avatar">
-                  </div>
-                  <span class="postUsername">@fluffycat</span>
-                </div>
-                <div class="postDate">2h ago</div>
-              </div>
-
-              <div class="postText">
-                Check out my new trick! 🐾
-              </div>
-
-              <div class="postMedia">
-                <img src="/assets/sample-post.jpg" alt="Post media">
-              </div>
-            </div>
-
-            <!-- ACTIONS -->
-            <div class="postActions">
-              <button
-                class="btn postLikeBtn"
-                id="likeBtn-POST123"
-                data-like-button
-                data-post-id="POST123"
-                data-liked="false"
-                aria-pressed="false"
-                type="button"
-              >
-                <span id="likeIcon-POST123" data-like-icon>🤍</span>
-                <span class="likeBtnLabel" data-like-label>Like</span>
-                <span id="likeCount-POST123" class="singlePostLikeCount" data-like-count-inline>0</span>
-              </button>
-
-              <button
-                class="btn postCommentsBtn"
-                id="commentsBtn-POST123"
-                data-post-id="POST123"
-                type="button"
-              >
-                Comments
-                <span class="op-commentsCount" id="commentsCount-POST123">0</span>
-              </button>
-
-              <button class="btn ghost" id="copyLinkBtn-POST123" type="button">
-                Copy link
-              </button>
-
-              <a class="btn ghost" id="backBtn-POST123" href="/html/app/feed.html">
-                Back
-              </a>
-            </div>
-
-            <!-- COMMENTS SECTION -->
-            <div class="op-commentsSection" data-post-id="POST123">
-              <form class="op-commentForm" id="commentForm-POST123">
-                <textarea id="commentInput-POST123" placeholder="Write a comment…"></textarea>
-                <div class="op-commentFormBottom">
-                  <p class="op-commentHint" id="commentHint-POST123"></p>
-                  <button type="submit" id="commentSubmit-POST123">Post</button>
-                </div>
-              </form>
-
-              <div class="op-commentsError" id="commentsError-POST123" hidden></div>
-              <div class="op-commentsEmpty" id="commentsEmpty-POST123">No comments yet.</div>
-
-              <div class="op-commentsList" id="commentsList-POST123">
-                <!-- JS populates comment cards -->
-              </div>
-
-              <button class="op-commentsLoadMore" id="commentsLoadMore-POST123" hidden>Load more</button>
-            </div>
-          </article>
-          <!-- /Example Post -->
-        </div>
-
+        <div class="posts feedPosts" id="posts"></div>
         <div class="hint" id="postsHint">Loading posts…</div>
       </section>
     </main>
@@ -170,7 +87,6 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- MEDIA MODAL -->
   <div id="mediaModal" class="mediaModal" aria-hidden="true">
     <div class="mediaModalInner" role="dialog" aria-modal="true" aria-label="Media preview">
       <button
@@ -187,7 +103,6 @@
     </div>
   </div>
 
-  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
