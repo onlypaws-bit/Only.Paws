@@ -209,6 +209,18 @@
     return `${base}?id=${encodeURIComponent(postId)}`;
   }
 
+function computePetHref(petId) {
+  if (!petId) return "";
+
+  if (ROUTES?.href) {
+    return ROUTES.href("app.fans.pet", { id: petId });
+  }
+
+  const base = PATHS?.app?.fans?.pet || "/html/app/fans/pet.html";
+  return `${base}?id=${encodeURIComponent(petId)}`;
+}
+
+   
   function creatorEligible(profile) {
     if (!profile) return false;
 
@@ -302,36 +314,38 @@
     renderCreatorSocials(c);
   }
 
-  function renderPets(list) {
-    if (!els.petsList) return;
+ function renderPets(list) {
+  if (!els.petsList) return;
 
-    if (!list?.length) {
-      els.petsList.innerHTML = "";
-      return;
-    }
+  if (!list?.length) {
+    els.petsList.innerHTML = "";
+    return;
+  }
 
-    els.petsList.innerHTML = list
-      .map((pet) => {
-        const name = pet.name || "Pet";
-        const line = [pet.species, pet.breed].filter(Boolean).join(" • ");
-        const avatarUrl = resolveAvatarUrl(pet);
+  els.petsList.innerHTML = list
+    .map((pet) => {
+      const name = pet.name || "Pet";
+      const line = [pet.species, pet.breed].filter(Boolean).join(" • ");
+      const avatarUrl = resolveAvatarUrl(pet);
+      const href = computePetHref(pet.id);
 
-        const av = avatarUrl
-          ? `<img src="${esc(avatarUrl)}" alt="${esc(name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-          : `<span aria-hidden="true">🐾</span>`;
+      const av = avatarUrl
+        ? `<img src="${esc(avatarUrl)}" alt="${esc(name)} avatar" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
+        : `<span aria-hidden="true">🐾</span>`;
 
-        return `
-        <div class="petCard">
+      return `
+        <a class="petCard" href="${esc(href)}">
           <div class="petAvatar">${av}</div>
           <div>
             <b>${esc(name)}</b>
             <span>${esc(line || " ")}</span>
           </div>
-        </div>
+        </a>
       `;
-      })
-      .join("");
-  }
+    })
+    .join("");
+}
+   
 
   function enrichPostsForRenderer(posts) {
     const access = computeAccess(state.subRow, state.creatorEligible);
