@@ -14,26 +14,20 @@
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", async () => {
-    if (!window.OP || !OP.client) return;
+  // assicurati che OP sia pronto
+  if (window.OP && OP.client) {
+    OP.client.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
 
-    // prendiamo l'utente loggato
-    const { data: { user } } = await OP.client.auth.getUser();
-    if (!user) return;
-
-    // prendiamo il profilo reale dal DB
-    const { data: profile, error } = await OP.client
-      .from('profiles')
-      .select('username, role')
-      .eq('id', user.id)
-      .single();
-
-    if (error || !profile) return;
-
-    const userPill = document.getElementById("userPill");
-    if (userPill && profile.username) {
-      const emoji = profile.role === "creator" ? "🐾" : "💜";
-      userPill.textContent = `${emoji} ${profile.username}`;
-    }
-  });
+      OP.client.from('profiles')
+        .select('username, role')
+        .eq('id', user.id)
+        .single()
+        .then(({ data: profile }) => {
+          if (!profile) return;
+          const emoji = profile.role === "creator" ? "🐾" : "💜";
+          document.getElementById("userPill").textContent = `${emoji} ${profile.username}`;
+        });
+    });
+  }
 </script>
