@@ -41,35 +41,40 @@
       <section class="creatorProfileGrid" aria-label="Creator profile overview">
         <section class="panel creatorHeroPanel" aria-labelledby="creatorName">
           <div class="pill">Creator</div>
+          
+<div class="heroRow">
+  <div class="avatarWrap">
+    <div class="avatar" id="creatorAvatar">
+      <img
+        id="creatorAvatarImg"
+        src="/assets/images/logo.png"
+        alt="Creator avatar"
+        loading="eager"
+        decoding="async"
+      />
+    </div>
 
-          <div class="heroRow">
-            <div class="avatar" id="creatorAvatar">
-              <img
-                id="creatorAvatarImg"
-                src="/assets/images/logo.png"
-                alt="Creator avatar"
-                loading="eager"
-                decoding="async"
-              />
-            </div>
+    <!-- mini socials -->
+    <div class="avatarSocials" id="creatorSocials" hidden>
+      <a id="creatorInstagram" class="socialIcon" hidden target="_blank">IG</a>
+      <a id="creatorTikTok" class="socialIcon" hidden target="_blank">TT</a>
+      <button id="shareProfileBtn" class="socialIcon" type="button">↗</button>
+    </div>
+  </div>
 
-            <div class="meta">
-              <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
-              <span id="creatorHandle">@username</span>
-            </div>
-          </div>
+  <div class="meta">
+    <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
+    <span id="creatorHandle">@username</span>
+  </div>
+</div>
 
           <p class="creatorBio" id="creatorBio"></p>
 
-          <div class="creatorSocials" id="creatorSocials" hidden aria-label="Creator social links">
-            <a id="creatorInstagram" class="socialChip" hidden target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a id="creatorTikTok" class="socialChip" hidden target="_blank" rel="noopener noreferrer">TikTok</a>
-          </div>
 
           <div class="btnRow" id="actionRow">
             <button class="ghost" id="followBtn" type="button">Follow</button>
             <button class="btn" id="premiumBtn" type="button">Subscribe</button>
-            <button class="ghost" id="shareProfileBtn" type="button">Share</button>
+          
           </div>
 
           <p class="hint" id="creatorHint" aria-live="polite"></p>
