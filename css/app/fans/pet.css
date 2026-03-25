@@ -1,0 +1,108 @@
+/* =========================================================
+   OnlyPaws
+   File: /css/app/fans/pet.css
+   Purpose:
+   - Fan-facing pet page
+   - Pet header, info, bio, gallery, special notes
+   ========================================================= */
+
+.petsFanPage {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.petDetails {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.petHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.petAvatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.petInfo h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+.petInfo p {
+  margin: 4px 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.petBio, .petMedia, .petNotes {
+  margin-top: 20px;
+}
+
+.petBio h2, .petMedia h2, .petNotes h2 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 4px;
+}
+
+.petBio p, .petNotes p {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.gallery img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.gallery img:hover {
+  transform: scale(1.05);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .petHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .petAvatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .petInfo h1 {
+    font-size: 1.5rem;
+  }
+
+  .gallery img {
+    width: 100px;
+    height: 100px;
+  }
+}
