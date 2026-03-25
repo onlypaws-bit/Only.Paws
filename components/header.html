@@ -13,16 +13,24 @@
   </div>
 </div>
 
-<script>
-  // Simuliamo l'utente corrente
-  const user = {
-    username: "Livia",
-    role: "creator" // oppure "fan"
-  };
+<script type="module">
+  import { OP } from '/js/onlypawsClient.js'; // o dal tuo client centralizzato
 
-  const userPill = document.getElementById("userPill");
-  if (userPill && user.username) {
-    const emoji = user.role === "creator" ? "🐾" : "💜";
-    userPill.textContent = `${emoji} ${user.username}`;
-  }
+  (async () => {
+    const { data: { user } } = await OP.client.auth.getUser();
+    if (!user) return;
+
+    // Prendiamo il profilo pubblico per avere role e username
+    const { data: profile } = await OP.client
+      .from('profiles')
+      .select('username, role')
+      .eq('id', user.id)
+      .single();
+
+    const userPill = document.getElementById("userPill");
+    if (userPill && profile?.username) {
+      const emoji = profile.role === "creator" ? "🐾" : "💜";
+      userPill.textContent = `${emoji} ${profile.username}`;
+    }
+  })();
 </script>
