@@ -8,13 +8,11 @@
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/app/fans/pet.css" />
 </head>
-<body class="petsFanPage" data-page="pet">
-  <div class="wrap">
-    <!-- Header -->
+<body>
+  <div class="pageShell">
     <div id="header-placeholder" class="partialMount partialHeaderMount"></div>
 
-    <!-- Main content -->
-    <main class="page">
+    <main class="wrap petsFanPage">
       <section class="panel petDetails">
         <div class="petHeader">
           <img class="petAvatar" src="/assets/images/default_pet.png" alt="Pet photo" id="petAvatar" />
@@ -45,29 +43,14 @@
       </section>
     </main>
 
-    <!-- Footer -->
     <div id="footer-placeholder" class="partialMount partialFooterMount"></div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/paths.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/onlypawsClient.js"></script>
-  <script>
-    // Inizializza OP.client prima di caricare i partials
-    window.OP = window.OP || {};
-    window.OP.client = window.onlypawsClient;
-    window.OP_PATHS = window.OP_PATHS || {};
-  </script>
+  <script src="/js/partials.js"></script>
   <script src="/js/nav.js"></script>
-  <script>
-    // Monta partials solo dopo DOM ready
-    window.addEventListener("DOMContentLoaded", async () => {
-      if (window.OPPartials?.loadLayout) {
-        await window.OPPartials.loadLayout();
-      }
-    });
-  </script>
   <script src="/js/app/fans/pet.js"></script>
 </body>
 </html>
