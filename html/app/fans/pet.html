@@ -8,24 +8,24 @@
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/app/fans/pet.css" />
 </head>
-<body>
+<body class="petsFanPage">
   <div class="pageShell">
     <div id="header-placeholder" class="partialMount partialHeaderMount"></div>
 
-    <main class="wrap petsFanPage">
+    <main class="wrap">
       <section class="panel petDetails">
         <div class="petHeader">
           <img class="petAvatar" src="/assets/images/default_pet.png" alt="Pet photo" id="petAvatar" />
           <div class="petInfo">
             <h1 id="petName">Pet Name</h1>
             <p id="petSpeciesBreed">Species / Breed</p>
-            <p id="petAge">Age years old</p>
+            <p id="petAge"></p>
           </div>
         </div>
 
         <div class="petBio">
           <h2>About</h2>
-          <p id="petBio">Short bio goes here</p>
+          <p id="petBio"></p>
         </div>
 
         <div class="petMedia">
@@ -39,18 +39,19 @@
           <p id="petSpecialMarks"></p>
         </div>
 
-        <div class="petFallbackHint hint" id="petFallbackHint"></div>
+        <div class="petFallbackHint hint" id="petFallbackHint" hidden></div>
       </section>
     </main>
 
     <div id="footer-placeholder" class="partialMount partialFooterMount"></div>
   </div>
 
-  <script src="/js/paths.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/paths.js"></script>
   <script src="/js/onlypawsClient.js"></script>
-  <script src="/js/partials.js"></script>
+  <script src="/js/auth-guard.js"></script>
   <script src="/js/nav.js"></script>
+  <script src="/js/partials.js"></script>
   <script src="/js/app/fans/pet.js"></script>
 </body>
 </html>
