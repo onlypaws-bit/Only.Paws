@@ -474,7 +474,6 @@
   color:var(--text);
 }
 
-#commentsCount,
 .op-commentsCount{
   display:inline-flex;
   align-items:center;
