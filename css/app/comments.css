@@ -453,6 +453,46 @@
 
 
 
+
+/* =========================================================
+   COMMENTS HEADER / TITLE
+   ========================================================= */
+
+.op-commentsHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.op-commentsHeader h2{
+  margin:0;
+  font-size:18px;
+  font-weight:900;
+  line-height:1.2;
+  color:var(--text);
+}
+
+#commentsCount,
+.op-commentsCount{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:34px;
+  height:34px;
+  padding:0 10px;
+  border-radius:999px;
+  background:var(--btn);
+  color:var(--btnText);
+  font-size:13px;
+  font-weight:900;
+  line-height:1;
+  border:1px solid var(--stroke);
+}
+
+
+
 /* =========================================================
    RESPONSIVE
    ========================================================= */
