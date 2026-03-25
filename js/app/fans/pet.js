@@ -24,6 +24,11 @@
     if (el) el.textContent = value;
   }
 
+  // ── Layout ───────────────────────────────────────────────
+  if (window.OPPartials?.loadLayout) {
+    await window.OPPartials.loadLayout();
+  }
+
   // ── Guard: client must be ready ──────────────────────────
   if (!client) {
     console.error("[pet.js] onlypawsClient not available.");
