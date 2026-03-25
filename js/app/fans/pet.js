@@ -12,7 +12,8 @@
 
   if (!petId) {
     console.error("No pet ID provided in URL");
-    document.querySelector(".petDetails").textContent = "Pet not found";
+    const detailsEl = document.querySelector(".petDetails");
+    if (detailsEl) detailsEl.textContent = "Pet not found";
     return;
   }
 
@@ -26,37 +27,60 @@
 
     if (error || !pet) {
       console.error("Pet fetch error:", error);
-      document.querySelector(".petDetails").textContent = "Pet not found";
+      const detailsEl = document.querySelector(".petDetails");
+      if (detailsEl) detailsEl.textContent = "Pet not found";
       return;
     }
 
     // Populate main info
-    document.getElementById("petAvatar").src = pet.avatar_url || OP_PATHS.assets.images.defaultPet || "/assets/images/default_pet.png";
-    document.getElementById("petName").textContent = pet.name || "Unnamed Pet";
-    document.getElementById("petSpeciesBreed").textContent = `${pet.species || "Unknown"} / ${pet.breed || "Unknown"}`;
-    document.getElementById("petAge").textContent = pet.age ? `${pet.age} years old` : "";
+    const avatarUrl = pet.avatar_url || OP_PATHS.assets.images.defaultPet || "/assets/images/default_pet.png";
+    const petName = pet.name || "Unnamed Pet";
+    const species = pet.species || "Unknown";
+    const breed = pet.breed || "Unknown";
+    const age = pet.age_years || "";
+
+    const petAvatarEl = document.getElementById("petAvatar");
+    if (petAvatarEl) {
+      petAvatarEl.src = avatarUrl;
+      petAvatarEl.alt = `${petName} avatar`;
+    }
+
+    const petNameEl = document.getElementById("petName");
+    if (petNameEl) petNameEl.textContent = petName;
+
+    const speciesBreedEl = document.getElementById("petSpeciesBreed");
+    if (speciesBreedEl) speciesBreedEl.textContent = `${species} / ${breed}`;
+
+    const petAgeEl = document.getElementById("petAge");
+    if (petAgeEl) petAgeEl.textContent = age ? `${age} years old` : "";
 
     // Populate bio and notes
-    document.getElementById("petBio").textContent = pet.bio || "No bio available.";
-    document.getElementById("petHealthNotes").textContent = pet.health_notes || "";
-    document.getElementById("petSpecialMarks").textContent = pet.special_marks || "";
+    const bioEl = document.getElementById("petBio");
+    if (bioEl) bioEl.textContent = pet.bio || "No bio available.";
 
-    // Populate gallery
+    const healthEl = document.getElementById("petHealthNotes");
+    if (healthEl) healthEl.textContent = pet.health_notes || "";
+
+    const marksEl = document.getElementById("petSpecialMarks");
+    if (marksEl) marksEl.textContent = pet.special_marks || "";
+
+    // Populate gallery (using avatar only for now)
     const galleryEl = document.getElementById("petGallery");
-    galleryEl.innerHTML = ""; // clear first
+    if (galleryEl) {
+      galleryEl.innerHTML = "";
 
-    if (pet.media && pet.media.length > 0) {
-      pet.media.forEach((src) => {
+      if (pet.avatar_url) {
         const img = document.createElement("img");
-        img.src = src;
-        img.alt = pet.name || "Pet image";
+        img.src = pet.avatar_url;
+        img.alt = petName;
         galleryEl.appendChild(img);
-      });
-    } else {
-      galleryEl.textContent = "No images available.";
+      } else {
+        galleryEl.textContent = "No images available.";
+      }
     }
   } catch (err) {
     console.error("Unexpected error loading pet:", err);
-    document.querySelector(".petDetails").textContent = "Error loading pet.";
+    const detailsEl = document.querySelector(".petDetails");
+    if (detailsEl) detailsEl.textContent = "Error loading pet.";
   }
 })();
