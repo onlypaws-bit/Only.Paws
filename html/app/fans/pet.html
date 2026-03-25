@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OnlyPaws — Pet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="/css/styles.css" />
+  <link rel="stylesheet" href="/css/app/creators/petsFan.css" />
+</head>
+<body>
+  <div class="pageShell">
+    <!-- Header -->
+    <div id="header-placeholder" class="partialMount partialHeaderMount"></div>
+
+    <!-- Main content -->
+    <main class="wrap petsFanPage">
+      <section class="panel petDetails">
+        <div class="petHeader">
+          <img class="petAvatar" src="/images/default_pet.png" alt="Pet photo" id="petAvatar" />
+          <div class="petInfo">
+            <h1 id="petName">Pet Name</h1>
+            <p id="petSpeciesBreed">Species / Breed</p>
+            <p id="petAge">Age years old</p>
+          </div>
+        </div>
+
+        <div class="petBio">
+          <h2>About</h2>
+          <p id="petBio">Short bio goes here</p>
+        </div>
+
+        <div class="petMedia">
+          <h2>Gallery</h2>
+          <div id="petGallery" class="gallery"></div>
+        </div>
+
+        <div class="petNotes">
+          <h2>Special Notes</h2>
+          <p id="petHealthNotes"></p>
+          <p id="petSpecialMarks"></p>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <div id="footer-placeholder" class="partialMount partialFooterMount"></div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/js/paths.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/onlypawsClient.js"></script>
+  <script src="/js/partials.js"></script>
+  <script src="/js/nav.js"></script>
+  <script src="/js/app/fans/pet.js"></script>
+</body>
+</html>
