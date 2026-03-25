@@ -142,7 +142,7 @@
 
       const iconEl = btn.querySelector("[data-like-icon]");
       if (iconEl) {
-        iconEl.textContent = liked ? "❤️" : "🤍";
+        iconEl.textContent = liked ? "💜" : "🤍";
       }
 
       const labelEl = btn.querySelector("[data-like-label]");
