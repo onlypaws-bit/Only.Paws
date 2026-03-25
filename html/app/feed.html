@@ -105,13 +105,43 @@
               </div>
             </div>
 
+            <!-- ACTIONS -->
+            <div class="postActions">
+              <button
+                class="btn postLikeBtn"
+                id="likeBtn-POST123"
+                data-like-button
+                data-post-id="POST123"
+                data-liked="false"
+                aria-pressed="false"
+                type="button"
+              >
+                <span id="likeIcon-POST123" data-like-icon>🤍</span>
+                <span class="likeBtnLabel" data-like-label>Like</span>
+                <span id="likeCount-POST123" class="singlePostLikeCount" data-like-count-inline>0</span>
+              </button>
+
+              <button
+                class="btn postCommentsBtn"
+                id="commentsBtn-POST123"
+                data-post-id="POST123"
+                type="button"
+              >
+                Comments
+                <span class="op-commentsCount" id="commentsCount-POST123">0</span>
+              </button>
+
+              <button class="btn ghost" id="copyLinkBtn-POST123" type="button">
+                Copy link
+              </button>
+
+              <a class="btn ghost" id="backBtn-POST123" href="/html/app/feed.html">
+                Back
+              </a>
+            </div>
+
             <!-- COMMENTS SECTION -->
             <div class="op-commentsSection" data-post-id="POST123">
-              <div class="op-commentsHeader">
-                <h2>Comments</h2>
-                <div class="op-commentsCount" id="commentsCount-POST123">0</div>
-              </div>
-
               <form class="op-commentForm" id="commentForm-POST123">
                 <textarea id="commentInput-POST123" placeholder="Write a comment…"></textarea>
                 <div class="op-commentFormBottom">
@@ -129,7 +159,6 @@
 
               <button class="op-commentsLoadMore" id="commentsLoadMore-POST123" hidden>Load more</button>
             </div>
-
           </article>
           <!-- /Example Post -->
         </div>
