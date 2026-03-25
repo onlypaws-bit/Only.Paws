@@ -1,3 +1,25 @@
+<!--
+  OnlyPaws
+  File: /html/app/fans/creator-profile.html
+
+  CSS:
+  - /css/styles.css
+  - /css/app/post.css
+  - /css/app/comments.css
+  - /css/app/fans/creator-profile.css
+
+  JS:
+  - https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  - /js/paths.js
+  - /js/onlypawsClient.js
+  - /js/nav.js
+  - /js/partials.js
+  - /js/app/likes.js
+  - /js/app/comments.js
+  - /js/app/post.js
+  - /js/app/fans/creator-profile.js
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,55 +41,56 @@
       <section class="creatorProfileGrid" aria-label="Creator profile overview">
         <section class="panel creatorHeroPanel" aria-labelledby="creatorName">
           <div class="pill">Creator</div>
+          
+<div class="heroRow">
+  <div class="avatarWrap">
+    <div class="avatar" id="creatorAvatar">
+      <img
+        id="creatorAvatarImg"
+        src="/assets/images/logo.png"
+        alt="Creator avatar"
+        loading="eager"
+        decoding="async"
+      />
+    </div>
 
-          <div class="heroRow">
-            <div class="avatarWrap">
-              <div class="avatar" id="creatorAvatar">
-                <img
-                  id="creatorAvatarImg"
-                  src="/assets/images/logo.png"
-                  alt="Creator avatar"
-                  loading="eager"
-                  decoding="async"
-                />
-              </div>
+    <!-- mini socials -->
+    <div class="avatarSocials" id="creatorSocials" hidden>
+      <a id="creatorInstagram" class="socialIcon" hidden target="_blank">
+  <!-- Instagram SVG -->
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5.2A4.8 4.8 0 1 0 16.8 12 4.8 4.8 0 0 0 12 7.2zm0 7.9A3.1 3.1 0 1 1 15.1 12 3.1 3.1 0 0 1 12 15.1zm4.9-8.4a1.1 1.1 0 1 1-1.1-1.1 1.1 1.1 0 0 1 1.1 1.1z"/>
+  </svg>
+</a>
 
-              <!-- mini socials overlay -->
-              <div class="avatarSocials">
-                <a href="#" id="creatorInstagram" class="socialIcon" target="_blank" rel="noopener noreferrer">
-                  <!-- Instagram SVG -->
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5.2A4.8 4.8 0 1 0 16.8 12 4.8 4.8 0 0 0 12 7.2zm0 7.9A3.1 3.1 0 1 1 15.1 12 3.1 3.1 0 0 1 12 15.1zm4.9-8.4a1.1 1.1 0 1 1-1.1-1.1 1.1 1.1 0 0 1 1.1 1.1z"/>
-                  </svg>
-                </a>
+<a id="creatorTikTok" class="socialIcon" hidden target="_blank">
+  <!-- TikTok SVG -->
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M16.5 3c.4 2 1.8 3.6 3.8 4v3.2a7.7 7.7 0 0 1-3.8-1.1v5.8a6.4 6.4 0 1 1-6.4-6.4c.3 0 .6 0 .9.1v3.3a3.1 3.1 0 1 0 2.3 3V3h3.2z"/>
+  </svg>
+</a>
 
-                <a href="#" id="creatorTikTok" class="socialIcon" target="_blank" rel="noopener noreferrer">
-                  <!-- TikTok SVG -->
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M16.5 3c.4 2 1.8 3.6 3.8 4v3.2a7.7 7.7 0 0 1-3.8-1.1v5.8a6.4 6.4 0 1 1-6.4-6.4c.3 0 .6 0 .9.1v3.3a3.1 3.1 0 1 0 2.3 3V3h3.2z"/>
-                  </svg>
-                </a>
+<button id="shareProfileBtn" class="socialIcon" type="button">
+  <!-- Share icon -->
+  <svg viewBox="0 0 24 24">
+    <path d="M14 3l7 7-7 7v-4H
+      <button id="shareProfileBtn" class="socialIcon" type="button">↗</button>
+    </div>
+  </div>
 
-                <button id="shareProfileBtn" class="socialIcon" type="button">
-                  <!-- Share icon -->
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M14 3l7 7-7 7v-4H3v-6h11V3z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div class="meta">
-              <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
-              <span id="creatorHandle">@username</span>
-            </div>
-          </div>
+  <div class="meta">
+    <h1 class="creatorDisplayName" id="creatorName">Creator</h1>
+    <span id="creatorHandle">@username</span>
+  </div>
+</div>
 
           <p class="creatorBio" id="creatorBio"></p>
+
 
           <div class="btnRow" id="actionRow">
             <button class="ghost" id="followBtn" type="button">Follow</button>
             <button class="btn" id="premiumBtn" type="button">Subscribe</button>
+          
           </div>
 
           <p class="hint" id="creatorHint" aria-live="polite"></p>
