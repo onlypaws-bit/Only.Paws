@@ -145,11 +145,6 @@
         iconEl.textContent = liked ? "💜" : "🤍";
       }
 
-      const labelEl = btn.querySelector("[data-like-label]");
-      if (labelEl) {
-        labelEl.textContent = liked ? "Liked" : "Like";
-      }
-
       const inlineCountEl = btn.querySelector("[data-like-count-inline]");
       if (inlineCountEl) {
         inlineCountEl.textContent = formatLikeCount(likeCount);
