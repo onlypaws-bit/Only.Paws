@@ -19,14 +19,13 @@
      - window.OPRoutes
    ========================================================= */
 
-
-
 (function initOnlyPawsPaths() {
   const ROOT = "";
 
   const OP_PATHS = {
     root: `${ROOT}/`,
 
+    // Logical navigation aliases
     index: `${ROOT}/index.html`,
     home: `${ROOT}/index.html`,
 
@@ -57,10 +56,13 @@
 
     components: {
       root: `${ROOT}/components`,
+
       header: `${ROOT}/components/header.html`,
       footer: `${ROOT}/components/footer.html`,
+
       headerMarketing: `${ROOT}/components/header-marketing.html`,
       footerMarketing: `${ROOT}/components/footer-marketing.html`,
+
       headerStripe: `${ROOT}/components/header-stripe.html`,
     },
 
@@ -70,6 +72,7 @@
 
       marketing: {
         root: `${ROOT}/css/marketing`,
+
         auth: `${ROOT}/css/marketing/auth.css`,
         creators: `${ROOT}/css/marketing/creators.css`,
         emailConfirmed: `${ROOT}/css/marketing/email-confirmed.css`,
@@ -93,6 +96,7 @@
 
         creators: {
           root: `${ROOT}/css/app/creators`,
+
           createPost: `${ROOT}/css/app/creators/create-post.css`,
           creatorDash: `${ROOT}/css/app/creators/creator-dash.css`,
           creatorPlan: `${ROOT}/css/app/creators/creator-plan.css`,
@@ -104,6 +108,7 @@
 
         fans: {
           root: `${ROOT}/css/app/fans`,
+
           creatorProfile: `${ROOT}/css/app/fans/creator-profile.css`,
           fanDash: `${ROOT}/css/app/fans/fan-dash.css`,
           purchasedPosts: `${ROOT}/css/app/fans/purchased-posts.css`,
@@ -125,6 +130,7 @@
 
       marketing: {
         root: `${ROOT}/js/marketing`,
+
         creators: `${ROOT}/js/marketing/creators.js`,
         fans: `${ROOT}/js/marketing/fans.js`,
         home: `${ROOT}/js/marketing/index.js`,
@@ -146,6 +152,7 @@
 
         creators: {
           root: `${ROOT}/js/app/creators`,
+
           createPost: `${ROOT}/js/app/creators/create-post.js`,
           creatorDash: `${ROOT}/js/app/creators/creator-dash.js`,
           creatorPlan: `${ROOT}/js/app/creators/creator-plan.js`,
@@ -157,6 +164,7 @@
 
         fans: {
           root: `${ROOT}/js/app/fans`,
+
           creatorProfile: `${ROOT}/js/app/fans/creator-profile.js`,
           fanDash: `${ROOT}/js/app/fans/fan-dash.js`,
           purchasedPosts: `${ROOT}/js/app/fans/purchased-posts.js`,
@@ -176,6 +184,7 @@
 
       creators: {
         root: `${ROOT}/html/app/creators`,
+
         createPost: `${ROOT}/html/app/creators/create-post.html`,
         creatorDash: `${ROOT}/html/app/creators/creator-dash.html`,
         creatorPlan: `${ROOT}/html/app/creators/creator-plan.html`,
@@ -187,6 +196,7 @@
 
       fans: {
         root: `${ROOT}/html/app/fans`,
+
         creatorProfile: `${ROOT}/html/app/fans/creator-profile.html`,
         fanDash: `${ROOT}/html/app/fans/fan-dash.html`,
         purchasedPosts: `${ROOT}/html/app/fans/purchased-posts.html`,
@@ -197,8 +207,13 @@
 
     marketing: {
       root: `${ROOT}/html/marketing`,
+
+      // Physical entries kept explicit:
+      // - index = root fallback entry
+      // - home  = marketing folder copy
       index: `${ROOT}/index.html`,
       home: `${ROOT}/html/marketing/index.html`,
+
       creators: `${ROOT}/html/marketing/creators.html`,
       fans: `${ROOT}/html/marketing/fans.html`,
       emailConfirmed: `${ROOT}/html/marketing/email-confirmed.html`,
@@ -231,34 +246,108 @@
 
   function resolvePath(pathKey) {
     if (!pathKey || typeof pathKey !== "string") return "";
+
     const parts = pathKey.split(".");
     let current = OP_PATHS;
+
     for (const part of parts) {
-      if (!current || typeof current !== "object" || !(part in current)) return "";
+      if (!current || typeof current !== "object" || !(part in current)) {
+        return "";
+      }
       current = current[part];
     }
+
     return typeof current === "string" ? current : "";
+  }
+
+  function normalizeHref(path) {
+    if (!path) return "";
+
+    if (/^https?:\/\//i.test(path)) {
+      return path;
+    }
+
+    try {
+      const url = new URL(path, window.location.origin);
+      return url.pathname + url.search + url.hash;
+    } catch (_) {
+      return path;
+    }
   }
 
   function buildHref(pathKey, query = {}, hash = "") {
     const base = resolvePath(pathKey);
     if (!base) return "";
+
+    const isAbsolute = /^https?:\/\//i.test(base);
     const url = new URL(base, window.location.origin);
 
-    Object.entries(query || {}).forEach(([k, v]) => {
-      if (v != null && v !== "") url.searchParams.set(k, String(v));
+    Object.entries(query || {}).forEach(([key, value]) => {
+      if (value == null || value === "") return;
+      url.searchParams.set(key, String(value));
     });
 
-    if (hash) url.hash = hash.startsWith("#") ? hash : `#${hash}`;
-    return url.pathname + url.search + url.hash;
+    if (hash) {
+      url.hash = String(hash).startsWith("#") ? String(hash) : `#${hash}`;
+    }
+
+    return isAbsolute ? url.toString() : (url.pathname + url.search + url.hash);
   }
 
   const OPRoutes = {
-    get: resolvePath,
-    has: (k) => !!resolvePath(k),
-    href: buildHref,
-    go: (k, q, h) => { const href = buildHref(k, q, h); if (href) window.location.href = href; },
-    replace: (k, q, h) => { const href = buildHref(k, q, h); if (href) window.location.replace(href); },
+    get(pathKey) {
+      return resolvePath(pathKey);
+    },
+
+    has(pathKey) {
+      return !!resolvePath(pathKey);
+    },
+
+    href(pathKey, query = {}, hash = "") {
+      return buildHref(pathKey, query, hash);
+    },
+
+    go(pathKey, query = {}, hash = "") {
+      const href = buildHref(pathKey, query, hash);
+      if (!href) return;
+      window.location.href = href;
+    },
+
+    replace(pathKey, query = {}, hash = "") {
+      const href = buildHref(pathKey, query, hash);
+      if (!href) return;
+      window.location.replace(href);
+    },
+
+    from(path, query = {}, hash = "") {
+      if (!path) return "";
+
+      const normalized = normalizeHref(path);
+      const url = new URL(normalized, window.location.origin);
+
+      Object.entries(query || {}).forEach(([key, value]) => {
+        if (value == null || value === "") return;
+        url.searchParams.set(key, String(value));
+      });
+
+      if (hash) {
+        url.hash = String(hash).startsWith("#") ? String(hash) : `#${hash}`;
+      }
+
+      return url.pathname + url.search + url.hash;
+    },
+
+    goTo(path, query = {}, hash = "") {
+      const href = this.from(path, query, hash);
+      if (!href) return;
+      window.location.href = href;
+    },
+
+    replaceTo(path, query = {}, hash = "") {
+      const href = this.from(path, query, hash);
+      if (!href) return;
+      window.location.replace(href);
+    },
   };
 
   window.OP_PATHS = Object.freeze(OP_PATHS);
