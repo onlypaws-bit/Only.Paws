@@ -46,12 +46,11 @@
     const { data, error } = await supabase
       .from("profiles")
       .select(`
-        id,
         is_early_creator,
         trial_expires_at,
         trial_used
       `)
-      .eq("id", userId)
+      .eq("user_id", userId)
       .maybeSingle();
 
     if (error) throw error;
