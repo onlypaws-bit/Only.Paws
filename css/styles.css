@@ -573,6 +573,31 @@ h2{
   text-decoration:underline;
 }
 
+.footerSocials{
+  display:flex;
+  gap:16px;
+  justify-content:center;
+  margin:12px 0 4px;
+}
+
+.footerSocials a{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  opacity:.7;
+  text-decoration:none;
+  transition:
+    opacity .18s ease,
+    transform .18s ease;
+}
+
+.footerSocials a:hover{
+  opacity:1;
+  transform:translateY(-2px);
+  text-decoration:none;
+}
+
 /* ===== MEDIA MODAL ===== */
 
 .mediaModal{
