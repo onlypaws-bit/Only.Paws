@@ -523,7 +523,6 @@
             aria-pressed="${liked ? "true" : "false"}"
           >
             <span class="op-likeIcon" data-like-icon>${liked ? "❤️" : "🤍"}</span>
-            <span class="op-likeLabel" data-like-label>Like</span>
             <span class="op-likeCount" data-like-count-inline>${Number(post?.likes_count || 0)}</span>
           </button>
 
