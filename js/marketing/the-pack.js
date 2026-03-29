@@ -77,8 +77,7 @@
   }
 
   function cardHref(creator) {
-    const fansPath =
-      PATHS?.marketing?.fans || "/html/marketing/fans.html";
+    const fansPath = PATHS?.marketing?.fans || "/html/marketing/fans.html";
 
     if (creator?.slug) {
       return `${fansPath}?creator=${encodeURIComponent(creator.slug)}`;
@@ -115,87 +114,57 @@
     `;
   }
 
-  async function fetchProfiles() {
-    let result = await client
-      .from("profiles")
-      .select("user_id, username, display_name, bio, avatar_url, role, pet, created_at")
-      .eq("role", "creator")
-      .order("created_at", { ascending: false })
-      .limit(12);
-
-    if (result.error) throw result.error;
-
-    if (result.data?.length) {
-      return result.data;
-    }
-
-    result = await client
-      .from("profiles")
-      .select("user_id, username, display_name, bio, avatar_url, role, pet, created_at")
-      .not("pet", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(12);
-
-    if (result.error) throw result.error;
-
-    return result.data || [];
-  }
-
-  async function fetchPetsByIds(petIds) {
-    if (!petIds.length) return [];
-
+  async function fetchPets() {
     const { data, error } = await client
       .from("pets")
-      .select("id, owner_id, name, species, breed, bio, avatar_url, created_at")
-      .in("id", petIds);
+      .select(`
+        id,
+        name,
+        species,
+        breed,
+        bio,
+        avatar_url,
+        created_at,
+        profiles (
+          username,
+          display_name,
+          avatar_url
+        )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(12);
 
     if (error) throw error;
 
     return data || [];
   }
 
-  function mergeProfilesAndPets(profiles, pets) {
-    const petsMap = new Map(pets.map((pet) => [pet.id, pet]));
+  function mapPetsToCreators(pets) {
+    return pets.map((pet) => {
+      const profile = pet.profiles || {};
 
-    return profiles
-      .map((profile) => {
-        const pet = petsMap.get(profile.pet);
-        if (!pet) return null;
+      const name = pet.name?.trim() || "unnamed pet";
+      const tag = pet.species?.trim() || "pet";
 
-        const name =
-          pet.name?.trim() ||
-          profile.display_name?.trim() ||
-          profile.username?.trim() ||
-          "unnamed pet";
+      const metaParts = [];
+      if (pet.breed?.trim()) metaParts.push(pet.breed.trim());
+      if (profile.username?.trim()) metaParts.push(`@${profile.username.trim()}`);
+      else if (profile.display_name?.trim()) metaParts.push(profile.display_name.trim());
 
-        const tag = pet.species?.trim() || "pet";
+      const bio = truncateText(
+        pet.bio?.trim() ||
+        "one of the adorable creators hanging around OnlyPaws."
+      );
 
-        const metaParts = [];
-
-        if (pet.breed?.trim()) metaParts.push(pet.breed.trim());
-
-        if (profile.username?.trim()) {
-          metaParts.push(`@${profile.username.trim()}`);
-        } else if (profile.display_name?.trim()) {
-          metaParts.push(profile.display_name.trim());
-        }
-
-        const bio = truncateText(
-          pet.bio?.trim() ||
-          profile.bio?.trim() ||
-          "one of the adorable creators hanging around OnlyPaws."
-        );
-
-        return {
-          name,
-          tag,
-          meta: metaParts.join(" • ") || "pet creator",
-          bio,
-          avatar: pet.avatar_url || profile.avatar_url || null,
-          slug: profile.username || profile.user_id,
-        };
-      })
-      .filter(Boolean);
+      return {
+        name,
+        tag,
+        meta: metaParts.join(" • ") || "pet creator",
+        bio,
+        avatar: pet.avatar_url || profile.avatar_url || null,
+        slug: profile.username || null,
+      };
+    });
   }
 
   function renderFallback(statusEl, gridEl, showErrorMessage) {
@@ -223,36 +192,28 @@
     if (!gridEl) return;
 
     if (!client) {
-      console.error("onlypawsClient missing");
+      console.error("[ThePack] onlypawsClient missing");
       renderFallback(statusEl, gridEl, true);
       return;
     }
 
     try {
-      const profiles = await fetchProfiles();
-      console.log("[ThePack] profiles fetched:", profiles);
-
-      const petIds = profiles.map((p) => p.pet).filter(Boolean);
-      console.log("[ThePack] petIds extracted:", petIds);
-
-      const pets = await fetchPetsByIds(petIds);
+      const pets = await fetchPets();
       console.log("[ThePack] pets fetched:", pets);
 
-      const creators = mergeProfilesAndPets(profiles, pets);
-      console.log("[ThePack] creators merged:", creators);
-
-      if (!creators.length) {
-        console.warn("[ThePack] no creators after merge — rendering fallback");
+      if (!pets.length) {
+        console.warn("[ThePack] no pets found — rendering fallback");
         renderFallback(statusEl, gridEl, false);
         return;
       }
 
+      const creators = mapPetsToCreators(pets);
+      console.log("[ThePack] creators mapped:", creators);
+
       gridEl.innerHTML = creators.map(createPetCard).join("");
       gridEl.hidden = false;
 
-      if (statusEl) {
-        statusEl.hidden = true;
-      }
+      if (statusEl) statusEl.hidden = true;
     } catch (error) {
       console.error("[ThePack] failed to load the pack:", error);
       renderFallback(statusEl, gridEl, true);
