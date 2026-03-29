@@ -12,8 +12,8 @@ const corsHeaders = {
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY")!;
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SITE_URL = (Deno.env.get("SITE_URL") ?? "https://onlypaws-psi.vercel.app").replace(/\/+$/, "");
 
-// ✅ il tuo price
 const PRICE_ID = "price_1StS6zLpyDgdWu8HPqemX38v";
 
 function toForm(params: Record<string, string>) {
@@ -67,15 +67,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const origin =
-      req.headers.get("origin") ??
-      "https://onlypaws-psi.vercel.app";
-
-    const successUrl =
-      `${origin}/html/app/creators/creator-dash.html?success=1&session_id={CHECKOUT_SESSION_ID}`;
-
-    const cancelUrl =
-      `${origin}/html/app/creators/creator-dash.html?canceled=1`;
+    // ✅ Use SITE_URL, not Origin (Origin can be null on server-to-server calls)
+    const successUrl = `${SITE_URL}/html/app/creators/creator-dash.html?success=1&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl  = `${SITE_URL}/html/app/creators/creator-dash.html?canceled=1`;
 
     const session = await stripePOST("checkout/sessions", {
       mode: "subscription",
@@ -84,8 +78,16 @@ Deno.serve(async (req) => {
       success_url: successUrl,
       cancel_url: cancelUrl,
 
+      // Session-level metadata (for checkout.session.completed)
       "metadata[user_id]": user.id,
+      "metadata[key]": "creator_plan",
+
+      // ✅ CRITICAL: subscription_data.metadata is what lands on the subscription object.
+      // isCreatorPlanSubscription() checks sub.metadata.key === "creator_plan" — without
+      // this, every customer.subscription.* event gets silently ignored.
       "subscription_data[metadata][user_id]": user.id,
+      "subscription_data[metadata][key]": "creator_plan",  // ← THE FIX
+
       "subscription_data[trial_period_days]": "14",
 
       customer_email: user.email ?? "",
@@ -95,9 +97,10 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
-    return new Response(`Error: ${(e as any)?.message ?? String(e)}`, {
-      status: 500,
-      headers: corsHeaders,
-    });
+    console.error("create-creator-plan-checkout error:", e);
+    return new Response(
+      JSON.stringify({ error: (e as any)?.message ?? String(e) }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 });
