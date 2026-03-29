@@ -125,7 +125,7 @@
         bio,
         avatar_url,
         created_at,
-        profiles (
+        profiles!pets_owner_id_fkey (
           username,
           display_name,
           avatar_url
