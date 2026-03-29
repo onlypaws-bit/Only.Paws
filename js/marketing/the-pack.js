@@ -230,11 +230,19 @@
 
     try {
       const profiles = await fetchProfiles();
+      console.log("[ThePack] profiles fetched:", profiles);
+
       const petIds = profiles.map((p) => p.pet).filter(Boolean);
+      console.log("[ThePack] petIds extracted:", petIds);
+
       const pets = await fetchPetsByIds(petIds);
+      console.log("[ThePack] pets fetched:", pets);
+
       const creators = mergeProfilesAndPets(profiles, pets);
+      console.log("[ThePack] creators merged:", creators);
 
       if (!creators.length) {
+        console.warn("[ThePack] no creators after merge — rendering fallback");
         renderFallback(statusEl, gridEl, false);
         return;
       }
@@ -246,7 +254,7 @@
         statusEl.hidden = true;
       }
     } catch (error) {
-      console.error("failed to load the pack:", error);
+      console.error("[ThePack] failed to load the pack:", error);
       renderFallback(statusEl, gridEl, true);
     }
   }
